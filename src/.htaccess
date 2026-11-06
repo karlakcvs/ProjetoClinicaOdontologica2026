@@ -1,0 +1,22 @@
+# ===== Segurança do site (SanyTech) =====
+# Não lista o conteúdo das pastas
+Options -Indexes
+ServerSignature Off
+
+# Bloqueia arquivos ocultos (.git, .env...), documentação e backups
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+<FilesMatch "\.(md|txt|sql|bak|old|log|ini|sh|yml|yaml|dist)$">
+    Require all denied
+</FilesMatch>
+
+# Cabeçalhos extras (se o módulo headers estiver ativo – o Dockerfile ativa)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header unset X-Powered-By
+</IfModule>
+
+ErrorDocument 403 "Acesso negado."

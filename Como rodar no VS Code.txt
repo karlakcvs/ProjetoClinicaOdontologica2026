@@ -1,0 +1,11 @@
+Consulte LEIA-ME.md para instalar e executar o projeto.
+
+Antes de iniciar:
+- Copie .env.example para .env e configure credenciais fortes.
+- Se usar um banco existente em mysql-data, mantenha as credenciais originais.
+- Não publique .env, mysql-data nem conteúdo de src/uploads; podem conter dados pessoais ou de saúde.
+
+Com o Docker Desktop aberto, execute:
+  docker compose up -d --build
+
+O site fica disponível em http://localhost.

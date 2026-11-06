@@ -1,0 +1,7 @@
+# Somente imagens públicas dos dentistas
+<FilesMatch "\.(jpe?g|png|webp)$">
+    Require all granted
+</FilesMatch>
+<FilesMatch "\.(php|phtml|phar|php\d|pht|svg|html?|js)$">
+    Require all denied
+</FilesMatch>

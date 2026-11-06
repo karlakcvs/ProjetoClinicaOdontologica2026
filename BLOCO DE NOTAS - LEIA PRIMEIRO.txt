@@ -1,0 +1,101 @@
+BLOCO DE NOTAS – Site Garcia Di Mase (versão 3 · 05/11/2026)
+=============================================================
+
+1) COMO INSTALAR (igual às outras vezes)
+----------------------------------------
+1. Abra o Docker Desktop e espere "Engine running".
+2. No VS Code: File → Open Folder → pasta DW2. Abra o terminal (Ctrl + ').
+3. Rode:  docker compose down
+4. (Recomendado) Copie a pasta mysql-data e cole como mysql-data-backup.
+5. Apague a pasta src antiga e coloque a src deste zip no lugar.
+   Troque também LEIA-ME.md, SEGURANCA.md e "Como rodar no VS Code.txt".
+   NÃO mexa na pasta mysql-data (ela não vem no zip, de propósito).
+6. Rode:  docker compose up -d --build
+7. Abra http://localhost. Na primeira visita o banco se atualiza sozinho (versão 3).
+   Nada é apagado: só os dados de DEMONSTRAÇÃO são ajustados.
+8. Se aparecer tudo "sem estilo" ou com a versão antiga: aperte Ctrl + F5.
+
+
+2) LOGINS – O E-MAIL MUDOU (as senhas são as mesmas)
+-----------------------------------------------------
+Área restrita: http://localhost/login.php
+
+Secretaria (Juliana Prado)   secretaria@garciadimase.example
+Dra. Helena Duarte           helena.duarte@garciadimase.example
+Dr. Rafael Monteiro          rafael.monteiro@garciadimase.example
+Dra. Camila Nogueira         camila.nogueira@garciadimase.example
+As senhas de demonstração não são publicadas no repositório. Troque-as antes de usar dados reais.
+
+O login antigo (@garciadimase.com.br) deixa de funcionar depois da atualização.
+
+
+3) DADOS FICTÍCIOS (nenhum existe de verdade)
+---------------------------------------------
+Telefone da clínica ..... (19) 0000-1234   → nenhum telefone no Brasil começa com 0
+WhatsApp ................ (19) 90000-1234
+E-mail .................. contato@garciadimase.example
+                          → ".example" é um domínio reservado: nunca pode existir
+Endereço ................ Rua Fictícia dos Sorrisos, 000 - Centro, Araras/SP - CEP 00000-000
+                          → o CEP 00000-000 não existe
+CRO dos dentistas ....... CRO-SP 00.001, 00.002 e 00.003
+Pacientes de exemplo .... telefones (19) 90000-0001 até 90000-0012
+                          e-mails nome@paciente.example
+Para mudar esses dados: src/include/config.php (linhas do começo).
+
+Atenção: pacientes que VOCÊ cadastrou à mão não são alterados. Se algum deles tiver
+telefone ou e-mail de verdade, troque na tela Pacientes.
+
+
+4) O QUE MUDOU NO SITE
+----------------------
+• MENU: botão ☰ à esquerda do logo, que abre um menu lateral (links, Agendar, Acesso restrito,
+  telefone e endereço). No computador os links continuam na barra também.
+  "Preços" virou "Tratamentos". "Primeira consulta" saiu do menu e do rodapé.
+  Na barra fica só o botão "Agendar consulta" ("Acesso restrito" foi para o menu ☰).
+• TOPO: saiu o botão "É minha primeira consulta" (ficou só "Agendar consulta").
+  Saíram o logo gigante e os balõezinhos. Entrou o dente 3D em malha que gira devagar e brilha.
+  Quem marca "reduzir movimento" no computador vê o dente parado.
+• PRIMEIRA CONSULTA: a seção de destaque saiu da página. Agora é o card
+  "Avaliação / Primeira consulta", o PRIMEIRO em Procedimentos e valores (com o selo
+  "Comece por aqui"). Também aparece primeiro no agendamento e no perfil dos dentistas.
+• ESPECIALIDADES (nomes técnicos):
+    Helena – Ortodontia e Ortopedia Facial: alinhadores invisíveis, aparelho estético,
+             má oclusão, mordida cruzada/aberta, diastemas, DTM e bruxismo
+    Rafael – Implantodontia e Cirurgia Oral: implantes, protocolo All-on-4, enxerto ósseo,
+             levantamento de seio maxilar, cirurgia guiada, sisos inclusos, carga imediata
+    Camila – Estética e Harmonização Orofacial: clareamento, lentes de contato e facetas,
+             harmonização orofacial, toxina botulínica (botox), ácido hialurônico, resinas
+  No perfil, o título virou "Principais tratamentos".
+• NOTAS: entraram mais 6 avaliações de exemplo. Média geral 4,9 (12 avaliações);
+  Rafael 5,0 · Camila 5,0 · Helena 4,8. Continuam com a etiqueta "exemplo".
+  (Se você já tinha removido as avaliações de exemplo, nada é adicionado.)
+• ANTES E DEPOIS: no perfil de cada dentista há 2 casos simples (clareamento e limpeza),
+  com a etiqueta "imagens ilustrativas" e um aviso de que os resultados variam.
+  O "antes" é a mesma foto com filtro amarelado.
+• DESENHOS DOS DENTISTAS: ficaram como estavam (você ia ver depois).
+
+
+5) COISAS IMPORTANTES
+---------------------
+• Precisa de INTERNET para as fotos do antes e depois (vêm do Unsplash, gratuito, inclusive
+  para uso comercial), além de Bootstrap, ícones e fontes. Sem internet, o espaço da foto
+  fica em branco, sem quebrar a página.
+• Para trocar uma foto do antes e depois: src/include/config.php → $CASOS_ANTES_DEPOIS.
+  Use o código que aparece no endereço da foto: images.unsplash.com/photo-XXXXXXXXX.
+  Se usar outro site de fotos, ele também precisa entrar na linha "img-src" do
+  src/include/seguranca.php (proteção do site); senão a foto é bloqueada.
+• Dente 3D: src/assets/js/dente3d.js. Para mudar a velocidade, procure "1 volta a cada 18 s"
+  e troque o número 18 (maior = mais devagar).
+• Antes de publicar o site de verdade: remover as avaliações de exemplo
+  (Avaliações → "Remover avaliações de exemplo") e trocar os dados fictícios pelos reais.
+
+
+6) CHECKLIST PARA CONFERIR DEPOIS DE INSTALAR
+---------------------------------------------
+[ ] http://localhost abre com o dente girando no topo
+[ ] O botão ☰ à esquerda do logo abre o menu lateral
+[ ] O menu mostra: Início, Especialistas, Tratamentos, Avaliações, Contato
+[ ] Em "Tratamentos", o primeiro card é "Avaliação / Primeira consulta"
+[ ] O perfil de cada dentista mostra o "Antes e depois"
+[ ] O login funciona com o e-mail novo (@garciadimase.example)
+[ ] O rodapé mostra o telefone (19) 0000-1234 e o e-mail contato@garciadimase.example

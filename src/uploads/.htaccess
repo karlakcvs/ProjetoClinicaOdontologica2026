@@ -1,0 +1,5 @@
+# Nenhum script enviado pode ser executado aqui
+<FilesMatch "\.(php|phtml|phar|php\d|pht|cgi|pl|py|sh|htaccess)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes -ExecCGI

@@ -1,0 +1,3 @@
+Este arquivo contém instruções antigas. Consulte LEIA-ME.md para instalar e executar o projeto.
+Configure as credenciais no arquivo local .env (copiado de .env.example); não publique esse arquivo.
+Não publique mysql-data nem conteúdo de src/uploads: podem conter dados pessoais ou informações de saúde.

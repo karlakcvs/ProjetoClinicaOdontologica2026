@@ -1,0 +1,3 @@
+# Fotos e exames de pacientes são dados de saúde (LGPD):
+# NUNCA acessíveis por link direto. Só via arquivo.php, com login do dentista.
+Require all denied

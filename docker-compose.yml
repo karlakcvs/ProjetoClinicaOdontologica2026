@@ -1,0 +1,45 @@
+services:
+  # Servidor Apache + PHP (site e sistema)
+  web:
+    build: .
+    container_name: php_apache
+    environment:
+      DB_HOST: db
+      DB_NAME: ${MYSQL_DATABASE:?Configure MYSQL_DATABASE in .env}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configure MYSQL_ROOT_PASSWORD in .env}
+    ports:
+      - "80:80"
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # Banco de Dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configure MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Configure MYSQL_DATABASE in .env}
+      MYSQL_USER: ${MYSQL_USER:?Configure MYSQL_USER in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Configure MYSQL_PASSWORD in .env}
+    volumes:
+      - ./mysql-data:/var/lib/mysql # Local database; do not commit this directory.
+    ports:
+      # Segurança: o banco só aceita conexões do próprio computador (127.0.0.1)
+      - "127.0.0.1:3306:3306"
+
+  # phpMyAdmin (também só acessível no próprio computador)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "127.0.0.1:8888:80"

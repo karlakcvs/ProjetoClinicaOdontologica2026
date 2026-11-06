@@ -1,0 +1,34 @@
+# Local credentials and environment
+.env
+.env.*
+!.env.example
+
+# Local database and uploaded patient/clinic files
+/mysql-data/
+/mysql-data-backup/
+/src/uploads/*
+!/src/uploads/.htaccess
+!/src/uploads/.gitkeep
+!/src/uploads/dentistas/
+!/src/uploads/galeria/
+!/src/uploads/prontuario/
+/src/uploads/dentistas/*
+/src/uploads/galeria/*
+/src/uploads/prontuario/*
+!/src/uploads/dentistas/.htaccess
+!/src/uploads/galeria/.htaccess
+!/src/uploads/prontuario/.htaccess
+!/src/uploads/dentistas/.gitkeep
+!/src/uploads/galeria/.gitkeep
+!/src/uploads/prontuario/.gitkeep
+
+# Local/editor/build artifacts
+.vscode/
+.idea/
+.vs/
+*.log
+*.bak
+*.old
+*.tmp
+Thumbs.db
+Desktop.ini
