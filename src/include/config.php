@@ -12,7 +12,10 @@ $whatsapp       = "5519900001234";           // FICTÍCIO – só números, com 
 $endereco       = "Rua Fictícia dos Sorrisos, 000 - Centro, Araras/SP - CEP 00000-000"; // FICTÍCIO
 $email_clinica  = "contato@garciadimase.example";   // FICTÍCIO (.example nunca existe)
 $empresa_dev    = "SanyTech";
-$dominio_login  = "garciadimase.example";     // usado nos logins: secretaria@garciadimase.example (domínio fictício)
+$dominio_login  = "garciadimase.example";
+// Redes sociais (a clínica ainda não tem: os ícones já ficam prontos; troque "#" pelo endereço real)
+$instagram      = "#";
+$facebook       = "#";     // usado nos logins: secretaria@garciadimase.example (domínio fictício)
 
 // Mantido do projeto original (cabecalho antigo usava $nome_barbearia)
 $nome_barbearia = $nome_clinica;
@@ -29,6 +32,36 @@ $STATUS_CONSULTA = [
     'FALTOU'     => ['Faltou',     'status-faltou',     'bi-person-x'],
 ];
 
+// Cores da agenda por TIPO de procedimento (para não ficar tudo da mesma cor)
+const CATEGORIAS_PROC = [
+    'avaliacao' => ['Avaliação / 1ª consulta', '#0b3a75'],
+    'prevencao' => ['Limpeza e prevenção',     '#12a3a0'],
+    'orto'      => ['Ortodontia',              '#7a5cc4'],
+    'cirurgia'  => ['Cirurgia e implante',     '#d9534f'],
+    'estetica'  => ['Estética e restauração',  '#d4900a'],
+];
+function categoria_proc($nome) {
+    $n = mb_strtolower((string) $nome);
+    if (preg_match('/avalia|primeira/u', $n)) return 'avaliacao';
+    if (preg_match('/aparelho|alinhador|ortod/u', $n)) return 'orto';
+    if (preg_match('/implante|extra|cirurg|siso|enxerto/u', $n)) return 'cirurgia';
+    if (preg_match('/limpeza|profilaxia|flúor|fluor/u', $n)) return 'prevencao';
+    return 'estetica';
+}
+
+// Odontograma: situação de cada dente [rótulo, cor]
+const SITUACOES_DENTE = [
+    'HIGIDO'     => ['Hígido (saudável)', '#ffffff'],
+    'CARIE'      => ['Cárie',             '#d9534f'],
+    'RESTAURADO' => ['Restaurado',        '#3a7bd5'],
+    'CANAL'      => ['Tratamento de canal', '#7a5cc4'],
+    'COROA'      => ['Coroa / lente',     '#d4900a'],
+    'IMPLANTE'   => ['Implante',          '#12a3a0'],
+    'AUSENTE'    => ['Ausente',           '#9aa5b1'],
+    'APARELHO'   => ['Com aparelho',      '#0b3a75'],
+    'EXTRAIR'    => ['Indicado extrair',  '#8b1e2b'],
+];
+
 // Formas de pagamento aceitas (pagamento feito na clínica, no dia do atendimento)
 $FORMAS_PAGAMENTO = ['PIX', 'Dinheiro', 'Cartão de débito', 'Cartão de crédito'];
 $FORMAS_ICONES    = ['PIX' => 'bi-qr-code', 'Dinheiro' => 'bi-cash', 'Cartão de débito' => 'bi-credit-card-2-front', 'Cartão de crédito' => 'bi-credit-card'];
@@ -37,28 +70,80 @@ $DIAS_SEMANA = [1 => 'Segunda', 2 => 'Terça', 3 => 'Quarta', 4 => 'Quinta', 5 =
 
 $UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
-// Antes e depois no perfil de cada dentista (IMAGENS ILUSTRATIVAS – fotos gratuitas do Unsplash).
-// O "antes" é a mesma foto com um filtro amarelado (CSS). Chave = primeiro nome do dentista em minúsculas.
-// Para trocar: copie o código da foto do endereço images.unsplash.com/photo-XXXX.
+// =====================================================================
+//  FOTOS DO SITE (bancos de imagens gratuitos: Pexels e Unsplash)
+//  Formato: 'pexels:ID' ou 'unsplash:ID' (o código que aparece no endereço da foto).
+//  QUER USAR FOTOS SUAS (ex.: feitas com IA)? Salve o arquivo em
+//  assets/img/fotos/<nome-do-espaço>.jpg  (ex.: assets/img/fotos/dentista-helena.jpg)
+//  e ele passa a ser usado no lugar da foto da internet, sem mexer no código.
+// =====================================================================
+$FOTOS_SITE = [
+    // topo da página inicial: dentista com pacientes sorridentes
+    'hero-principal'   => 'pexels:7800568',    // dentista com menina sorrindo na cadeira
+    'hero-paciente-1'  => 'pexels:3845759',    // paciente sorrindo com o espelho
+    'hero-paciente-2'  => 'pexels:7800561',    // criança sorridente na cadeira
+    // foto ao lado do agendamento
+    'agendar'          => 'pexels:5355703',    // dentista mostrando o tablet à paciente
+    'agendar-inicio'   => 'pexels:20596945',   // paciente sorrindo no consultório
+    // dentistas (usadas enquanto a secretaria não enviar outra foto em "Dentistas")
+    'dentista-helena'  => 'pexels:19596247',
+    'dentista-rafael'  => 'pexels:37458054',
+    'dentista-camila'  => 'pexels:31043313',
+];
+
+// Antes e depois no perfil de cada dentista: SIMULAÇÕES ILUSTRATIVAS enviadas pela equipe
+// (assets/img/antes-depois). Chave = primeiro nome do dentista em minúsculas.
+// [foto antes, foto depois, título do caso, detalhe]
 $CASOS_ANTES_DEPOIS = [
     'helena' => [
-        ['1598256989809-394fa4f6cd26', 'Limpeza e polimento durante o aparelho', 'Profilaxia · 1 sessão'],
-        ['1609840114035-3c981b782dfe', 'Remoção de manchas antes dos alinhadores', 'Limpeza + polimento'],
+        ['assets/img/antes-depois/helena-1-antes.jpg', 'assets/img/antes-depois/helena-1-depois.jpg', 'Correção de dentes apinhados', 'Aparelho fixo estético · 18 meses'],
+        ['assets/img/antes-depois/helena-2-antes.jpg', 'assets/img/antes-depois/helena-2-depois.jpg', 'Fechamento de diastema', 'Alinhadores invisíveis · 9 meses'],
     ],
     'rafael' => [
-        ['1670250492416-570b5b7343b1', 'Limpeza e polimento após o implante', 'Profilaxia · 1 sessão'],
-        ['1656514894252-fb336a3ad6a6', 'Clareamento depois da reabilitação', '2 sessões'],
+        ['assets/img/antes-depois/rafael-1-antes.jpg', 'assets/img/antes-depois/rafael-1-depois.jpg', 'Implante do incisivo lateral', 'Carga imediata · coroa em cerâmica'],
+        ['assets/img/antes-depois/rafael-2-antes.jpg', 'assets/img/antes-depois/rafael-2-depois.jpg', 'Implante na região do canino', 'Enxerto ósseo + coroa · 5 meses'],
     ],
     'camila' => [
-        ['1677026010083-78ec7f1b84ed', 'Clareamento em consultório', '2 sessões'],
-        ['1769559893692-c6d0623bf8e4', 'Clareamento + limpeza', '1 sessão de cada'],
+        ['assets/img/antes-depois/camila-1-antes.jpg', 'assets/img/antes-depois/camila-1-depois.jpg', 'Clareamento em consultório', '2 sessões'],
+        ['assets/img/antes-depois/camila-2-antes.jpg', 'assets/img/antes-depois/camila-2-depois.jpg', 'Lentes de contato dental', 'Dentes lascados e diastema · 2 sessões'],
     ],
 ];
-function foto_unsplash($id, $largura = 600) {
-    return 'https://images.unsplash.com/photo-' . rawurlencode($id) . '?w=' . (int) $largura . '&q=70&auto=format&fit=crop';
+
+// Foto "fora do consultório" no perfil de cada dentista (opcional).
+// Salve o arquivo em assets/img/fotos/pessoal-<nome>.jpg e ela aparece sozinha.
+$FOTO_PESSOAL = [
+    'helena' => 'Com o marido e a filha nas férias de julho.',
+    'rafael' => 'Com o Thor, companheiro das caminhadas de domingo.',
+    'camila' => 'Em Paris, depois de um congresso de estética do sorriso.',
+];
+
+// Monta o endereço de uma foto: 'pexels:ID', 'unsplash:ID' ou caminho local
+function url_foto($ref, $largura = 600, $altura = null) {
+    $ref = (string) $ref;
+    if (strncmp($ref, 'pexels:', 7) === 0) {
+        $id = preg_replace('/\D/', '', substr($ref, 7));
+        return 'https://images.pexels.com/photos/' . $id . '/pexels-photo-' . $id . '.jpeg?auto=compress&cs=tinysrgb&w=' . (int) $largura
+             . ($altura ? '&h=' . (int) $altura . '&fit=crop' : '');
+    }
+    if (strncmp($ref, 'unsplash:', 9) === 0) {
+        return 'https://images.unsplash.com/photo-' . rawurlencode(substr($ref, 9)) . '?w=' . (int) $largura
+             . ($altura ? '&h=' . (int) $altura : '') . '&q=72&auto=format&fit=crop';
+    }
+    return $ref;
+}
+// Mantido para compatibilidade com a versão anterior
+function foto_unsplash($id, $largura = 600) { return url_foto('unsplash:' . $id, $largura); }
+
+// Foto de um "espaço" do site: usa o arquivo local (assets/img/fotos/<espaço>.jpg) se existir
+function foto_site($espaco, $largura = 900, $altura = null) {
+    global $FOTOS_SITE;
+    foreach (['jpg', 'jpeg', 'webp', 'png'] as $ext) {
+        if (is_file(__DIR__ . '/../assets/img/fotos/' . $espaco . '.' . $ext)) return 'assets/img/fotos/' . $espaco . '.' . $ext;
+    }
+    return url_foto($FOTOS_SITE[$espaco] ?? '', $largura, $altura);
 }
 
-// Segurança: sessão protegida, cabeçalhos, CSRF, captcha e limite de tentativas
+// Segurança: sessão protegida, cabeçalhos, CSRF e RATE LIMITING (4 tentativas + limite por minuto)
 require_once __DIR__ . '/seguranca.php';
 
 // Função para saudação baseada na hora (mantida do projeto da barbearia)
@@ -132,12 +217,33 @@ function logo_clinica($classe = 'brand-logo', $variante = 'cor') {
     return '<img src="assets/img/' . $arq . '" alt="' . e($nome_clinica . ' – ' . $slogan_clinica) . '" class="' . e($classe) . '-img" width="268" height="46">';
 }
 
-// Foto do dentista (ou ilustração padrão)
-function foto_dentista($d) {
+// Foto do dentista: enviada pela secretaria > arquivo local em assets/img/fotos > banco de imagens
+function foto_dentista($d, $largura = 700) {
     if (empty($d['foto'])) return '';
-    $arq = rawurlencode(basename($d['foto']));
-    // fotos enviadas pela secretaria ficam em uploads/dentistas; as ilustrações padrão em assets
-    return (strpos($d['foto'], 'up_') === 0 ? 'uploads/dentistas/' : 'assets/img/dentistas/') . $arq;
+    if (strpos($d['foto'], 'up_') === 0) return 'uploads/dentistas/' . rawurlencode(basename($d['foto']));
+    if (preg_match('/^(pexels|unsplash):/', $d['foto'])) {
+        $espaco = 'dentista-' . mb_strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', primeiro_nome($d['nome'])));
+        foreach (['jpg', 'jpeg', 'webp', 'png'] as $ext) {
+            if (is_file(__DIR__ . '/../assets/img/fotos/' . $espaco . '.' . $ext)) return 'assets/img/fotos/' . $espaco . '.' . $ext;
+        }
+        return url_foto($d['foto'], $largura);
+    }
+    return 'assets/img/dentistas/' . rawurlencode(basename($d['foto']));
+}
+
+// Avatar de paciente: foto (cadastros completos de pacientes antigos) ou iniciais.
+// Se a foto não carregar (sem internet), as iniciais continuam aparecendo por baixo.
+function avatar_paciente($p, $tam = 'sm', $nomeCampo = 'nome') {
+    $nome = (string) ($p[$nomeCampo] ?? $p['paciente'] ?? '');
+    $foto = $p['foto'] ?? ($p['foto_paciente'] ?? '');
+    $cores = ['#4f7cc4', '#12a3a0', '#0b3a75', '#7a5cc4', '#c47a3a', '#2f8f5b'];
+    $cor = $cores[abs(crc32($nome)) % count($cores)];
+    $h = '<span class="avatar avatar-' . e($tam) . ' avatar-pac" style="--c:' . $cor . '" aria-hidden="true"><span>' . e(iniciais($nome)) . '</span>';
+    if ($foto) {
+        $w = ['xs' => 80, 'sm' => 120, 'md' => 200, 'lg' => 320][$tam] ?? 160;
+        $h .= '<img src="' . e(url_foto($foto, $w, $w)) . '" alt="" loading="lazy" onerror="this.remove()">';
+    }
+    return $h . '</span>';
 }
 
 function estrelas($nota, $classe = '') {

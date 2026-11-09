@@ -11,11 +11,11 @@ $volta = 'volta';
 // 1. Formulário expirado ou enviado de outro site
 if (!csrf_ok()) $volta('expirado');
 
-// 2. Muitas tentativas erradas deste IP? Bloqueia por alguns minutos (força bruta)
-if (limite_excedido($pdo, 'login', LOGIN_MAX_TENTATIVAS, LOGIN_JANELA_MIN)) $volta('bloqueado');
+// 2. RATE LIMITING: 4 tentativas erradas em 15 min bloqueiam este IP (força bruta)
+if (limite_excedido($pdo, 'login')) $volta('bloqueado');
 
-// 3. Verificação "não sou um robô"
-if (captcha_validar('login', 1) !== '') { limite_registrar($pdo, 'login'); $volta('captcha'); }
+// 3. Campo-isca e envio rápido demais = robô (conta como tentativa)
+if (protecao_validar('login', 1) !== '') { limite_registrar($pdo, 'login'); $volta('robo'); }
 
 $user = mb_strtolower(trim((string) ($_POST['usuario'] ?? '')));
 $pass = (string) ($_POST['senha'] ?? '');
@@ -29,7 +29,7 @@ $u = $stmt->fetch();
 $hash = $u['senha'] ?? '$2y$10$usuarioInexistenteXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 if (!$u || !password_verify($pass, $hash) || !in_array($u['perfil'], ['SECRETARIA', 'DENTISTA'], true)) {
     limite_registrar($pdo, 'login');
-    $volta('1');
+    $volta(limite_excedido($pdo, 'login') ? 'bloqueado' : '1');
 }
 
 // 5. LOGIN OK: nova sessão (evita sequestro de sessão) e dados mínimos

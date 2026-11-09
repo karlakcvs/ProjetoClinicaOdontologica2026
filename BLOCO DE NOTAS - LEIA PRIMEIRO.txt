@@ -1,5 +1,25 @@
-BLOCO DE NOTAS – Site Garcia Di Mase (versão 3 · 05/11/2026)
-=============================================================
+BLOCO DE NOTAS – Site Garcia Di Mase (versão 5 · 07/11/2026 · apresentação 24/11)
+==================================================================================
+
+NOVIDADES DA VERSÃO 5 (resumo)
+• Fotos novas dos dentistas (com nome bordado no jaleco), foto do topo (perfil 1),
+  foto do agendamento da página inicial (perfil 2) e antes/depois por especialidade.
+• Rafael com 20 anos de experiência; formações em universidades públicas (USP, Unicamp, Unesp).
+• ÁREA TÉCNICA SANYTECH: http://localhost/sanytech.php  (usuário ti@sanytech.example;
+  a senha foi passada na conversa – NÃO fica no código). Mostra funcionamento, velocidade
+  e segurança. Não mostra nenhum dado de paciente. O menu "Segurança" saiu da secretaria.
+• Proteção nos formulários agora é discreta: cadeado + "Protegido · Restam X de 4 tentativas".
+• Agenda colorida por tipo de procedimento (botão "Cor por tipo / Cor por dentista").
+• Agenda de demonstração até 11/12/2026.
+• Dentista: ao clicar no paciente abre "Resumo e odontograma" (dentes clicáveis,
+  gráfico de evolução, procedimentos e financeiro com aquele dentista).
+• Secretaria: botão "Resumo" em Pacientes (cadastro, histórico, pagamentos, assiduidade).
+• Instagram e Facebook no rodapé e no menu ☰ (troque o "#" em include/config.php).
+• "Acesso restrito" só aparece no menu ☰. No celular o botão Agendar saiu do topo.
+• Foto pessoal do dentista ("Fora do consultório"): salve em src/assets/img/fotos/
+  pessoal-helena.jpg, pessoal-rafael.jpg, pessoal-camila.jpg que ela aparece no perfil.
+• Cantos retos em todos os blocos.
+
 
 1) COMO INSTALAR (igual às outras vezes)
 ----------------------------------------
@@ -8,94 +28,94 @@ BLOCO DE NOTAS – Site Garcia Di Mase (versão 3 · 05/11/2026)
 3. Rode:  docker compose down
 4. (Recomendado) Copie a pasta mysql-data e cole como mysql-data-backup.
 5. Apague a pasta src antiga e coloque a src deste zip no lugar.
-   Troque também LEIA-ME.md, SEGURANCA.md e "Como rodar no VS Code.txt".
+   Troque também LEIA-ME.md, SEGURANCA.md e este bloco de notas.
    NÃO mexa na pasta mysql-data (ela não vem no zip, de propósito).
 6. Rode:  docker compose up -d --build
-7. Abra http://localhost. Na primeira visita o banco se atualiza sozinho (versão 3).
-   Nada é apagado: só os dados de DEMONSTRAÇÃO são ajustados.
-8. Se aparecer tudo "sem estilo" ou com a versão antiga: aperte Ctrl + F5.
+7. Abra http://localhost. Na primeira visita o banco se atualiza sozinho (versão 4).
+   Nada que vocês cadastraram é apagado: só dados de DEMONSTRAÇÃO são criados/ajustados.
+8. Se aparecer a versão antiga: aperte Ctrl + F5.
+
+Tecnologias continuam as mesmas: PHP + MySQL + HTML/CSS + JavaScript (Bootstrap).
+Na primeira visita o banco vai para a versão 5 sozinho (nada que vocês cadastraram é apagado).
 
 
-2) LOGINS – O E-MAIL MUDOU (as senhas são as mesmas)
------------------------------------------------------
+2) LOGINS (não mudaram)
+-----------------------
 Área restrita: http://localhost/login.php
-
 Secretaria (Juliana Prado)   secretaria@garciadimase.example
 Dra. Helena Duarte           helena.duarte@garciadimase.example
 Dr. Rafael Monteiro          rafael.monteiro@garciadimase.example
 Dra. Camila Nogueira         camila.nogueira@garciadimase.example
-As senhas de demonstração não são publicadas no repositório. Troque-as antes de usar dados reais.
+Senhas: as mesmas de antes.
 
-O login antigo (@garciadimase.com.br) deixa de funcionar depois da atualização.
-
-
-3) DADOS FICTÍCIOS (nenhum existe de verdade)
----------------------------------------------
-Telefone da clínica ..... (19) 0000-1234   → nenhum telefone no Brasil começa com 0
-WhatsApp ................ (19) 90000-1234
-E-mail .................. contato@garciadimase.example
-                          → ".example" é um domínio reservado: nunca pode existir
-Endereço ................ Rua Fictícia dos Sorrisos, 000 - Centro, Araras/SP - CEP 00000-000
-                          → o CEP 00000-000 não existe
-CRO dos dentistas ....... CRO-SP 00.001, 00.002 e 00.003
-Pacientes de exemplo .... telefones (19) 90000-0001 até 90000-0012
-                          e-mails nome@paciente.example
-Para mudar esses dados: src/include/config.php (linhas do começo).
-
-Atenção: pacientes que VOCÊ cadastrou à mão não são alterados. Se algum deles tiver
-telefone ou e-mail de verdade, troque na tela Pacientes.
+ATENÇÃO NO DIA: o login agora bloqueia depois de 4 senhas erradas (15 minutos).
+Se isso acontecer durante a apresentação, rode no terminal do VS Code:
+    docker exec -it php_apache php /var/www/html/include/liberar_bloqueios.php
+(ou espere a contagem regressiva acabar). Obs.: no Docker Desktop todos os aparelhos
+podem aparecer com o mesmo IP, então o bloqueio vale para todos.
 
 
-4) O QUE MUDOU NO SITE
-----------------------
-• MENU: botão ☰ à esquerda do logo, que abre um menu lateral (links, Agendar, Acesso restrito,
-  telefone e endereço). No computador os links continuam na barra também.
-  "Preços" virou "Tratamentos". "Primeira consulta" saiu do menu e do rodapé.
-  Na barra fica só o botão "Agendar consulta" ("Acesso restrito" foi para o menu ☰).
-• TOPO: saiu o botão "É minha primeira consulta" (ficou só "Agendar consulta").
-  Saíram o logo gigante e os balõezinhos. Entrou o dente 3D em malha que gira devagar e brilha.
-  Quem marca "reduzir movimento" no computador vê o dente parado.
-• PRIMEIRA CONSULTA: a seção de destaque saiu da página. Agora é o card
-  "Avaliação / Primeira consulta", o PRIMEIRO em Procedimentos e valores (com o selo
-  "Comece por aqui"). Também aparece primeiro no agendamento e no perfil dos dentistas.
-• ESPECIALIDADES (nomes técnicos):
-    Helena – Ortodontia e Ortopedia Facial: alinhadores invisíveis, aparelho estético,
-             má oclusão, mordida cruzada/aberta, diastemas, DTM e bruxismo
-    Rafael – Implantodontia e Cirurgia Oral: implantes, protocolo All-on-4, enxerto ósseo,
-             levantamento de seio maxilar, cirurgia guiada, sisos inclusos, carga imediata
-    Camila – Estética e Harmonização Orofacial: clareamento, lentes de contato e facetas,
-             harmonização orofacial, toxina botulínica (botox), ácido hialurônico, resinas
-  No perfil, o título virou "Principais tratamentos".
-• NOTAS: entraram mais 6 avaliações de exemplo. Média geral 4,9 (12 avaliações);
-  Rafael 5,0 · Camila 5,0 · Helena 4,8. Continuam com a etiqueta "exemplo".
-  (Se você já tinha removido as avaliações de exemplo, nada é adicionado.)
-• ANTES E DEPOIS: no perfil de cada dentista há 2 casos simples (clareamento e limpeza),
-  com a etiqueta "imagens ilustrativas" e um aviso de que os resultados variam.
-  O "antes" é a mesma foto com filtro amarelado.
-• DESENHOS DOS DENTISTAS: ficaram como estavam (você ia ver depois).
+3) O QUE MUDOU NA VERSÃO 4
+--------------------------
+• SEGURANÇA – RATE LIMITING NO LUGAR DO CAPTCHA DE LETRAS
+  - Login: 4 tentativas a cada 15 min. A tela mostra um medidor "0 de 4 usadas" e,
+    se bloquear, uma contagem regressiva até liberar.
+  - Agendamento, Fale conosco, Avaliação e Troca de senha: 4 envios por período.
+    Os formulários mostram "Protegido por rate limiting – Restam X".
+  - Tráfego geral: 120 páginas/min, 40 consultas de horários/min, 60 arquivos/min,
+    20 formulários/min por IP. Passou disso → erro 429 (Too Many Requests) com Retry-After.
+  - O painel de SEGURANÇA fica na área técnica SanyTech (sanytech.php).
+  - Para demonstrar: erre a senha 4 vezes no login (o bloqueio aparece na hora) e depois
+    mostre o painel Segurança na área técnica SanyTech.
+  Explicação completa em SEGURANCA.md.
+
+• DENTISTAS COM FOTOS DE PESSOAS REAIS
+  Helena = mulher negra · Rafael = rapaz · Camila = moça. Cards no estilo do exemplo:
+  foto em fundo azul-claro, nome grande, especialidade e nota em quadradinhos.
+
+• TOPO DA PÁGINA INICIAL: saiu o dente girando. Entrou a dentista (Dra. Helena) com
+  duas pacientes sorrindo ao lado. Menu superior e botão sanduíche (☰) mantidos.
+
+• PROCEDIMENTOS no estilo do exemplo (grade com ícone quadrado, título e descrição).
+
+• AGENDAMENTO COM FOTO AO LADO (estilo do exemplo): na página inicial (seção
+  "Agende sua consulta hoje!") e no topo da página Agendar.
+
+• BOXES QUADRADOS: botões, etiquetas, cartões e campos sem formato oval/pílula.
+
+• ANTES E DEPOIS: agora são duas fotos DIFERENTES (ex.: com aparelho → sorriso
+  alinhado). Continuam marcadas como "imagens ilustrativas" (banco de imagens).
+
+• SECRETARIA E DENTISTAS: fotinha de perfil dos pacientes antigos (cadastro completo):
+  Ana Beatriz, Bruno, Carla, Eduarda, Gabriela, Henrique, Isabela e Marcos.
+  Eles têm "paciente desde 2019/2020/2021", histórico de consultas e anotações no
+  prontuário. Painel da secretaria ganhou o bloco "Pacientes de longa data".
+
+• AGENDA ATÉ 30/11: consultas em todos os dias úteis de novembro, com a semana de
+  23 a 27/11 bem cheia e o dia 24/11 lotado. As consultas de demonstração que já
+  passaram viram "Realizada" (com pagamento no financeiro) sozinhas – então no dia
+  24 o painel, o financeiro e a agenda estarão atualizados.
+
+• RESPONSIVIDADE E ACESSIBILIDADE: botões com contraste melhor (padrão AA),
+  textos alternativos nas fotos, foco visível, contraste alto e A−/A+ funcionando
+  nas telas novas, layout testado em celular (390 px) e computador.
 
 
-5) COISAS IMPORTANTES
----------------------
-• Precisa de INTERNET para as fotos do antes e depois (vêm do Unsplash, gratuito, inclusive
-  para uso comercial), além de Bootstrap, ícones e fontes. Sem internet, o espaço da foto
-  fica em branco, sem quebrar a página.
-• Para trocar uma foto do antes e depois: src/include/config.php → $CASOS_ANTES_DEPOIS.
-  Use o código que aparece no endereço da foto: images.unsplash.com/photo-XXXXXXXXX.
-  Se usar outro site de fotos, ele também precisa entrar na linha "img-src" do
-  src/include/seguranca.php (proteção do site); senão a foto é bloqueada.
-• Dente 3D: src/assets/js/dente3d.js. Para mudar a velocidade, procure "1 volta a cada 18 s"
-  e troque o número 18 (maior = mais devagar).
-• Antes de publicar o site de verdade: remover as avaliações de exemplo
-  (Avaliações → "Remover avaliações de exemplo") e trocar os dados fictícios pelos reais.
+4) FOTOS
+--------
+• Precisa de INTERNET no dia (fotos vêm do Pexels e Unsplash – gratuitos, uso comercial
+  liberado). Sem internet aparecem as iniciais no lugar da foto, sem quebrar a página.
+• Quer usar fotos feitas por IA? Coloque o arquivo em src/assets/img/fotos/ com o nome
+  indicado no LEIA-ME.txt dessa pasta (ex.: dentista-helena.jpg). Troca automática.
+• Para trocar a foto da internet: src/include/config.php → $FOTOS_SITE e $CASOS_ANTES_DEPOIS.
 
 
-6) CHECKLIST PARA CONFERIR DEPOIS DE INSTALAR
----------------------------------------------
-[ ] http://localhost abre com o dente girando no topo
-[ ] O botão ☰ à esquerda do logo abre o menu lateral
-[ ] O menu mostra: Início, Especialistas, Tratamentos, Avaliações, Contato
-[ ] Em "Tratamentos", o primeiro card é "Avaliação / Primeira consulta"
-[ ] O perfil de cada dentista mostra o "Antes e depois"
-[ ] O login funciona com o e-mail novo (@garciadimase.example)
-[ ] O rodapé mostra o telefone (19) 0000-1234 e o e-mail contato@garciadimase.example
+5) CHECKLIST ANTES DA APRESENTAÇÃO
+----------------------------------
+[ ] http://localhost abre com a dentista e as pacientes no topo
+[ ] Os 3 dentistas aparecem com foto
+[ ] Login mostra "Tentativas de acesso – 0 de 4 usadas"
+[ ] http://localhost/sanytech.php abre a área técnica com o login da SanyTech
+[ ] Painel da secretaria mostra "Pacientes de longa data" com fotos
+[ ] Agenda da semana de 23/11 está cheia
+[ ] Teste no celular (abra pelo IP do computador na mesma rede)

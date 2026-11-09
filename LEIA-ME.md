@@ -120,7 +120,9 @@ Veja o arquivo **SEGURANCA.md** para a análise completa (problemas encontrados 
 ```
 src/
   index.php, especialista.php, agendar.php, confirmacao.php     → site do paciente
-  avaliar.php, contato.php, captcha.php                         → avaliação, contato, "não sou um robô"
+  avaliar.php, contato.php                                      → avaliação e contato (com rate limiting)
+  sanytech.php, ti_painel.php, ti_velocidade.php, ti_seguranca.php → área técnica SanyTech
+  paciente_resumo.php                                           → resumo do paciente (secretaria)
   login.php, auth.php, logout.php, alterar_senha.php            → acesso
   painel.php, agenda_semana.php, lista_agendamentos.php, nova_consulta.php, editar.php,
   acao_consulta.php, excluir.php, lembretes.php, pacientes.php, dentistas.php,

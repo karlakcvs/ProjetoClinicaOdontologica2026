@@ -41,7 +41,7 @@ $links_menu = [
                 <li><a class="nav-link <?= $ativo ? 'active' : '' ?>" href="<?= $href ?>" <?= $ativo ? 'aria-current="page"' : '' ?>><?= $txt ?></a></li>
             <?php endforeach; ?>
         </ul>
-        <a href="agendar.php" class="btn btn-teal btn-sm text-nowrap"><i class="bi bi-calendar2-plus me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Agendar consulta</span><span class="d-sm-none">Agendar</span></a>
+        <a href="agendar.php" class="btn btn-teal btn-sm text-nowrap nav-agendar" aria-label="Agendar consulta"><i class="bi bi-calendar2-plus" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Agendar consulta</span></a>
     </div>
 </nav>
 
@@ -64,6 +64,10 @@ $links_menu = [
         <?php else: ?>
             <a href="login.php" class="btn btn-ghost"><i class="bi bi-lock me-1" aria-hidden="true"></i> Acesso restrito</a>
         <?php endif; ?>
+        <div class="d-flex gap-2 mt-4">
+            <a href="<?= e($instagram) ?>" class="social-ico social-claro" aria-label="Instagram da clínica"><i class="bi bi-instagram" aria-hidden="true"></i></a>
+            <a href="<?= e($facebook) ?>" class="social-ico social-claro" aria-label="Facebook da clínica"><i class="bi bi-facebook" aria-hidden="true"></i></a>
+        </div>
         <div class="mt-auto pt-4 small text-muted d-grid gap-1">
             <span><i class="bi bi-telephone me-2" aria-hidden="true"></i><?= e($contato) ?></span>
             <span><i class="bi bi-clock me-2" aria-hidden="true"></i>Seg a Sex, 07h30 às 19h</span>

@@ -24,7 +24,10 @@ $avs = $st->fetchAll();
 $media = $avs ? array_sum(array_column($avs, 'nota')) / count($avs) : 0;
 $cond = array_filter(array_map('trim', explode("\n", (string) $d['condicoes'])));
 $ft = foto_dentista($d);
-$casos = $CASOS_ANTES_DEPOIS[mb_strtolower(primeiro_nome($d['nome']))] ?? [];
+$chaveNome = mb_strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', primeiro_nome($d['nome'])));
+$casos = $CASOS_ANTES_DEPOIS[$chaveNome] ?? [];
+$fotoPessoal = '';
+foreach (['jpg', 'jpeg', 'webp', 'png'] as $ext) if (is_file(__DIR__ . "/assets/img/fotos/pessoal-$chaveNome.$ext")) { $fotoPessoal = "assets/img/fotos/pessoal-$chaveNome.$ext"; break; }
 
 $titulo = $d['nome'] . ' – ' . $d['especialidade'];
 $pagina = 'especialista';
@@ -35,7 +38,7 @@ include __DIR__ . '/include/cabecalho.php';
         <nav aria-label="Você está em" class="small mb-3"><a href="index.php">Início</a> <i class="bi bi-chevron-right mx-1" aria-hidden="true"></i> <a href="index.php#especialistas">Especialistas</a> <i class="bi bi-chevron-right mx-1" aria-hidden="true"></i> <span class="text-muted"><?= e($d['nome']) ?></span></nav>
         <div class="row g-4 align-items-center">
             <div class="col-md-5 col-lg-4 text-center text-md-start">
-                <?php if ($ft): ?><img src="<?= e($ft) ?>" alt="Ilustração de <?= e($d['nome']) ?>" class="perfil-foto"><?php endif; ?>
+                <div class="perfil-foto-box"><span class="doc-v4-ini" aria-hidden="true"><?= e(iniciais($d['nome'])) ?></span><?php if ($ft): ?><img src="<?= e(foto_dentista($d, 800)) ?>" alt="Foto de <?= e($d['nome']) ?>" class="perfil-foto" onerror="this.remove()"><?php endif; ?></div>
             </div>
             <div class="col-md-7 col-lg-8">
                 <span class="tag mb-2"><?= e($d['especialidade']) ?></span>
@@ -82,24 +85,30 @@ include __DIR__ . '/include/cabecalho.php';
                     </div>
                 </div></div>
                 <?php endif; ?>
+                <?php if ($fotoPessoal): ?>
+                <div class="col-12"><figure class="card-soft pessoal m-0">
+                    <img src="<?= e($fotoPessoal) ?>" alt="<?= e($d['nome']) ?> fora do consultório" loading="lazy">
+                    <figcaption><span class="eyebrow mb-2"><i class="bi bi-heart" aria-hidden="true"></i> Fora do consultório</span><p class="mb-0"><?= e($FOTO_PESSOAL[$chaveNome] ?? '') ?></p></figcaption>
+                </figure></div>
+                <?php endif; ?>
                 <?php if ($casos): ?>
                 <div class="col-12">
                     <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
                         <h2 class="h4 mb-0">Antes e depois</h2>
-                        <span class="demo-tag" title="Fotos de banco de imagens, apenas para ilustrar">imagens ilustrativas</span>
+                        <span class="demo-tag" title="Simulação, não é caso clínico real">simulação ilustrativa</span>
                     </div>
                     <div class="row g-3">
-                        <?php foreach ($casos as [$foto, $caso, $detalhe]): ?>
+                        <?php foreach ($casos as [$fAntes, $fDepois, $caso, $detalhe]): ?>
                         <div class="col-md-6"><figure class="card-soft antes-depois m-0">
                             <div class="ad-par">
-                                <div class="ad-antes"><img src="<?= e(foto_unsplash($foto, 500)) ?>" alt="Antes: <?= e($caso) ?>" loading="lazy" onerror="this.style.visibility='hidden'"><span>Antes</span></div>
-                                <div><img src="<?= e(foto_unsplash($foto, 500)) ?>" alt="Depois: <?= e($caso) ?>" loading="lazy" onerror="this.style.visibility='hidden'"><span>Depois</span></div>
+                                <div class="ad-antes"><img src="<?= e(url_foto($fAntes, 520, 520)) ?>" alt="Antes do tratamento: <?= e($caso) ?>" loading="lazy" onerror="this.style.visibility='hidden'"><span>Antes</span></div>
+                                <div class="ad-depois"><img src="<?= e(url_foto($fDepois, 520, 520)) ?>" alt="Depois do tratamento: <?= e($caso) ?>" loading="lazy" onerror="this.style.visibility='hidden'"><span>Depois</span></div>
                             </div>
                             <figcaption><strong><?= e($caso) ?></strong><span class="text-muted"> · <?= e($detalhe) ?></span></figcaption>
                         </figure></div>
                         <?php endforeach; ?>
                     </div>
-                    <p class="small text-muted mt-2 mb-0">Imagens meramente ilustrativas. Cada tratamento é avaliado individualmente e os resultados variam de pessoa para pessoa.</p>
+                    <p class="small text-muted mt-2 mb-0">Simulação ilustrativa — não é caso clínico real. Cada tratamento é avaliado individualmente e os resultados variam de pessoa para pessoa.</p>
                 </div>
                 <?php endif; ?>
                 <div class="col-12">

@@ -4,7 +4,17 @@ $titulo = $titulo ?? 'Painel';
 $pagina = $pagina ?? '';
 $perfil = perfil_atual();
 
-if ($perfil === 'DENTISTA') {
+if ($perfil === 'TI') {
+    $menu = [
+        ['Monitoramento', null, null],
+        ['ti_painel',          'Funcionamento',      'bi-activity'],
+        ['ti_velocidade',      'Velocidade',         'bi-speedometer2'],
+        ['ti_seguranca',       'Segurança',          'bi-shield-lock'],
+        ['Conta', null, null],
+        ['alterar_senha',      'Alterar senha',      'bi-key'],
+    ];
+    $papel = 'SanyTech · TI';
+} elseif ($perfil === 'DENTISTA') {
     $menu = [
         ['Meu consultório', null, null],
         ['dent_painel',        'Visão geral',        'bi-grid-1x2'],
@@ -51,7 +61,7 @@ $titulo_pagina = $titulo . ' · ' . $papel . ' · ' . $nome_clinica;
 
 <aside class="sidebar" id="sidebar" aria-label="Menu principal">
     <div class="sidebar-head">
-        <a href="<?= $inicio ?>" class="sidebar-logo"><?= logo_clinica() ?></a>
+        <a href="<?= $inicio ?>" class="sidebar-logo"><?php if ($perfil === 'TI'): ?><img src="assets/img/sanytech.png" alt="SanyTech – área técnica" class="brand-logo-img"><?php else: ?><?= logo_clinica() ?><?php endif; ?></a>
         <button class="btn btn-icon btn-ghost mobile-only" type="button" data-menu-toggle aria-label="Fechar menu" aria-controls="sidebar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
     </div>
     <nav class="sidebar-scroll">
@@ -66,7 +76,7 @@ $titulo_pagina = $titulo . ' · ' . $papel . ' · ' . $nome_clinica;
                     </a></li>
                 <?php endif; ?>
             <?php endforeach; ?>
-            <li class="lbl">Site</li>
+            <?php if ($perfil !== 'TI'): ?><li class="lbl">Site</li><?php endif; ?>
             <li><a href="index.php" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span>Ver site</span></a></li>
         </ul>
     </nav>

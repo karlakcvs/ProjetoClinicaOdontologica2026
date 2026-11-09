@@ -86,14 +86,16 @@ include __DIR__ . '/include/admin_topo.php';
         <tbody>
         <?php foreach ($pacientes as $p): $ok = cadastro_completo($p); ?>
             <tr>
-                <td class="td-main"><div class="d-flex align-items-center gap-2"><span class="avatar avatar-xs" style="--c:#4f7cc4" aria-hidden="true"><?= e(iniciais($p['nome'])) ?></span>
-                    <div class="min-w-0"><strong><?= e($p['nome']) ?></strong><br><span class="<?= $ok ? 'badge-ok' : 'badge-inc' ?>"><?= $ok ? 'Cadastro completo' : 'Cadastro incompleto' ?></span>
+                <td class="td-main"><div class="d-flex align-items-center gap-2"><?= avatar_paciente($p, $p['foto'] ? 'md' : 'sm') ?>
+                    <div class="min-w-0"><a href="paciente_resumo.php?id=<?= (int) $p['id_paciente'] ?>" class="fw-bold text-reset"><?= e($p['nome']) ?></a><br><span class="<?= $ok ? 'badge-ok' : 'badge-inc' ?>"><?= $ok ? 'Cadastro completo' : 'Cadastro incompleto' ?></span>
+                    <?php if ($ok && $p['criado_em'] && $p['criado_em'] < date('Y-01-01', strtotime('-1 year'))): ?> <span class="paciente-desde"><i class="bi bi-award" aria-hidden="true"></i> desde <?= date('Y', strtotime($p['criado_em'])) ?></span><?php endif; ?>
                     <?php if ($p['cpf']): ?><span class="small text-muted ms-1"><?= e($p['cpf']) ?></span><?php endif; ?></div></div></td>
                 <td data-label="Contato" class="small"><div><?= e($p['telefone']) ?><br><span class="text-muted"><?= e($p['email']) ?></span></div></td>
                 <td data-label="Endereço" class="small d-none d-lg-table-cell"><div><?= $p['logradouro'] ? e($p['logradouro'] . ', ' . $p['numero'] . ' – ' . $p['bairro']) . '<br><span class="text-muted">' . e($p['cidade'] . '/' . $p['uf'] . ' · ' . $p['cep']) . '</span>' : '<span class="text-muted">—</span>' ?></div></td>
                 <td data-label="Atendimentos" class="d-none d-md-table-cell"><?= (int) $p['atendimentos'] ?></td>
                 <td data-label="Próxima consulta" class="small"><?= $p['proxima'] ? '<span class="status status-confirmada">' . data_br($p['proxima']) . '</span>' : '<span class="text-muted">—</span>' ?></td>
                 <td class="text-end text-nowrap td-acoes">
+                    <a href="paciente_resumo.php?id=<?= (int) $p['id_paciente'] ?>" class="btn btn-sm btn-soft" title="Resumo do paciente"><i class="bi bi-person-lines-fill" aria-hidden="true"></i> Resumo</a>
                     <a href="lista_agendamentos.php?<?= e(http_build_query(['busca_nome' => $p['nome'], 'data' => date('Y-m-d', strtotime('-1 year')), 'ate' => date('Y-m-d', strtotime('+1 year'))])) ?>" class="btn btn-sm btn-ghost" title="Histórico de consultas"><i class="bi bi-clock-history" aria-hidden="true"></i> <span class="d-md-none">Histórico</span></a>
                     <button class="btn btn-sm <?= $ok ? 'btn-ghost' : 'btn-soft' ?>" type="button" data-bs-toggle="modal" data-bs-target="#mPac" data-paciente="<?= e(js(array_intersect_key($p, array_flip(array_merge(['id_paciente'], $campos))))) ?>" id="btnPac<?= (int) $p['id_paciente'] ?>">
                         <i class="bi bi-pencil" aria-hidden="true"></i> <?= $ok ? 'Editar' : 'Completar' ?>

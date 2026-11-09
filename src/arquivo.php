@@ -2,7 +2,9 @@
 // Entrega fotos e exames do prontuário SOMENTE para dentistas com acesso ao paciente.
 // Os arquivos ficam em uploads/prontuario (bloqueado para acesso direto).
 require_once __DIR__ . '/include/check_dentista.php';
+$SEM_LIMITE_PAGINA = true;          // downloads têm limite próprio
 require_once __DIR__ . '/include/conexao.php';
+aplicar_limite_trafego($pdo, 'arquivo');   // rate limiting: 60 arquivos por minuto
 require_once __DIR__ . '/classes/prontuario.php';
 
 $id = (int) ($_GET['id'] ?? 0);

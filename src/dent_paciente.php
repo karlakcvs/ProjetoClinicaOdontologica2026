@@ -3,6 +3,7 @@
 require_once __DIR__ . '/include/check_dentista.php';
 require_once __DIR__ . '/include/conexao.php';
 require_once __DIR__ . '/classes/prontuario.php';
+require_once __DIR__ . '/include/odontograma.php';
 
 $idPac = (int) ($_GET['id'] ?? $_POST['id_paciente'] ?? 0);
 $pr = new Prontuario($pdo, $ID_DENTISTA);
@@ -11,7 +12,7 @@ if (!$idPac || !$pr->podeAcessar($idPac)) {
     header('Location: dent_pacientes.php');
     exit;
 }
-$aba = in_array($_GET['aba'] ?? '', ['sessoes', 'exames', 'notas', 'consultas'], true) ? $_GET['aba'] : 'sessoes';
+$aba = in_array($_GET['aba'] ?? '', ['resumo', 'sessoes', 'exames', 'notas', 'consultas'], true) ? $_GET['aba'] : 'resumo';
 
 // consultas deste paciente com este dentista (para vincular fotos/observações à sessão)
 $st = $pdo->prepare("SELECT c.id_consulta, c.data, c.hora_inicio, c.status, c.primeira_consulta, pr.nome AS procedimento, pr.valor
@@ -34,6 +35,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dados = ['id_consulta' => $idC, 'titulo' => $titulo_r, 'texto' => '', 'data' => $data];
     $ok = 0; $erros = [];
 
+    if ($acao === 'dente') {
+        // Odontograma: atualiza a situação de um dente
+        $dente = (int) ($_POST['dente'] ?? 0);
+        $sit = (string) ($_POST['situacao'] ?? '');
+        $validos = array_merge(range(11, 18), range(21, 28), range(31, 38), range(41, 48));
+        if (in_array($dente, $validos, true) && isset(SITUACOES_DENTE[$sit])) {
+            $pdo->prepare("DELETE FROM odontograma WHERE id_paciente = ? AND dente = ?")->execute([$idPac, $dente]);
+            if ($sit !== 'HIGIDO') {
+                $pdo->prepare("INSERT INTO odontograma (id_paciente, dente, situacao, observacao, id_dentista, atualizado_em) VALUES (?,?,?,?,?,?)")
+                    ->execute([$idPac, $dente, $sit, mb_substr(trim(strip_tags((string) ($_POST['observacao'] ?? ''))), 0, 200) ?: null, $ID_DENTISTA, date('Y-m-d H:i:s')]);
+            }
+            flash('Dente ' . $dente . ' atualizado: ' . SITUACOES_DENTE[$sit][0] . '.');
+        }
+        header('Location: dent_paciente.php?id=' . $idPac . '&aba=resumo#odontograma');
+        exit;
+    }
     if ($acao === 'sessao') {
         if ($texto !== '') { $pr->salvarNota($idPac, ['texto' => $texto] + $dados); $ok++; }
         foreach (Prontuario::arquivos('fotos') as $arq) {
@@ -89,6 +106,26 @@ uasort($sessoes, fn($a, $b) => strcmp($b['data'], $a['data']));
 $proxima = null;
 foreach (array_reverse($consultas) as $c) if ($c['data'] >= date('Y-m-d') && in_array($c['status'], ['AGENDADA', 'CONFIRMADA'])) { $proxima = $c; break; }
 $idade = idade($p['data_nascimento']);
+
+// ---------- Resumo: números, evolução e financeiro do paciente com este dentista ----------
+$realizadas = array_values(array_filter($consultas, fn($c) => $c['status'] === 'REALIZADA'));
+$faltas = count(array_filter($consultas, fn($c) => $c['status'] === 'FALTOU'));
+$st = $pdo->prepare("SELECT f.data, f.valor, f.forma_pagamento, pr.nome AS procedimento FROM registro_financeiro f
+                     JOIN consulta c ON c.id_consulta = f.id_consulta JOIN procedimento pr ON pr.id_procedimento = c.id_procedimento
+                     WHERE c.id_paciente = ? AND c.id_dentista = ? ORDER BY f.data DESC");
+$st->execute([$idPac, $ID_DENTISTA]);
+$pagamentos = $st->fetchAll();
+$totalPago = array_sum(array_column($pagamentos, 'valor'));
+$aReceber = array_sum(array_map(fn($c) => (float) $c['valor'], array_filter($consultas, fn($c) => in_array($c['status'], ['AGENDADA', 'CONFIRMADA'], true) && $c['data'] >= date('Y-m-d'))));
+$porAno = [];
+foreach ($realizadas as $c) { $a = substr($c['data'], 0, 4); $porAno[$a]['n'] = ($porAno[$a]['n'] ?? 0) + 1; }
+foreach ($pagamentos as $pg) { $a = substr($pg['data'], 0, 4); $porAno[$a]['v'] = ($porAno[$a]['v'] ?? 0) + (float) $pg['valor']; }
+ksort($porAno);
+$porProc = [];
+foreach ($realizadas as $c) $porProc[$c['procedimento']] = ($porProc[$c['procedimento']] ?? 0) + 1;
+arsort($porProc);
+$mapaDentes = odontograma_mapa($pdo, $idPac);
+$contSit = array_count_values(array_column($mapaDentes, 'situacao'));
 $optConsultas = function () use ($consultas, $STATUS_CONSULTA) {
     $h = '<option value="">Sem vínculo (usar a data abaixo)</option>';
     foreach ($consultas as $c) {
@@ -104,9 +141,10 @@ $acoes_topo = '<a href="dent_pacientes.php" class="btn btn-ghost btn-sm"><i clas
 include __DIR__ . '/include/admin_topo.php';
 ?>
 <div class="card-soft pac-head mb-4">
-    <span class="avatar" style="--c:#4f7cc4" aria-hidden="true"><?= e(iniciais($p['nome'])) ?></span>
+    <?= avatar_paciente($p, 'lg') ?>
     <div class="flex-grow-1 min-w-0">
         <h2 class="h4 mb-1"><?= e($p['nome']) ?></h2>
+        <?php if (cadastro_completo($p)): ?><p class="mb-2"><span class="badge-ok">Cadastro completo</span> <span class="paciente-desde"><i class="bi bi-award" aria-hidden="true"></i> paciente desde <?= mb_strtolower(nome_mes(date('n', strtotime($p['criado_em'])))) ?> de <?= date('Y', strtotime($p['criado_em'])) ?></span> <span class="small text-muted ms-1"><?= count(array_filter($consultas, fn($c) => $c['status'] === 'REALIZADA')) ?> sessões com você</span></p><?php endif; ?>
         <div class="small text-muted d-flex flex-wrap gap-3">
             <?php if ($idade !== null): ?><span><i class="bi bi-cake2 me-1" aria-hidden="true"></i><?= $idade ?> anos (<?= data_br($p['data_nascimento']) ?>)</span><?php endif; ?>
             <span><i class="bi bi-telephone me-1" aria-hidden="true"></i><?= e($p['telefone']) ?></span>
@@ -122,13 +160,80 @@ include __DIR__ . '/include/admin_topo.php';
 </div>
 
 <nav class="ptabs" aria-label="Seções do prontuário">
+    <a href="<?= $url('resumo') ?>" class="<?= $aba === 'resumo' ? 'active' : '' ?>" <?= $aba === 'resumo' ? 'aria-current="page"' : '' ?>><i class="bi bi-grid-1x2" aria-hidden="true"></i>Resumo e odontograma</a>
     <a href="<?= $url('sessoes') ?>" class="<?= $aba === 'sessoes' ? 'active' : '' ?>" <?= $aba === 'sessoes' ? 'aria-current="page"' : '' ?>><i class="bi bi-camera" aria-hidden="true"></i>Sessões e fotos <span class="count"><?= count($fotos) ?></span></a>
     <a href="<?= $url('exames') ?>" class="<?= $aba === 'exames' ? 'active' : '' ?>" <?= $aba === 'exames' ? 'aria-current="page"' : '' ?>><i class="bi bi-file-earmark-medical" aria-hidden="true"></i>Exames <span class="count"><?= count($exames) ?></span></a>
     <a href="<?= $url('notas') ?>" class="<?= $aba === 'notas' ? 'active' : '' ?>" <?= $aba === 'notas' ? 'aria-current="page"' : '' ?>><i class="bi bi-journal-text" aria-hidden="true"></i>Observações <span class="count"><?= count($notas) ?></span></a>
     <a href="<?= $url('consultas') ?>" class="<?= $aba === 'consultas' ? 'active' : '' ?>" <?= $aba === 'consultas' ? 'aria-current="page"' : '' ?>><i class="bi bi-calendar-check" aria-hidden="true"></i>Consultas <span class="count"><?= count($consultas) ?></span></a>
 </nav>
 
-<?php if ($aba === 'sessoes'): ?>
+<?php if ($aba === 'resumo'): ?>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3"><div class="card-soft kpi kpi-hero"><div class="k">Sessões com você</div><div class="v"><?= count($realizadas) ?></div><div class="sub"><?= $realizadas ? 'desde ' . data_br(end($realizadas)['data']) : 'nenhuma ainda' ?></div></div></div>
+    <div class="col-6 col-xl-3"><div class="card-soft kpi"><div class="k">Total pago</div><div class="v"><?= moeda($totalPago) ?></div><div class="sub"><?= count($pagamentos) ?> pagamento(s)</div></div></div>
+    <div class="col-6 col-xl-3"><div class="card-soft kpi"><div class="k">Ticket médio</div><div class="v"><?= moeda($pagamentos ? $totalPago / count($pagamentos) : 0) ?></div><div class="sub">por sessão</div></div></div>
+    <div class="col-6 col-xl-3"><div class="card-soft kpi"><div class="k">Agendado a receber</div><div class="v"><?= moeda($aReceber) ?></div><div class="sub"><?= $faltas ?> falta(s) no histórico</div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="card-soft panel mb-4" id="odontograma">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h2 class="panel-title">Odontograma</h2>
+                <span class="small text-muted">Clique em um dente para atualizar</span>
+            </div>
+            <?= odontograma_html($mapaDentes, true) ?>
+            <?php if ($contSit): ?>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <?php foreach ($contSit as $s => $n): ?><span class="tag tag-navy"><?= e(SITUACOES_DENTE[$s][0] ?? $s) ?>: <?= $n ?></span><?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <div class="card-soft panel">
+            <h2 class="panel-title mb-3">Evolução do tratamento <span class="text-muted fw-normal small">· sessões e valores por ano</span></h2>
+            <?php if ($porAno): ?><div class="chart-box" style="height:260px"><canvas id="gEvol" role="img" aria-label="Gráfico de sessões e valores pagos por ano"></canvas></div>
+            <?php else: ?><p class="small text-muted mb-0">Ainda não há sessões realizadas.</p><?php endif; ?>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="card-soft panel mb-4">
+            <h2 class="panel-title mb-3">Procedimentos realizados</h2>
+            <?php $maxP = max([1] + array_values($porProc)); foreach (array_slice($porProc, 0, 6, true) as $nomeP => $n): ?>
+                <div class="mb-2"><div class="d-flex justify-content-between small"><span><?= e($nomeP) ?></span><strong><?= $n ?></strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:<?= round($n / $maxP * 100) ?>%;background:<?= e(CATEGORIAS_PROC[categoria_proc($nomeP)][1]) ?>"></div></div></div>
+            <?php endforeach; ?>
+            <?php if (!$porProc): ?><p class="small text-muted mb-0">Nenhum procedimento realizado ainda.</p><?php endif; ?>
+        </div>
+        <div class="card-soft panel">
+            <h2 class="panel-title mb-3">Financeiro com você</h2>
+            <?php foreach (array_slice($pagamentos, 0, 8) as $pg): ?>
+                <div class="d-flex justify-content-between gap-2 py-2 border-bottom small">
+                    <span><strong><?= data_br($pg['data']) ?></strong> · <?= e($pg['procedimento']) ?><br><span class="text-muted"><i class="bi <?= $FORMAS_ICONES[$pg['forma_pagamento']] ?? 'bi-wallet2' ?>" aria-hidden="true"></i> <?= e($pg['forma_pagamento']) ?></span></span>
+                    <strong class="text-nowrap"><?= moeda($pg['valor']) ?></strong>
+                </div>
+            <?php endforeach; ?>
+            <?php if (!$pagamentos): ?><p class="small text-muted mb-0">Nenhum pagamento registrado.</p><?php elseif (count($pagamentos) > 8): ?><p class="small text-muted mt-2 mb-0">+ <?= count($pagamentos) - 8 ?> pagamento(s) anteriores.</p><?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="mDente" tabindex="-1" aria-labelledby="mDenteTit" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" class="modal-content">
+            <?= csrf_campo() ?><input type="hidden" name="acao" value="dente"><input type="hidden" name="id_paciente" value="<?= $idPac ?>"><input type="hidden" name="dente" id="fDente">
+            <div class="modal-header"><h2 class="modal-title h5" id="mDenteTit">Dente</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+            <div class="modal-body">
+                <label class="form-label" for="fSit">Situação</label>
+                <select name="situacao" id="fSit" class="form-select mb-3"><?php foreach (SITUACOES_DENTE as $k => [$nomeS]): ?><option value="<?= $k ?>"><?= e($nomeS) ?></option><?php endforeach; ?></select>
+                <label class="form-label" for="fObs">Observação <span class="text-muted fw-normal">(opcional)</span></label>
+                <input name="observacao" id="fObs" class="form-control" maxlength="200" placeholder="Ex.: restauração em resina, face oclusal">
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-teal">Salvar</button></div>
+        </form>
+    </div>
+</div>
+
+<?php elseif ($aba === 'sessoes'): ?>
 <div class="row g-4">
     <div class="col-lg-5 order-lg-2">
         <form method="POST" enctype="multipart/form-data" class="card-soft panel" data-enviando="Enviando fotos…">
@@ -279,7 +384,22 @@ include __DIR__ . '/include/admin_topo.php';
     <img alt="">
 </div>
 <?php
-$scripts_extra = '<script>
+$scriptsResumo = $aba === 'resumo' ? '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.getElementById("mDente")?.addEventListener("show.bs.modal", ev => {
+  const b = ev.relatedTarget; if (!b) return;
+  document.getElementById("mDenteTit").textContent = "Dente " + b.dataset.dente;
+  document.getElementById("fDente").value = b.dataset.dente;
+  document.getElementById("fSit").value = b.dataset.sit;
+  document.getElementById("fObs").value = b.dataset.obs || "";
+});
+const gE = document.getElementById("gEvol");
+if (gE && window.Chart) new Chart(gE, { data: { labels: ' . js(array_keys($porAno)) . ', datasets: [
+  { type: "bar", label: "Sessões", data: ' . js(array_map(fn($a) => $a['n'] ?? 0, array_values($porAno))) . ', backgroundColor: "rgba(12,127,124,.35)", borderColor: "#0c7f7c", borderWidth: 1, yAxisID: "y" },
+  { type: "line", label: "Valor pago (R$)", data: ' . js(array_map(fn($a) => round($a['v'] ?? 0, 2), array_values($porAno))) . ', borderColor: "#0b3a75", backgroundColor: "#0b3a75", tension: .3, yAxisID: "y1" } ] },
+  options: { maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, y1: { beginAtZero: true, position: "right", grid: { drawOnChartArea: false } } } } });
+</script>' : '';
+$scripts_extra = $scriptsResumo . '<script>
 (() => {
   const lb = document.getElementById("lightbox"), img = lb.querySelector("img"), fechar = () => lb.classList.remove("show");
   document.querySelectorAll("[data-zoom]").forEach(i => { i.tabIndex = 0; const abrir = () => { img.src = i.src; img.alt = i.alt; lb.classList.add("show"); lb.querySelector("button").focus(); };

@@ -216,7 +216,7 @@ class Agendamento {
     //  Consultas / filtros (mantido do projeto original e ampliado)
     // ---------------------------------------------------------------
     private function sqlBase() {
-        return "SELECT c.*, p.nome AS paciente, p.telefone, p.email, p.cpf, p.cep, p.logradouro, p.numero, p.cidade, p.data_nascimento,
+        return "SELECT c.*, p.nome AS paciente, p.telefone, p.email, p.cpf, p.cep, p.logradouro, p.numero, p.cidade, p.data_nascimento, p.foto AS foto_paciente, p.criado_em AS paciente_desde,
                        d.nome AS dentista, d.especialidade, d.cor,
                        pr.nome AS procedimento, pr.valor AS valor_tabela, pr.duracao_min,
                        f.valor AS valor_pago, f.forma_pagamento

@@ -66,6 +66,10 @@
     try {
       const r = await fetch('api/horarios.php?' + params, { credentials: 'same-origin' });
       const j = await r.json();
+      if (r.status === 429) {   // rate limiting da API: muitas consultas em pouco tempo
+        slotsArea.innerHTML = '<div class="alert alert-warning d-flex gap-2" role="alert"><i class="bi bi-shield-lock" aria-hidden="true"></i><div>' + esc(j.msg || 'Muitas consultas em pouco tempo. Aguarde alguns segundos.') + '</div></div>';
+        return;
+      }
       renderSlots(j.horarios || []);
     } catch (e) {
       slotsArea.innerHTML = '<div class="alert alert-warning">Não foi possível carregar os horários. Tente novamente.</div>';
@@ -110,7 +114,7 @@
     $('#rHora').textContent = h ? `${h.value} às ${h.dataset.fim}` : '—';
 
     // etapas
-    const nomeOk = $('#nome').value.trim().length >= 3;
+    const nomeOk = /\S+\s+\S+/.test($('#nome').value.trim());   // nome completo: nome e sobrenome
     const telOk = $('#tel').value.replace(/\D/g, '').length >= 10;
     const etapas = [!!p, !!d, !!(inpData.value && inpHora.value), nomeOk && telOk];
     $$('#stepper .st').forEach((el, i) => {
@@ -155,14 +159,6 @@
 
   form.addEventListener('submit', e => {
     if ($('#btnConfirmar').disabled) { e.preventDefault(); return; }
-    const cap = $('.captcha-inp', form);
-    if (cap && cap.value.trim().length < 5) {
-      e.preventDefault();
-      cap.focus();
-      cap.setAttribute('aria-invalid', 'true');
-      $('#faltando').textContent = 'Digite o código de verificação (não sou um robô).';
-      return;
-    }
     $('#btnConfirmar').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirmando…';
   });
 

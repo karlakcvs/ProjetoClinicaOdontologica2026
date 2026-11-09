@@ -1,14 +1,21 @@
 <?php
 require_once __DIR__ . '/include/config.php';
+require_once __DIR__ . '/include/conexao.php';
 if (!empty($_SESSION['logado'])) { header('Location: ' . pagina_inicial_perfil(perfil_atual())); exit; }
 
 $msgs = [
     '1'         => ['danger',  'bi-exclamation-circle', 'E-mail ou senha inválidos.'],
-    'captcha'   => ['warning', 'bi-shield-exclamation', 'Código de verificação incorreto ou expirado. Digite o novo código.'],
-    'bloqueado' => ['danger',  'bi-lock', 'Muitas tentativas sem sucesso. Por segurança, aguarde ' . LOGIN_JANELA_MIN . ' minutos e tente novamente.'],
+    'robo'      => ['warning', 'bi-shield-exclamation', 'Não foi possível validar o envio. Aguarde alguns segundos e tente novamente.'],
+    'bloqueado' => ['danger',  'bi-lock', 'Limite de ' . LOGIN_MAX_TENTATIVAS . ' tentativas atingido. Por segurança, o acesso deste aparelho ficou bloqueado temporariamente.'],
     'expirado'  => ['warning', 'bi-clock-history', 'A página ficou aberta por muito tempo. Tente entrar novamente.'],
 ];
 $aviso = $msgs[$_GET['erro'] ?? ''] ?? null;
+// RATE LIMITING: situação deste aparelho (IP) nas tentativas de login
+$lim = limite_status($pdo, 'login');
+if ($lim['bloqueado']) $aviso = $msgs['bloqueado'];
+elseif (($_GET['erro'] ?? '') === '1' && $lim['usadas']) {
+    $aviso = ['danger', 'bi-exclamation-circle', 'E-mail ou senha inválidos. Restam ' . $lim['restantes'] . ' de ' . $lim['max'] . ' tentativas.'];
+}
 if (isset($_GET['saiu']))    $aviso = ['success', 'bi-check-circle', 'Você saiu do sistema com segurança.'];
 if (isset($_GET['expirou'])) $aviso = ['info', 'bi-hourglass-split', 'Sua sessão expirou após ' . SESSAO_INATIVIDADE_MIN . ' minutos sem uso. Entre novamente.'];
 $titulo_pagina = 'Acesso restrito · ' . $nome_clinica;
@@ -57,10 +64,24 @@ $titulo_pagina = 'Acesso restrito · ' . $nome_clinica;
                         <button type="button" class="btn-ver-senha" aria-label="Mostrar senha" aria-controls="s" onclick="const i=document.getElementById('s');const v=i.type==='password';i.type=v?'text':'password';this.setAttribute('aria-label',v?'Ocultar senha':'Mostrar senha');this.firstElementChild.className=v?'bi bi-eye-slash':'bi bi-eye'"><i class="bi bi-eye" aria-hidden="true"></i></button>
                     </div>
                 </div>
-                <div class="mb-4"><?= captcha_campo('login') ?></div>
-                <button type="submit" class="btn btn-teal w-100 btn-lg">Entrar no sistema</button>
+                <?php $_SESSION['form_inicio']['login'] = time(); ?>
+                <div class="hp-field" aria-hidden="true"><label>Não preencha este campo<input type="text" name="site_url" tabindex="-1" autocomplete="off"></label></div>
+
+                <!-- Limite de tentativas (rate limiting): 4 a cada 15 minutos -->
+                <div class="rl-login<?= $lim['bloqueado'] ? ' rl-bloqueado' : '' ?>" <?= $lim['bloqueado'] ? 'data-libera-em="' . (int) $lim['libera_em'] . '" data-botao="btnEntrar"' : '' ?>>
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="small fw-bold"><i class="bi bi-lock-fill me-1" aria-hidden="true"></i>Acesso protegido</span>
+                        <span class="small text-muted">Tentativas: <?= $lim['usadas'] ?> de <?= $lim['max'] ?></span>
+                    </div>
+                    <div class="rl-barra mt-2" aria-hidden="true">
+                        <?php for ($i = 1; $i <= $lim['max']; $i++): ?><span class="<?= $i <= $lim['usadas'] ? 'usado' : '' ?>"></span><?php endfor; ?>
+                    </div>
+                    <?php if ($lim['bloqueado']): ?>
+                        <p class="small mb-0 mt-2" aria-live="polite">Acesso bloqueado temporariamente. Tente novamente em <strong data-contador><?= gmdate('i:s', $lim['espera_seg']) ?></strong>.</p>
+                    <?php endif; ?>
+                </div>
+                <button type="submit" class="btn btn-teal w-100 btn-lg mt-4" id="btnEntrar" <?= $lim['bloqueado'] ? 'disabled' : '' ?>>Entrar no sistema</button>
             </form>
-            <p class="small text-muted text-center mt-3 mb-0"><i class="bi bi-lock-fill" aria-hidden="true"></i> Após <?= LOGIN_MAX_TENTATIVAS ?> tentativas erradas o acesso é bloqueado por <?= LOGIN_JANELA_MIN ?> min.</p>
         </div>
 
         <div class="text-center mt-4 d-flex flex-column gap-3 align-items-center">
@@ -69,6 +90,6 @@ $titulo_pagina = 'Acesso restrito · ' . $nome_clinica;
         </div>
     </div>
 </main>
-<script src="assets/js/site.js?v=10"></script>
+<script src="assets/js/site.js?v=12"></script>
 </body>
 </html>

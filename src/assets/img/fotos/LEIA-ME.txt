@@ -1,0 +1,9 @@
+FOTOS DO SITE
+=============
+Já estão aqui: dentista-helena.jpg, dentista-rafael.jpg, dentista-camila.jpg
+(com o nome bordado no jaleco), hero-principal.jpg (topo) e agendar-inicio.jpg.
+Para trocar, salve outra foto com o MESMO nome.
+
+FOTO PESSOAL DE CADA DENTISTA ("Fora do consultório", no perfil):
+  pessoal-helena.jpg   pessoal-rafael.jpg   pessoal-camila.jpg
+Basta colocar o arquivo aqui que o bloco aparece sozinho no perfil.

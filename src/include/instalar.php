@@ -7,7 +7,7 @@
 //  As tabelas antigas da barbearia (usuarios e agendamentos) não são tocadas.
 // =====================================================================
 
-const VERSAO_BANCO = 3;
+const VERSAO_BANCO = 5;
 
 function tabela_existe(PDO $pdo, $tabela) {
     try { $pdo->query("SELECT 1 FROM $tabela LIMIT 1"); return true; }
@@ -66,6 +66,20 @@ function instalar_banco(PDO $pdo) {
         try { migracao_3($pdo); $pdo->commit(); }
         catch (Throwable $t) { $pdo->rollBack(); throw $t; }
         registrar_versao($pdo, 3);
+    }
+    if ($v < 4) {
+        migracao_4_estrutura($pdo, $motor);
+        $pdo->beginTransaction();
+        try { migracao_4($pdo); $pdo->commit(); }
+        catch (Throwable $t) { $pdo->rollBack(); throw $t; }
+        registrar_versao($pdo, 4);
+    }
+    if ($v < 5) {
+        migracao_5_estrutura($pdo, $motor);
+        $pdo->beginTransaction();
+        try { migracao_5($pdo); $pdo->commit(); }
+        catch (Throwable $t) { $pdo->rollBack(); throw $t; }
+        registrar_versao($pdo, 5);
     }
 }
 
@@ -438,6 +452,311 @@ function migracao_3(PDO $pdo) {
             $st = $pdo->prepare("INSERT INTO avaliacao (id_dentista, nome, nota, comentario, status, demo, criado_em) VALUES (?,?,?,?, 'APROVADA', 1, ?)");
             foreach ($novas as $i => $a) $st->execute([$a[0], $a[1], $a[2], $a[3], date('Y-m-d H:i:s', strtotime('-' . (1 + $i * 4) . ' days'))]);
         }
+    }
+}
+
+// ---------------------------------------------------------------------
+//  Versão 4 (apresentação de 24/11/2026):
+//  - rate limiting (tabela de requisições por minuto)
+//  - fotos reais dos dentistas (banco de imagens) e de pacientes antigos
+//  - pacientes antigos com cadastro completo e histórico desde 2019
+//  - agenda de NOVEMBRO completa até o dia 30, concentrada na semana de 23 a 27/11
+//  Só mexe em dados de DEMONSTRAÇÃO; nada que você cadastrou é apagado.
+// ---------------------------------------------------------------------
+function migracao_4_estrutura(PDO $pdo, $motor) {
+    $pdo->exec(sql_compat($pdo, "CREATE TABLE IF NOT EXISTS limite_requisicao (
+        ip VARCHAR(45) NOT NULL,
+        chave VARCHAR(20) NOT NULL,
+        janela INT NOT NULL,
+        total INT NOT NULL DEFAULT 1,
+        PRIMARY KEY (ip, chave, janela)
+    )$motor"));
+    add_coluna($pdo, 'paciente', 'foto', 'VARCHAR(255) NULL');
+    add_coluna($pdo, 'consulta', 'demo', 'TINYINT NOT NULL DEFAULT 0');
+}
+
+// CPF fictício com dígitos verificadores válidos (gerado a partir de uma semente fixa)
+function cpf_ficticio($semente) {
+    mt_srand($semente);
+    $n = [];
+    for ($i = 0; $i < 9; $i++) $n[] = mt_rand(0, 9);
+    for ($t = 9; $t < 11; $t++) {
+        $s = 0;
+        for ($i = 0; $i < $t; $i++) $s += $n[$i] * (($t + 1) - $i);
+        $n[] = ((10 * $s) % 11) % 10;
+    }
+    $c = implode('', $n);
+    return substr($c, 0, 3) . '.' . substr($c, 3, 3) . '.' . substr($c, 6, 3) . '-' . substr($c, 9);
+}
+
+function migracao_4(PDO $pdo) {
+    // ----- dentistas: fotos de pessoas reais (banco de imagens) e perfis -----
+    // Helena: mulher negra · Rafael: rapaz · Camila: moça (só troca se ainda estiver com a ilustração padrão)
+    $perfis = [
+        'CRO-SP 00.001' => ['helena.svg', 'pexels:19596247', 14, null],
+        'CRO-SP 00.002' => ['rafael.svg', 'pexels:37458054', 9,
+            'Jovem especialista em reabilitação oral, o Dr. Rafael já instalou mais de 900 implantes. Usa tomografia e cirurgia guiada para procedimentos mais rápidos, previsíveis e confortáveis, com acompanhamento próximo no pós-operatório. Seu objetivo é devolver ao paciente a segurança de mastigar, falar e sorrir sem preocupação.'],
+        'CRO-SP 00.003' => ['camila.svg', 'pexels:31043313', 7,
+            'A Dra. Camila une técnica e olhar artístico para criar sorrisos naturais. Há 7 anos se dedica a clareamentos, lentes de contato, restaurações estéticas e harmonização orofacial (toxina botulínica e preenchimento com ácido hialurônico), sempre buscando um resultado equilibrado e natural, com atendimento calmo e acolhedor.'],
+    ];
+    foreach ($perfis as $cro => [$svg, $foto, $anos, $bio]) {
+        $pdo->prepare("UPDATE dentista SET foto = ? WHERE cro = ? AND (foto IS NULL OR foto = '' OR foto = ?)")->execute([$foto, $cro, $svg]);
+        $pdo->prepare("UPDATE dentista SET anos_experiencia = ? WHERE cro = ?")->execute([$anos, $cro]);
+        if ($bio) $pdo->prepare("UPDATE dentista SET bio = ? WHERE cro = ?")->execute([$bio, $cro]);
+    }
+
+    // ----- pacientes antigos: cadastro completo + foto de perfil + "paciente desde" -----
+    // [nome, foto, nascimento, desde, rua, nº, bairro, observação]
+    $antigos = [
+        ['Ana Beatriz Lima',      'unsplash:1758600433495-99b9e69cf5f6', '1994-03-12', '2019-02-18', 'Rua Fictícia das Acácias', '120', 'Jardim Exemplo', 'Prefere horários no início da manhã.'],
+        ['Carla Mendes',          'unsplash:1758874384842-7e79ce77ed1a', '1988-07-25', '2019-08-05', 'Avenida Modelo dos Ipês', '455', 'Centro', null],
+        ['Isabela Martins',       'unsplash:1758599543111-36ce5c34fceb', '1991-11-02', '2020-03-09', 'Rua Imaginária das Palmeiras', '78', 'Vila Demonstração', 'Alergia a dipirona.'],
+        ['Eduarda Rocha',         'unsplash:1494790108377-be9c29b29330', '1999-05-30', '2020-10-14', 'Rua Fictícia dos Girassóis', '32', 'Jardim Exemplo', null],
+        ['Gabriela Costa',        'pexels:774909',                      '1985-01-17', '2021-01-26', 'Rua Exemplo das Orquídeas', '901', 'Parque Teste', 'Avisar sempre por WhatsApp.'],
+        ['Bruno Henrique Alves',  'pexels:220453',                      '1983-09-08', '2019-05-13', 'Avenida Fictícia Brasil', '1500', 'Centro', null],
+        ['Henrique Barros',       'unsplash:1507003211169-0a1dd7228f2d', '1979-12-21', '2019-11-04', 'Rua Modelo dos Jequitibás', '64', 'Vila Demonstração', 'Hipertenso controlado — confirmar medicação.'],
+        ['Marcos Vinícius Souza', 'pexels:614810',                      '1990-04-03', '2021-06-21', 'Rua Imaginária das Mangueiras', '210', 'Parque Teste', null],
+    ];
+    $busca = $pdo->prepare("SELECT * FROM paciente WHERE nome = ?");
+    $up = $pdo->prepare("UPDATE paciente SET foto = COALESCE(foto, ?), data_nascimento = COALESCE(data_nascimento, ?), cpf = COALESCE(cpf, ?),
+                         cep = COALESCE(cep, ?), logradouro = COALESCE(logradouro, ?), numero = COALESCE(numero, ?), bairro = COALESCE(bairro, ?),
+                         cidade = COALESCE(cidade, 'Araras'), uf = COALESCE(uf, 'SP'), observacoes = COALESCE(observacoes, ?), criado_em = ?
+                         WHERE id_paciente = ?");
+    $idsAntigos = [];
+    foreach ($antigos as $i => [$nome, $foto, $nasc, $desde, $rua, $num, $bairro, $obs]) {
+        $busca->execute([$nome]);
+        $p = $busca->fetch();
+        if (!$p) continue;
+        // só pacientes de demonstração (telefone fictício 90000-xxxx)
+        if (strpos((string) $p['telefone'], '90000-') === false) continue;
+        $cpf = cpf_ficticio(4100 + $i);
+        $dupl = $pdo->prepare("SELECT COUNT(*) FROM paciente WHERE cpf = ? AND id_paciente <> ?");
+        $dupl->execute([$cpf, $p['id_paciente']]);
+        if ($dupl->fetchColumn()) $cpf = null;
+        $up->execute([$foto, $nasc, $cpf, '00000-' . str_pad((string) (100 + $i), 3, '0', STR_PAD_LEFT), $rua, $num, $bairro, $obs, $desde . ' 09:00:00', $p['id_paciente']]);
+        $idsAntigos[] = (int) $p['id_paciente'];
+    }
+
+    $dent = $pdo->query("SELECT id_dentista FROM dentista WHERE ativo = 1 ORDER BY id_dentista")->fetchAll(PDO::FETCH_COLUMN);
+    if (!$dent) return;
+    $procPorDentista = []; $procInfo = [];
+    foreach ($pdo->query("SELECT dp.id_dentista, p.id_procedimento, p.duracao_min, p.valor, p.nome FROM dentista_procedimento dp JOIN procedimento p ON p.id_procedimento = dp.id_procedimento")->fetchAll() as $r) {
+        $procPorDentista[$r['id_dentista']][] = (int) $r['id_procedimento'];
+        $procInfo[$r['id_procedimento']] = ['dur' => (int) $r['duracao_min'], 'valor' => (float) $r['valor'], 'nome' => $r['nome']];
+    }
+
+    // ----- histórico dos pacientes antigos (consultas realizadas desde que chegaram) -----
+    mt_srand(2419);
+    $stC = $pdo->prepare("INSERT INTO consulta (id_paciente, id_dentista, id_procedimento, data, hora_inicio, hora_fim, status, origem, demo) VALUES (?,?,?,?,?,?,?,?,1)");
+    $stF = $pdo->prepare("INSERT INTO registro_financeiro (id_consulta, id_dentista, valor, forma_pagamento, data) VALUES (?,?,?,?,?)");
+    $stN = $pdo->prepare("INSERT INTO prontuario (id_paciente, id_dentista, id_consulta, tipo, titulo, texto, data_registro) VALUES (?,?,?, 'NOTA', ?, ?, ?)");
+    $formas = ['PIX', 'PIX', 'Cartão de crédito', 'Cartão de débito', 'Dinheiro'];
+    $notas = [
+        'Boa higiene oral. Retorno em 6 meses para nova profilaxia.',
+        'Paciente relata sensibilidade leve ao frio. Orientado creme dental para sensibilidade.',
+        'Procedimento sem intercorrências. Paciente tranquilo durante toda a sessão.',
+        'Revisão completa: gengiva saudável, sem novas lesões de cárie.',
+        'Ajuste realizado. Próximo retorno conforme plano de tratamento.',
+    ];
+    $jaTem = $pdo->prepare("SELECT COUNT(*) FROM consulta WHERE id_paciente = ? AND data < '2026-01-01'");
+    foreach ($idsAntigos as $k => $idPac) {
+        $jaTem->execute([$idPac]);
+        if ($jaTem->fetchColumn()) continue;
+        $st = $pdo->prepare("SELECT criado_em FROM paciente WHERE id_paciente = ?");
+        $st->execute([$idPac]);
+        $t = strtotime(substr((string) $st->fetchColumn(), 0, 10) ?: '2020-01-01');
+        $idD = $dent[$k % count($dent)];
+        while ($t < strtotime('2026-10-01')) {
+            if ((int) date('N', $t) > 5) $t = strtotime('next monday', $t);
+            $lista = $procPorDentista[$idD] ?? [];
+            if (!$lista) break;
+            $idP = $lista[mt_rand(0, count($lista) - 1)];
+            $ini = mktime(mt_rand(9, 15), [0, 15, 30, 45][mt_rand(0, 3)], 0, (int) date('n', $t), (int) date('j', $t), (int) date('Y', $t));
+            $dia = date('Y-m-d', $ini);
+            $stC->execute([$idPac, $idD, $idP, $dia, date('H:i:s', $ini), date('H:i:s', $ini + $procInfo[$idP]['dur'] * 60), 'REALIZADA', 'SECRETARIA']);
+            $idC = (int) $pdo->lastInsertId();
+            $stF->execute([$idC, $idD, $procInfo[$idP]['valor'], $formas[mt_rand(0, count($formas) - 1)], $dia]);
+            if (mt_rand(1, 100) <= 60) $stN->execute([$idPac, $idD, $idC, 'Evolução da sessão', $notas[mt_rand(0, count($notas) - 1)], $dia]);
+            $t = strtotime('+' . mt_rand(4, 8) . ' months', $t);
+            if (mt_rand(1, 100) <= 25) $idD = $dent[mt_rand(0, count($dent) - 1)];   // às vezes passa por outro especialista
+        }
+    }
+
+    // ----- agenda de NOVEMBRO/2026 até o dia 30 (mais cheia na semana da apresentação) -----
+    gerar_novembro_demo($pdo, $procPorDentista, $procInfo, $idsAntigos);
+
+    // ----- algumas avaliações pendentes e mensagens novas para mostrar na apresentação -----
+    $temPend = (int) $pdo->query("SELECT COUNT(*) FROM avaliacao WHERE status = 'PENDENTE'")->fetchColumn();
+    if (!$temPend && count($dent) >= 3) {
+        $st = $pdo->prepare("INSERT INTO avaliacao (id_dentista, nome, nota, comentario, status, demo, criado_em) VALUES (?,?,?,?, 'PENDENTE', 1, ?)");
+        $st->execute([$dent[1], 'Henrique B.', 5, 'Faço acompanhamento com o Dr. Rafael há anos. Implante perfeito e equipe muito atenciosa.', date('Y-m-d H:i:s', strtotime('-2 hours'))]);
+        $st->execute([$dent[0], 'Ana Beatriz L.', 5, 'Sou paciente da Dra. Helena desde 2019. Agendar pelo site ficou muito mais fácil!', date('Y-m-d H:i:s', strtotime('-1 day'))]);
+    }
+    if (!(int) $pdo->query("SELECT COUNT(*) FROM mensagem_contato WHERE lida = 0")->fetchColumn()) {
+        $st = $pdo->prepare("INSERT INTO mensagem_contato (nome, email, telefone, assunto, mensagem, criado_em) VALUES (?,?,?,?,?,?)");
+        $st->execute(['Paula Ribeiro', 'paula@paciente.example', '(19) 90000-0101', 'Valores e pagamento', 'Gostaria de saber se o clareamento pode ser parcelado no cartão.', date('Y-m-d H:i:s', strtotime('-3 hours'))]);
+        $st->execute(['Rodrigo Nunes', 'rodrigo@paciente.example', null, 'Dúvida sobre tratamento', 'Vocês atendem crianças de 8 anos para avaliação de aparelho?', date('Y-m-d H:i:s', strtotime('-26 hours'))]);
+    }
+}
+
+// ---------------------------------------------------------------------
+//  Versão 5: área técnica SanyTech (login TI + métricas de velocidade),
+//  odontograma dos pacientes, fotos/perfis novos dos dentistas e
+//  agenda de demonstração até a 2ª semana de dezembro (11/12/2026).
+// ---------------------------------------------------------------------
+function migracao_5_estrutura(PDO $pdo, $motor) {
+    $pdo->exec(sql_compat($pdo, "CREATE TABLE IF NOT EXISTS metrica_requisicao (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        pagina VARCHAR(60) NOT NULL,
+        metodo VARCHAR(6) NOT NULL,
+        status SMALLINT NOT NULL,
+        ms INT NOT NULL,
+        criado_em DATETIME NOT NULL
+    )$motor"));
+    try { $pdo->exec("CREATE INDEX idx_metrica ON metrica_requisicao (criado_em)"); } catch (PDOException $e) {}
+    $pdo->exec(sql_compat($pdo, "CREATE TABLE IF NOT EXISTS odontograma (
+        id_paciente INT NOT NULL,
+        dente TINYINT NOT NULL,
+        situacao VARCHAR(12) NOT NULL,
+        observacao VARCHAR(200) NULL,
+        id_dentista INT NULL,
+        atualizado_em DATETIME NOT NULL,
+        PRIMARY KEY (id_paciente, dente)
+    )$motor"));
+}
+
+function migracao_5(PDO $pdo) {
+    // ----- login da equipe técnica SanyTech (só o hash fica no código; a senha foi entregue à equipe) -----
+    $st = $pdo->prepare("SELECT COUNT(*) FROM usuario WHERE email = ?");
+    $st->execute(['ti@sanytech.example']);
+    if (!$st->fetchColumn()) {
+        $pdo->prepare("INSERT INTO usuario (nome, email, senha, perfil) VALUES ('Equipe SanyTech', 'ti@sanytech.example', ?, 'TI')")
+            ->execute(['$2y$10$FoljCOgHdZ5WK3WuwiiaSu6BvFX0Aa/yhNrzo60.z/K34lvc36pAS']);
+    }
+
+    // ----- dentistas: formação em universidades públicas, Rafael com 20 anos de experiência -----
+    $dados = [
+        'CRO-SP 00.001' => [null, 'Graduação em Odontologia pela USP (Faculdade de Odontologia de Bauru), especialização em Ortodontia e Ortopedia Facial pela Unicamp (FOP – Piracicaba) e mestrado em Ortodontia pela Unesp (Araraquara).', null],
+        'CRO-SP 00.002' => [20, 'Graduação em Odontologia pela Unesp (Araraquara), especialização em Implantodontia pela USP (Ribeirão Preto), mestrado e doutorado em Cirurgia e Traumatologia Bucomaxilofacial pela Unicamp (FOP – Piracicaba).',
+            'São 20 anos dedicados à reabilitação oral e mais de 2.500 implantes instalados. O Dr. Rafael usa tomografia e cirurgia guiada para procedimentos mais rápidos, previsíveis e confortáveis, com acompanhamento próximo no pós-operatório. Seu objetivo é devolver ao paciente a segurança de mastigar, falar e sorrir sem preocupação.'],
+        'CRO-SP 00.003' => [null, 'Graduação em Odontologia pela Unicamp (FOP – Piracicaba), especialização em Dentística Restauradora pela USP (São Paulo) e aperfeiçoamento em Harmonização Orofacial pela Unesp (São José dos Campos).', null],
+    ];
+    foreach ($dados as $cro => [$anos, $form, $bio]) {
+        $pdo->prepare("UPDATE dentista SET formacao = ? WHERE cro = ?")->execute([$form, $cro]);
+        if ($anos) $pdo->prepare("UPDATE dentista SET anos_experiencia = ? WHERE cro = ?")->execute([$anos, $cro]);
+        if ($bio) $pdo->prepare("UPDATE dentista SET bio = ? WHERE cro = ?")->execute([$bio, $cro]);
+    }
+
+    // ----- agenda de demonstração até a 2ª semana de dezembro -----
+    $procPorDentista = []; $procInfo = [];
+    foreach ($pdo->query("SELECT dp.id_dentista, p.id_procedimento, p.duracao_min, p.valor, p.nome FROM dentista_procedimento dp JOIN procedimento p ON p.id_procedimento = dp.id_procedimento")->fetchAll() as $r) {
+        $procPorDentista[$r['id_dentista']][] = (int) $r['id_procedimento'];
+        $procInfo[$r['id_procedimento']] = ['dur' => (int) $r['duracao_min'], 'valor' => (float) $r['valor'], 'nome' => $r['nome']];
+    }
+    $antigos = array_map('intval', $pdo->query("SELECT id_paciente FROM paciente WHERE foto IS NOT NULL")->fetchAll(PDO::FETCH_COLUMN));
+    if ($procPorDentista) gerar_novembro_demo($pdo, $procPorDentista, $procInfo, $antigos, '2026-12-01', '2026-12-11', 1212);
+
+    // ----- odontograma de exemplo dos pacientes antigos -----
+    $ins = $pdo->prepare("INSERT INTO odontograma (id_paciente, dente, situacao, observacao, id_dentista, atualizado_em) VALUES (?,?,?,?,?,?)");
+    $tem = $pdo->prepare("SELECT COUNT(*) FROM odontograma WHERE id_paciente = ?");
+    $dentes = array_merge(range(11, 18), range(21, 28), range(31, 38), range(41, 48));
+    $sit = ['RESTAURADO', 'RESTAURADO', 'RESTAURADO', 'CARIE', 'CANAL', 'COROA', 'IMPLANTE', 'AUSENTE', 'APARELHO'];
+    $dentId = array_map('intval', $pdo->query("SELECT id_dentista FROM dentista ORDER BY id_dentista")->fetchAll(PDO::FETCH_COLUMN));
+    mt_srand(5050);
+    foreach ($antigos as $k => $idPac) {
+        $tem->execute([$idPac]);
+        if ($tem->fetchColumn()) continue;
+        $usados = [];
+        $n = mt_rand(4, 8);
+        for ($i = 0; $i < $n; $i++) {
+            $d = $dentes[mt_rand(0, count($dentes) - 1)];
+            if (isset($usados[$d])) continue;
+            $usados[$d] = 1;
+            $s = $sit[mt_rand(0, count($sit) - 1)];
+            if ($s === 'APARELHO' && $k % 3) $s = 'RESTAURADO';
+            $ins->execute([$idPac, $d, $s, null, $dentId[$k % max(1, count($dentId))] ?? null, date('Y-m-d H:i:s', strtotime('-' . mt_rand(10, 600) . ' days'))]);
+        }
+    }
+}
+
+// Consultas de demonstração em todos os dias úteis de novembro/2026.
+// Semana de 23 a 27/11 (apresentação no dia 24) fica com a agenda quase cheia.
+function gerar_novembro_demo(PDO $pdo, $procPorDentista, $procInfo, $idsAntigos, $periodoIni = '2026-11-01', $periodoFim = '2026-11-30', $semente = 2411) {
+    $turnos = [];
+    foreach ($pdo->query("SELECT id_dentista, dia_semana, hora_inicio, hora_fim FROM horario_atendimento ORDER BY hora_inicio")->fetchAll() as $h) {
+        $turnos[$h['id_dentista']][(int) $h['dia_semana']][] = [hm_($h['hora_inicio']), hm_($h['hora_fim'])];
+    }
+    $idsPac = array_map('intval', $pdo->query("SELECT id_paciente FROM paciente WHERE telefone LIKE '%90000-%'")->fetchAll(PDO::FETCH_COLUMN));
+    if (!$idsPac) $idsPac = array_map('intval', $pdo->query("SELECT id_paciente FROM paciente")->fetchAll(PDO::FETCH_COLUMN));
+    if (!$idsPac || !$turnos) return;
+    $ocup = $pdo->prepare("SELECT COUNT(*) FROM consulta WHERE id_dentista = ? AND data = ? AND status <> 'CANCELADA' AND hora_inicio < ? AND hora_fim > ?");
+    $stC = $pdo->prepare("INSERT INTO consulta (id_paciente, id_dentista, id_procedimento, data, hora_inicio, hora_fim, status, origem, primeira_consulta, observacoes, demo) VALUES (?,?,?,?,?,?,?,?,?,?,1)");
+    $obsLista = [null, null, null, null, 'Paciente pediu lembrete por WhatsApp.', 'Trazer exames anteriores.', null, 'Sensibilidade no dente 26.'];
+    mt_srand($semente);
+    $agora = time();
+    for ($d = strtotime($periodoIni); $d <= strtotime($periodoFim); $d = strtotime('+1 day', $d)) {
+        $dia = date('Y-m-d', $d);
+        $dow = (int) date('w', $d);
+        $semanaApresentacao = $dia >= '2026-11-23' && $dia <= '2026-11-27';
+        $ocupacao = $dia === "2026-11-24" ? 100 : ($semanaApresentacao ? 92 : ($dia >= "2026-11-16" ? 55 : 45));   // % de horários preenchidos
+        foreach ($turnos as $idD => $porDia) {
+            foreach ($porDia[$dow] ?? [] as [$ini, $fim]) {
+                if (empty($procPorDentista[$idD])) continue;
+                $t = strtotime("$dia $ini") + mt_rand(0, 1) * 15 * 60;
+                $limite = strtotime("$dia $fim");
+                while (true) {
+                    $idP = $procPorDentista[$idD][mt_rand(0, count($procPorDentista[$idD]) - 1)];
+                    $fimC = $t + $procInfo[$idP]['dur'] * 60;
+                    if ($fimC > $limite) break;
+                    if (mt_rand(1, 100) > $ocupacao) { $t = $fimC + 15 * 60; continue; }
+                    $ocup->execute([$idD, $dia, date('H:i:s', $fimC), date('H:i:s', $t)]);
+                    if (!$ocup->fetchColumn()) {
+                        // pacientes antigos aparecem bastante (têm foto e histórico para mostrar)
+                        $idPac = ($idsAntigos && mt_rand(1, 100) <= 45) ? $idsAntigos[mt_rand(0, count($idsAntigos) - 1)] : $idsPac[mt_rand(0, count($idsPac) - 1)];
+                        if ($fimC < $agora) {
+                            $status = 'AGENDADA';               // vira REALIZADA/FALTOU em atualizar_demo()
+                        } else {
+                            $status = mt_rand(1, 100) <= ($dia <= date('Y-m-d', strtotime('+2 days', $agora)) ? 70 : 40) ? 'CONFIRMADA' : 'AGENDADA';
+                        }
+                        $primeira = stripos($procInfo[$idP]['nome'], 'Primeira consulta') !== false ? 1 : 0;
+                        $stC->execute([$idPac, $idD, $idP, $dia, date('H:i:s', $t), date('H:i:s', $fimC), $status, mt_rand(1, 100) <= 55 ? 'SITE' : 'SECRETARIA', $primeira, $obsLista[mt_rand(0, count($obsLista) - 1)]]);
+                    }
+                    $t = $fimC + mt_rand(0, 1) * 15 * 60;
+                }
+            }
+        }
+    }
+}
+
+// Mantém a demonstração "viva": consultas de DEMONSTRAÇÃO que já terminaram viram
+// REALIZADA (com pagamento lançado) ou FALTOU. Roda no máximo a cada 10 minutos.
+// Consultas criadas pelo site ou pela secretaria (demo = 0) nunca são alteradas.
+function atualizar_demo(PDO $pdo) {
+    $marca = sys_get_temp_dir() . '/gdm_demo_' . md5(__DIR__ . (getenv('DB_SQLITE') ?: getenv('DB_NAME') ?: ''));
+    if (is_file($marca) && time() - filemtime($marca) < 600) return;
+    @touch($marca);
+    try {
+        $st = $pdo->prepare("SELECT c.id_consulta, c.id_dentista, c.data, p.valor FROM consulta c JOIN procedimento p ON p.id_procedimento = c.id_procedimento
+                             WHERE c.demo = 1 AND c.status IN ('AGENDADA','CONFIRMADA') AND (c.data < ? OR (c.data = ? AND c.hora_fim <= ?))");
+        $st->execute([date('Y-m-d'), date('Y-m-d'), date('H:i:s')]);
+        $lista = $st->fetchAll();
+        if (!$lista) return;
+        $formas = ['PIX', 'PIX', 'Cartão de crédito', 'Cartão de débito', 'Dinheiro'];
+        $upd = $pdo->prepare("UPDATE consulta SET status = ? WHERE id_consulta = ?");
+        $tem = $pdo->prepare("SELECT COUNT(*) FROM registro_financeiro WHERE id_consulta = ?");
+        $fin = $pdo->prepare("INSERT INTO registro_financeiro (id_consulta, id_dentista, valor, forma_pagamento, data) VALUES (?,?,?,?,?)");
+        $pdo->beginTransaction();
+        foreach ($lista as $c) {
+            $id = (int) $c['id_consulta'];
+            if ($id % 13 === 0) { $upd->execute(['FALTOU', $id]); continue; }
+            $upd->execute(['REALIZADA', $id]);
+            $tem->execute([$id]);
+            if (!$tem->fetchColumn()) $fin->execute([$id, $c['id_dentista'], $c['valor'], $formas[$id % count($formas)], $c['data']]);
+        }
+        $pdo->commit();
+    } catch (Throwable $t) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        error_log('[clinica] atualizar_demo: ' . $t->getMessage());
     }
 }
 

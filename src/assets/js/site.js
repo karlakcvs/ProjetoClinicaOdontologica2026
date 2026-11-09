@@ -54,15 +54,18 @@
   // ---------- Confirmação antes de ações destrutivas ----------
   $$('form[data-confirm]').forEach(f => f.addEventListener('submit', e => { if (!confirm(f.dataset.confirm)) e.preventDefault(); }));
 
-  // ---------- Captcha: gerar outro código ----------
-  document.addEventListener('click', e => {
-    const b = e.target.closest('.captcha-novo');
-    if (!b) return;
-    const box = b.closest('.captcha-box'), img = $('.captcha-img', box);
-    img.src = 'captcha.php?f=' + encodeURIComponent(box.dataset.form) + '&r=' + Date.now();
-    const inp = $('.captcha-inp', box); inp.value = ''; inp.focus();
+  // ---------- Rate limiting: contagem regressiva quando o login está bloqueado ----------
+  $$('[data-libera-em]').forEach(el => {
+    const fim = parseInt(el.dataset.liberaEm, 10) * 1000;
+    const alvo = $('[data-contador]', el) || el;
+    const btn = document.getElementById(el.dataset.botao || '');
+    const tick = () => {
+      const s = Math.max(0, Math.round((fim - Date.now()) / 1000));
+      alvo.textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+      if (s <= 0) { clearInterval(t); if (btn) btn.disabled = false; el.classList.add('liberado'); alvo.textContent = 'liberado'; }
+    };
+    const t = setInterval(tick, 1000); tick();
   });
-  $$('.captcha-inp').forEach(i => i.addEventListener('input', () => { i.value = i.value.toUpperCase().replace(/\s/g, ''); }));
 
   // ---------- Máscaras ----------
   const masks = {

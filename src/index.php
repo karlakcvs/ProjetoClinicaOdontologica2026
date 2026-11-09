@@ -28,41 +28,32 @@ $pagina = 'inicio';
 include __DIR__ . '/include/cabecalho.php';
 ?>
 
-<!-- HERO -->
-<header class="hero">
+<!-- HERO: dentista da clínica com pacientes sorridentes -->
+<header class="hero hero-v4">
     <div class="container">
-        <div class="row align-items-center">
+        <div class="row align-items-center g-5">
             <div class="col-lg-6">
-                <span class="eyebrow"><i class="bi bi-stars" aria-hidden="true"></i> <?= saudar() ?>! Agende online em 1 minuto</span>
-                <h1 class="mt-3 mb-3">Seu sorriso nas mãos de <em>especialistas</em>.</h1>
-                <p class="lead mb-4">Ortodontia, implantes e estética dental em um só lugar. Escolha o procedimento, o profissional e o melhor horário — a gente cuida do resto.</p>
-                <a href="agendar.php" class="btn btn-teal btn-lg"><i class="bi bi-calendar2-check me-2" aria-hidden="true"></i>Agendar consulta</a>
-                <div class="hero-stats">
-                    <div><strong><?= count($dentistas) ?></strong><span>especialistas</span></div>
-                    <?php if ($resumo['qtd']): ?><div><strong><?= number_format((float) $resumo['media'], 1, ',', '') ?><span class="ms-1" style="color:#e3a21a" aria-hidden="true">★</span></strong><span><?= (int) $resumo['qtd'] ?> avaliações</span></div><?php endif; ?>
-                    <div><strong>Seg–Sex</strong><span>atendimento presencial</span></div>
+                <span class="hero-kicker">Odontologia especializada em Araras/SP</span>
+                <h1 class="mt-3 mb-3">Sorrisos saudáveis, cuidados por <em>especialistas</em>.</h1>
+<p class="lead mb-4">Ortodontia, implantes e estética dental em um só lugar. Escolha o procedimento, o profissional e o melhor horário.<br>A gente cuida do resto.</p>                <div class="d-flex flex-wrap gap-2">
+                    <a href="agendar.php" class="btn btn-teal btn-lg"><i class="bi bi-calendar2-check me-2" aria-hidden="true"></i>Agendar consulta</a>
+                    <a href="#especialistas" class="btn btn-ghost btn-lg">Conhecer especialistas</a>
                 </div>
+                <dl class="hero-stats">
+                    <div><dt><?= count($dentistas) ?></dt><dd>especialistas</dd></div>
+                    <?php if ($resumo['qtd']): ?><div><dt><?= number_format((float) $resumo['media'], 1, ',', '') ?><span class="estrela-ico" aria-hidden="true">★</span></dt><dd><?= (int) $resumo['qtd'] ?> avaliações</dd></div><?php endif; ?>
+                    <div><dt>Seg–Sex</dt><dd>07h30 às 19h</dd></div>
+                </dl>
             </div>
             <div class="col-lg-6">
-                <div class="hero-visual">
-                    <span class="blob b1"></span><span class="blob b2"></span>
-                    <div class="hero-card">
-                        <div class="hero-art hero-dente">
-                            <canvas data-dente3d role="img" aria-label="Dente em malha 3D, branco e brilhante, girando devagar"></canvas>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <div class="d-flex">
-                                <?php foreach ($dentistas as $i => $d): $ft = foto_dentista($d); ?>
-                                    <?php if ($ft): ?>
-                                        <img src="<?= e($ft) ?>" alt="<?= e($d['nome']) ?>" class="avatar avatar-sm avatar-foto" style="<?= $i ? 'margin-left:-10px;' : '' ?>border:2px solid #fff">
-                                    <?php else: ?>
-                                        <span class="avatar avatar-sm" style="--c:<?= e($d['cor']) ?>;<?= $i ? 'margin-left:-10px;' : '' ?>border:2px solid #fff"><?= e(iniciais($d['nome'])) ?></span>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </div>
-                            <a href="agendar.php" class="small fw-semibold">Ver horários livres <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
-                        </div>
-                    </div>
+                <div class="hero-fotos hero-uma">
+                    <span class="hf-fundo" aria-hidden="true"></span>
+                    <figure class="hf-main m-0">
+                        <img src="<?= e(foto_site('hero-principal', 1400)) ?>" alt="Dentista da clínica conversando com mãe e filha sorridentes no consultório" width="1400" height="933" fetchpriority="high" onerror="this.closest('figure').classList.add('sem-foto')">
+                    </figure>
+                    <?php if ($resumo['qtd']): ?>
+                    <div class="hf-chip hf-c1"><span class="hf-chip-ico"><i class="bi bi-star-fill" aria-hidden="true"></i></span><div><strong><?= number_format((float) $resumo['media'], 1, ',', '') ?> de 5</strong><small><?= (int) $resumo['qtd'] ?> avaliações de pacientes</small></div></div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -94,22 +85,24 @@ include __DIR__ . '/include/cabecalho.php';
                 $cond = array_filter(array_map('trim', explode("\n", (string) $d['condicoes'])));
                 $nd = $notaDent[$d['id_dentista']] ?? null; ?>
             <div class="col-md-6 col-lg-4">
-                <article class="card-soft card-hover doc-card h-100">
-                    <div class="doc-photo" style="background:<?= e($d['cor']) ?>22">
-                        <?php if ($ft): ?><img src="<?= e($ft) ?>" alt="Ilustração de <?= e($d['nome']) ?>" loading="lazy"><?php endif; ?>
-                        <?php if ($d['anos_experiencia']): ?><span class="doc-xp"><strong><?= (int) $d['anos_experiencia'] ?></strong>anos de experiência</span><?php endif; ?>
-                    </div>
-                    <div class="doc-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
-                            <h3 class="h5 mb-0"><?= e($d['nome']) ?></h3>
-                            <?php if ($nd): ?><span class="small fw-bold text-nowrap"><span style="color:#e3a21a" aria-hidden="true">★</span> <?= number_format((float) $nd['media'], 1, ',', '') ?></span><?php endif; ?>
+                <article class="doc-v4 h-100">
+                    <a href="especialista.php?id=<?= (int) $d['id_dentista'] ?>" class="doc-v4-foto" aria-label="Ver perfil de <?= e($d['nome']) ?>">
+                        <?php if ($ft): ?><img src="<?= e($ft) ?>" alt="Foto de <?= e($d['nome']) ?>" loading="lazy" width="420" height="420" onerror="this.remove()"><?php endif; ?>
+                        <span class="doc-v4-ini" aria-hidden="true"><?= e(iniciais($d['nome'])) ?></span>
+                        <?php if ($d['anos_experiencia']): ?><span class="doc-xp"><strong><?= (int) $d['anos_experiencia'] ?></strong> anos de experiência</span><?php endif; ?>
+                    </a>
+                    <div class="doc-v4-body">
+                        <h3 class="doc-v4-nome"><?= e($d['nome']) ?></h3>
+                        <p class="doc-v4-esp"><?= e($d['especialidade']) ?> <span>· <?= e($d['cro']) ?></span></p>
+                        <?php if ($nd): ?>
+                        <div class="nota-quadros" role="img" aria-label="Nota <?= number_format((float) $nd['media'], 1, ',', '') ?> de 5 em <?= (int) $nd['qtd'] ?> avaliações">
+                            <span class="quadros" aria-hidden="true"><?php for ($i = 1; $i <= 5; $i++): ?><span class="<?= $i <= round((float) $nd['media']) ? 'on' : '' ?>">★</span><?php endfor; ?></span>
+                            <span class="nota-txt" aria-hidden="true"><?= number_format((float) $nd['media'], 1, ',', '') ?>/5,0 (<?= (int) $nd['qtd'] ?> avaliações)</span>
                         </div>
-                        <div class="mb-3"><span class="tag"><?= e($d['especialidade']) ?></span> <span class="small text-muted ms-1"><?= e($d['cro']) ?></span></div>
-                        <p class="text-muted small mb-3"><?= e(mb_strimwidth((string) $d['bio'], 0, 190, '…')) ?></p>
+                        <?php endif; ?>
                         <ul class="doc-info">
-                            <?php if ($d['publico']): ?><li><i class="bi bi-people" aria-hidden="true"></i><strong>Atende:</strong> <?= e($d['publico']) ?></li><?php endif; ?>
-                            <li><i class="bi bi-building" aria-hidden="true"></i><strong>Formato:</strong> <?= e($d['atendimento'] ?: 'Presencial') ?></li>
-                            <li><i class="bi bi-clock" aria-hidden="true"></i><strong>Horário:</strong> Seg a Sex · <?= e(implode(' / ', $turnos[$d['id_dentista']] ?? [])) ?></li>
+                            <?php if ($d['publico']): ?><li><i class="bi bi-people" aria-hidden="true"></i><span><strong>Atende:</strong> <?= e($d['publico']) ?></span></li><?php endif; ?>
+                            <li><i class="bi bi-clock" aria-hidden="true"></i><span><strong>Horário:</strong> Seg a Sex · <?= e(implode(' / ', $turnos[$d['id_dentista']] ?? [])) ?></span></li>
                         </ul>
                         <?php if ($cond): ?>
                         <div class="cond-list" aria-label="Principais tratamentos">
@@ -117,8 +110,8 @@ include __DIR__ . '/include/cabecalho.php';
                         </div>
                         <?php endif; ?>
                         <div class="d-flex gap-2 mt-auto">
-                            <a href="especialista.php?id=<?= (int) $d['id_dentista'] ?>" class="btn btn-ghost flex-fill">Ver perfil</a>
-                            <a href="agendar.php?dentista=<?= (int) $d['id_dentista'] ?>" class="btn btn-soft flex-fill">Agendar</a>
+                            <a href="especialista.php?id=<?= (int) $d['id_dentista'] ?>" class="btn btn-ghost flex-fill">Ver perfil<span class="visually-hidden"> de <?= e($d['nome']) ?></span></a>
+                            <a href="agendar.php?dentista=<?= (int) $d['id_dentista'] ?>" class="btn btn-teal flex-fill">Agendar<span class="visually-hidden"> com <?= e($d['nome']) ?></span></a>
                         </div>
                     </div>
                 </article>
@@ -129,7 +122,7 @@ include __DIR__ . '/include/cabecalho.php';
 </section>
 
 <!-- PROCEDIMENTOS E PREÇOS -->
-<section class="section bg-white" id="procedimentos">
+<section class="section sec-suave" id="procedimentos">
     <div class="container">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-5">
             <div>
@@ -137,23 +130,75 @@ include __DIR__ . '/include/cabecalho.php';
                 <h2 class="section-title mt-3 mb-2">Procedimentos e valores</h2>
                 <p class="section-sub mb-0">Valores de referência. O orçamento final é confirmado pelo especialista na consulta, antes de qualquer procedimento.</p>
             </div>
-            <a href="agendar.php" class="btn btn-teal">Agendar agora</a>
         </div>
-        <div class="row g-3">
+        <div class="row g-4 proc-grid">
             <?php foreach ($procedimentos as $p): $ehPrimeira = stripos($p['nome'], 'Primeira consulta') !== false; ?>
-            <div class="col-sm-6 col-lg-4 col-xl-3">
-                <a href="agendar.php?procedimento=<?= (int) $p['id_procedimento'] ?><?= $ehPrimeira ? '&amp;primeira=1' : '' ?>" class="card-soft card-hover proc-card text-reset<?= $ehPrimeira ? ' proc-primeira' : '' ?>">
+            <div class="col-sm-6 col-lg-4">
+                <a href="agendar.php?procedimento=<?= (int) $p['id_procedimento'] ?><?= $ehPrimeira ? '&amp;primeira=1' : '' ?>" class="proc-v4<?= $ehPrimeira ? ' proc-primeira' : '' ?>">
                     <?php if ($ehPrimeira): ?><span class="proc-selo"><i class="bi bi-stars" aria-hidden="true"></i> Comece por aqui</span><?php endif; ?>
-                    <span class="proc-ico mb-3"><i class="bi <?= e($p['icone']) ?>" aria-hidden="true"></i></span>
-                    <h3 class="h6 mb-1"><?= e($p['nome']) ?></h3>
-                    <p class="small text-muted mb-0"><?= e($p['descricao']) ?></p>
-                    <div class="proc-meta">
-                        <span class="tag"><i class="bi bi-clock" aria-hidden="true"></i> <?= duracao_txt($p['duracao_min']) ?></span>
-                        <span class="tag tag-navy price">a partir de <?= moeda($p['valor']) ?></span>
-                    </div>
+                    <span class="proc-v4-ico" aria-hidden="true"><i class="bi <?= e($p['icone']) ?>"></i></span>
+                    <h3 class="proc-v4-tit"><?= e($p['nome']) ?></h3>
+                    <p class="proc-v4-desc"><?= e($p['descricao']) ?></p>
+                    <span class="proc-v4-meta">
+                        <span><i class="bi bi-clock" aria-hidden="true"></i> <?= duracao_txt($p['duracao_min']) ?></span>
+                        <span class="price">a partir de <?= moeda($p['valor']) ?></span>
+                    </span>
                 </a>
             </div>
             <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- AGENDAMENTO RÁPIDO: foto ao lado (estilo do exemplo enviado) -->
+<section class="section" id="agende" aria-labelledby="agendeTit">
+    <div class="container">
+        <div class="agende-split">
+            <div class="agende-foto">
+                <img src="<?= e(foto_site('agendar-inicio', 1100)) ?>" alt="" loading="lazy" onerror="this.remove()">
+                <div class="agende-foto-conteudo">
+                    <div class="agende-chips">
+                        <span><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> Araras/SP</span>
+                        <span class="chip-on"><i class="bi bi-circle-fill" aria-hidden="true"></i> Seg a Sex · 07h30 às 19h</span>
+                    </div>
+                    <div>
+                        <h2 id="agendeTit" class="agende-tit">Agende sua consulta hoje!</h2>
+                        <p class="mb-0">Escolha o tratamento e o especialista: os horários livres aparecem na hora.</p>
+                    </div>
+                    <?php if ($resumo['qtd']): ?>
+                    <p class="agende-nota mb-0">Nossos pacientes avaliam:
+                        <span class="quadros quadros-sm" aria-hidden="true"><?php for ($i = 1; $i <= 5; $i++): ?><span class="<?= $i <= round((float) $resumo['media']) ? 'on' : '' ?>">★</span><?php endfor; ?></span>
+                        <strong><?= number_format((float) $resumo['media'], 1, ',', '') ?>/5,0</strong> (<?= (int) $resumo['qtd'] ?> avaliações)</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <form action="agendar.php" method="GET" class="agende-form">
+                <p class="eyebrow mb-3"><i class="bi bi-lightning-charge" aria-hidden="true"></i> Agendamento em 1 minuto</p>
+                <div class="row g-4">
+                    <div class="col-12">
+                        <label class="form-label" for="agProc">Tratamento</label>
+                        <select id="agProc" name="procedimento" class="form-select form-linha">
+                            <option value="">Selecione o tratamento</option>
+                            <?php foreach ($procedimentos as $p): ?><option value="<?= (int) $p['id_procedimento'] ?>"><?= e($p['nome']) ?> · <?= moeda($p['valor']) ?></option><?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="agDent">Especialista <span class="text-muted fw-normal">(opcional)</span></label>
+                        <select id="agDent" name="dentista" class="form-select form-linha">
+                            <option value="">Qualquer especialista</option>
+                            <?php foreach ($dentistas as $d): ?><option value="<?= (int) $d['id_dentista'] ?>"><?= e($d['nome']) ?> — <?= e($d['especialidade']) ?></option><?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <ul class="agende-lista">
+                            <li><i class="bi bi-check2-square" aria-hidden="true"></i> Confirmação da secretaria pelo WhatsApp</li>
+                            <li><i class="bi bi-check2-square" aria-hidden="true"></i> Pagamento só na clínica, no dia</li>
+                            <li><i class="bi bi-lock" aria-hidden="true"></i> Seus dados protegidos</li>
+                        </ul>
+                    </div>
+                    <div class="col-12"><button type="submit" class="btn btn-teal btn-lg w-100"><i class="bi bi-calendar2-week me-2" aria-hidden="true"></i>Ver horários livres</button></div>
+                </div>
+            </form>
         </div>
     </div>
 </section>
@@ -239,7 +284,7 @@ include __DIR__ . '/include/cabecalho.php';
                                 <?php foreach ($dentistas as $d): ?><option value="<?= (int) $d['id_dentista'] ?>" <?= (string) antigo('avaliacao', 'id_dentista') === (string) $d['id_dentista'] ? 'selected' : '' ?>><?= e($d['nome']) ?></option><?php endforeach; ?>
                             </select></div>
                         <div class="col-12"><label class="form-label" for="avCom">Comentário</label><textarea id="avCom" name="comentario" class="form-control" rows="3" required minlength="10" maxlength="600" placeholder="Como foi o atendimento?"><?= e(antigo('avaliacao', 'comentario')) ?></textarea></div>
-                        <div class="col-12"><?= captcha_campo('avaliacao') ?></div>
+                        <div class="col-12"><?= protecao_campo('avaliacao') ?></div>
                         <div class="col-12"><button type="submit" class="btn btn-teal"><i class="bi bi-send me-1" aria-hidden="true"></i> Enviar avaliação</button></div>
                     </div>
                 </form>
@@ -277,7 +322,7 @@ include __DIR__ . '/include/cabecalho.php';
                                 <?php endforeach; ?>
                             </select></div>
                         <div class="col-12"><label class="form-label" for="ctMsg">Mensagem</label><textarea id="ctMsg" name="mensagem" class="form-control" rows="4" required minlength="10" maxlength="2000"><?= e(antigo('contato', 'mensagem')) ?></textarea></div>
-                        <div class="col-12"><?= captcha_campo('contato') ?></div>
+                        <div class="col-12"><?= protecao_campo('contato') ?></div>
                         <div class="col-12 d-flex flex-wrap gap-2 align-items-center">
                             <button type="submit" class="btn btn-teal"><i class="bi bi-envelope me-1" aria-hidden="true"></i> Enviar mensagem</button>
                             <span class="small text-muted"><i class="bi bi-lock" aria-hidden="true"></i> Seus dados são usados apenas para responder você.</span>
@@ -289,24 +334,5 @@ include __DIR__ . '/include/cabecalho.php';
     </div>
 </section>
 
-<!-- CTA -->
-<section class="pb-2" aria-label="Agendar">
-    <div class="container">
-        <div class="cta">
-            <div class="row align-items-center g-4">
-                <div class="col-lg-8">
-                    <h2 class="mb-2">Pronto para cuidar do seu sorriso?</h2>
-                    <p class="mb-0 opacity-75">Escolha o procedimento e veja na hora os horários livres de cada especialista.</p>
-                </div>
-                <div class="col-lg-4 text-lg-end d-flex flex-wrap gap-2 justify-content-lg-end">
-                    <a href="agendar.php" class="btn btn-teal btn-lg">Agendar</a>
-                    <a href="https://wa.me/<?= e($whatsapp) ?>" target="_blank" rel="noopener" class="btn btn-outline-light-soft btn-lg"><i class="bi bi-whatsapp me-1" aria-hidden="true"></i> WhatsApp</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
 <?php limpar_antigos('avaliacao'); limpar_antigos('contato');
-$scripts_extra = '<script src="assets/js/dente3d.js?v=1"></script>';
 include __DIR__ . '/include/rodape.php'; ?>

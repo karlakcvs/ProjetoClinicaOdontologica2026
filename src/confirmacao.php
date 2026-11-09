@@ -13,11 +13,11 @@ $modoSecretaria = ($_POST['modo'] ?? '') === 'secretaria' && perfil_atual() === 
 csrf_validar();
 $voltar = $modoSecretaria ? 'nova_consulta.php' : 'agendar.php';
 
-// Paciente pelo site: verificação "não sou um robô" e limite de agendamentos por IP
+// Paciente pelo site: RATE LIMITING (4 agendamentos por hora por IP) + campo-isca anti-robô
 $erro = '';
 if (!$modoSecretaria) {
-    if (limite_excedido($pdo, 'agendamento', 4, 60)) $erro = 'Muitos agendamentos feitos deste aparelho na última hora. Para marcar mais consultas, fale com a clínica pelo telefone ou WhatsApp.';
-    elseif ($m = captcha_validar('agendamento')) $erro = $m;
+    if (($lim = limite_status($pdo, 'agendamento'))['bloqueado']) $erro = limite_mensagem($lim) . ' Para marcar mais consultas, fale com a clínica pelo telefone ou WhatsApp.';
+    elseif ($m = protecao_validar('agendamento')) $erro = $m;
 }
 
 // 2. Validação básica dos campos
@@ -27,7 +27,7 @@ $email = trim($_POST['email_paciente'] ?? '');
 $data  = $_POST['data_agendamento'] ?? '';
 $hora  = $_POST['hora_agendamento'] ?? '';
 if ($erro) {}
-elseif (mb_strlen($nome) < 3)                                  $erro = 'Informe o nome completo.';
+elseif (mb_strlen($nome) < 5 || !preg_match('/\S+\s+\S+/u', $nome)) $erro = 'Informe o nome completo (nome e sobrenome).';
 elseif (strlen(preg_replace('/\D/', '', $tel)) < 10)       $erro = 'Informe um telefone válido com DDD.';
 elseif ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $erro = 'E-mail inválido.';
 elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data) || !preg_match('/^\d{2}:\d{2}$/', $hora)) $erro = 'Escolha a data e o horário.';

@@ -14,8 +14,8 @@ $antigos = ['nome' => $nome, 'comentario' => $com, 'nota' => $nota, 'id_dentista
 
 $erro = '';
 if (!csrf_ok()) $erro = 'O formulário expirou. Tente novamente.';
-elseif (limite_excedido($pdo, 'avaliacao', 3, 60)) $erro = 'Você já enviou avaliações recentemente. Tente mais tarde.';
-elseif ($m = captcha_validar('avaliacao')) $erro = $m;
+elseif (($lim = limite_status($pdo, 'avaliacao'))['bloqueado']) $erro = limite_mensagem($lim);   // rate limiting: 4 por hora
+elseif ($m = protecao_validar('avaliacao')) $erro = $m;
 elseif ($nota < 1 || $nota > 5) $erro = 'Escolha de 1 a 5 estrelas.';
 elseif (mb_strlen($nome) < 2) $erro = 'Informe seu nome.';
 elseif (mb_strlen($com) < 10) $erro = 'Escreva um comentário com pelo menos 10 caracteres.';

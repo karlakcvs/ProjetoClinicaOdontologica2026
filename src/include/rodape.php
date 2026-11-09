@@ -27,19 +27,23 @@
                     <li><a href="agendar.php">Agendar consulta</a></li>
                     <li><a href="index.php#procedimentos">Tratamentos</a></li>
                     <li><a href="index.php#avaliacoes">Deixar avaliação</a></li>
-                    <li><a href="login.php">Acesso restrito</a></li>
                 </ul>
             </div>
         </div>
         <hr class="border-light opacity-10 my-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
             <span>© <?= date('Y') ?> <?= e($nome_clinica) ?> · <?= e($slogan_clinica) ?></span>
+            <div class="d-flex align-items-center gap-2">
+                <a href="<?= e($instagram) ?>" class="social-ico" aria-label="Instagram da clínica" <?= $instagram !== '#' ? 'target="_blank" rel="noopener"' : '' ?>><i class="bi bi-instagram" aria-hidden="true"></i></a>
+                <a href="<?= e($facebook) ?>" class="social-ico" aria-label="Facebook da clínica" <?= $facebook !== '#' ? 'target="_blank" rel="noopener"' : '' ?>><i class="bi bi-facebook" aria-hidden="true"></i></a>
+                <a href="https://wa.me/<?= e($whatsapp) ?>" class="social-ico" aria-label="WhatsApp da clínica" target="_blank" rel="noopener"><i class="bi bi-whatsapp" aria-hidden="true"></i></a>
+            </div>
             <span class="dev-badge"><img src="assets/img/sanytech-simbolo.png" alt="" width="16" height="18"> Desenvolvido por <b><?= e($empresa_dev) ?></b></span>
         </div>
     </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="assets/js/site.js?v=10"></script>
+<script src="assets/js/site.js?v=12"></script>
 <?= $scripts_extra ?? '' ?>
 </body>
 </html>

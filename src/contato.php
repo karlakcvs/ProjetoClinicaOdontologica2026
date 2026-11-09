@@ -15,8 +15,8 @@ $antigos = compact('nome', 'email', 'assunto') + ['telefone' => $tel, 'mensagem'
 
 $erro = '';
 if (!csrf_ok()) $erro = 'O formulário expirou. Tente novamente.';
-elseif (limite_excedido($pdo, 'contato', 3, 30)) $erro = 'Você enviou várias mensagens em pouco tempo. Aguarde alguns minutos.';
-elseif ($m = captcha_validar('contato')) $erro = $m;
+elseif (($lim = limite_status($pdo, 'contato'))['bloqueado']) $erro = limite_mensagem($lim);   // rate limiting: 4 por 30 min
+elseif ($m = protecao_validar('contato')) $erro = $m;
 elseif (mb_strlen($nome) < 3) $erro = 'Informe seu nome.';
 elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $erro = 'Informe um e-mail válido.';
 elseif (mb_strlen($msg) < 10) $erro = 'Escreva uma mensagem com pelo menos 10 caracteres.';

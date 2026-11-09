@@ -81,7 +81,7 @@ include __DIR__ . '/include/admin_topo.php';
                 <a href="dent_paciente.php?id=<?= (int) $c['id_paciente'] ?>" class="pac-item">
                     <div class="text-center" style="width:58px"><div class="fw-bold text-navy"><?= hm($c['hora_inicio']) ?></div><div class="small text-muted"><?= hm($c['hora_fim']) ?></div></div>
                     <div class="min-w-0">
-                        <div class="nm text-truncate"><?= e($c['paciente']) ?> <?php if ($c['primeira_consulta']): ?><span class="tag tag-navy ms-1"><i class="bi bi-stars" aria-hidden="true"></i> 1ª consulta</span><?php endif; ?></div>
+                        <div class="nm text-truncate d-flex align-items-center gap-2"><?= avatar_paciente($c, 'xs', 'paciente') ?><span class="text-truncate"><?= e($c['paciente']) ?></span> <?php if ($c['primeira_consulta']): ?><span class="tag tag-navy ms-1"><i class="bi bi-stars" aria-hidden="true"></i> 1ª consulta</span><?php endif; ?></div>
                         <div class="meta text-truncate"><?= e($c['procedimento']) ?><?= $c['data_nascimento'] ? ' · ' . idade($c['data_nascimento']) . ' anos' : '' ?></div>
                     </div>
                     <span class="status <?= $cls ?>"><?= $rot ?></span>
@@ -100,6 +100,7 @@ include __DIR__ . '/include/admin_topo.php';
             <?php foreach (array_slice($proximos, 0, 8) as $c): ?>
                 <a href="dent_paciente.php?id=<?= (int) $c['id_paciente'] ?>" class="d-flex align-items-center gap-3 py-2 border-bottom text-reset">
                     <div class="text-center" style="width:44px"><div class="fw-bold text-navy lh-1"><?= date('d', strtotime($c['data'])) ?></div><div class="small text-muted"><?= $diasPt[(int) date('w', strtotime($c['data']))] ?></div></div>
+                    <?= avatar_paciente($c, 'xs', 'paciente') ?>
                     <div class="small flex-grow-1 lh-sm min-w-0"><strong class="d-block text-truncate"><?= e($c['paciente']) ?></strong><span class="text-muted"><?= hm($c['hora_inicio']) ?> · <?= e($c['procedimento']) ?></span></div>
                     <span class="small fw-semibold text-nowrap"><?= moeda($c['valor_tabela']) ?></span>
                 </a>

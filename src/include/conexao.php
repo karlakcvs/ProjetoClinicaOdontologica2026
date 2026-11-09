@@ -43,3 +43,15 @@ if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
 // Cria as tabelas na primeira vez e aplica as atualizações do banco (migrações)
 require_once __DIR__ . '/instalar.php';
 instalar_banco($pdo);
+
+// Tempo de resposta de cada página (painel técnico da SanyTech)
+registrar_metrica($pdo);
+
+// Mantém os dados de DEMONSTRAÇÃO em dia (consultas que já passaram viram "realizadas")
+atualizar_demo($pdo);
+
+// RATE LIMITING do tráfego geral (ver include/seguranca.php):
+// cada IP pode abrir até 120 páginas por minuto e enviar até 20 formulários por minuto.
+// A API de horários e os downloads do prontuário têm limites próprios.
+if (empty($SEM_LIMITE_PAGINA)) aplicar_limite_trafego($pdo, 'pagina');
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') aplicar_limite_trafego($pdo, 'envio');

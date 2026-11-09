@@ -1,6 +1,7 @@
 <?php
 // Cada usuário (secretaria ou dentista) troca a própria senha
-require_once __DIR__ . '/include/check_area.php';
+require_once __DIR__ . '/include/config.php';
+exigir_login(['SECRETARIA', 'DENTISTA', 'TI']);
 require_once __DIR__ . '/include/conexao.php';
 
 $erro = '';
@@ -13,8 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $st->execute([$_SESSION['usuario_id']]);
     $hash = (string) $st->fetchColumn();
 
-    if (limite_excedido($pdo, 'troca_senha', 5, 15)) $erro = 'Muitas tentativas. Aguarde alguns minutos.';
-    elseif (!password_verify($atual, $hash)) { $erro = 'A senha atual está incorreta.'; limite_registrar($pdo, 'troca_senha'); }
+    if (perfil_atual() === 'TI' && mb_strlen($nova) < 14) $erro = 'Na área técnica a senha precisa ter pelo menos 14 caracteres.';
+    elseif (($lim = limite_status($pdo, 'troca_senha'))['bloqueado']) $erro = limite_mensagem($lim);   // rate limiting: 4 tentativas / 15 min
+    elseif (!password_verify($atual, $hash)) {
+        limite_registrar($pdo, 'troca_senha');
+        $rest = limite_status($pdo, 'troca_senha')['restantes'];
+        $erro = 'A senha atual está incorreta. ' . ($rest ? "Restam $rest de " . LIMITE_TENTATIVAS . ' tentativas.' : 'Limite atingido: aguarde 15 minutos.');
+    }
     elseif ($nova !== $conf) $erro = 'A confirmação não é igual à nova senha.';
     elseif ($nova === $atual) $erro = 'A nova senha deve ser diferente da atual.';
     elseif ($m = senha_forte($nova)) $erro = $m;

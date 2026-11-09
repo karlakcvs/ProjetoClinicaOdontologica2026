@@ -6,7 +6,7 @@ require_once __DIR__ . '/include/conexao.php';
 $busca = trim($_GET['q'] ?? '');
 $ordem = ($_GET['ordem'] ?? '') === 'nome' ? 'nome' : 'recentes';
 $hoje = date('Y-m-d');
-$sql = "SELECT p.id_paciente, p.nome, p.telefone, p.data_nascimento,
+$sql = "SELECT p.id_paciente, p.nome, p.telefone, p.data_nascimento, p.foto, p.criado_em, p.cpf, p.cep, p.logradouro, p.numero, p.cidade,
                MAX(CASE WHEN c.status = 'REALIZADA' THEN c.data END) AS ultima,
                MIN(CASE WHEN c.data >= ? AND c.status IN ('AGENDADA','CONFIRMADA') THEN c.data END) AS proxima,
                SUM(CASE WHEN c.status = 'REALIZADA' THEN 1 ELSE 0 END) AS sessoes,
@@ -15,7 +15,7 @@ $sql = "SELECT p.id_paciente, p.nome, p.telefone, p.data_nascimento,
         FROM paciente p JOIN consulta c ON c.id_paciente = p.id_paciente AND c.id_dentista = ?";
 $par = [$hoje, $ID_DENTISTA];
 if ($busca !== '') { $sql .= " WHERE p.nome LIKE ? OR p.telefone LIKE ?"; $par[] = "%$busca%"; $par[] = "%$busca%"; }
-$sql .= " GROUP BY p.id_paciente, p.nome, p.telefone, p.data_nascimento";
+$sql .= " GROUP BY p.id_paciente, p.nome, p.telefone, p.data_nascimento, p.foto, p.criado_em, p.cpf, p.cep, p.logradouro, p.numero, p.cidade";
 $sql .= $ordem === 'nome' ? " ORDER BY p.nome" : " ORDER BY MAX(c.data) DESC";
 $st = $pdo->prepare($sql);
 $st->execute($par);
@@ -40,9 +40,9 @@ include __DIR__ . '/include/admin_topo.php';
 <div class="pac-list">
 <?php foreach ($pacientes as $p): $id = idade($p['data_nascimento']); ?>
     <a href="dent_paciente.php?id=<?= (int) $p['id_paciente'] ?>" class="pac-item">
-        <span class="avatar avatar-sm" style="--c:#4f7cc4" aria-hidden="true"><?= e(iniciais($p['nome'])) ?></span>
+        <?= avatar_paciente($p, $p['foto'] ? 'md' : 'sm') ?>
         <div class="min-w-0">
-            <div class="nm text-truncate"><?= e($p['nome']) ?></div>
+            <div class="nm text-truncate"><?= e($p['nome']) ?><?php if (cadastro_completo($p) && $p['criado_em'] < date('Y-01-01', strtotime('-1 year'))): ?> <span class="paciente-desde ms-1"><i class="bi bi-award" aria-hidden="true"></i> desde <?= date('Y', strtotime($p['criado_em'])) ?></span><?php endif; ?></div>
             <div class="meta"><?= $id !== null ? $id . ' anos · ' : '' ?><?= e($p['telefone']) ?> · <?= (int) $p['sessoes'] ?> sessão(ões)
                 <?= $p['ultima'] ? ' · última ' . data_br($p['ultima']) : '' ?></div>
         </div>

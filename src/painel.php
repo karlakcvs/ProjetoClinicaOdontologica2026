@@ -27,6 +27,12 @@ $noSite = (int) $st->fetchColumn();
 $incompletos = (int) $pdo->query("SELECT COUNT(*) FROM paciente WHERE cpf IS NULL OR cep IS NULL OR numero IS NULL OR data_nascimento IS NULL")->fetchColumn();
 $avalPend = (int) $pdo->query("SELECT COUNT(*) FROM avaliacao WHERE status = 'PENDENTE'")->fetchColumn();
 $msgPend = (int) $pdo->query("SELECT COUNT(*) FROM mensagem_contato WHERE lida = 0")->fetchColumn();
+// Pacientes de longa data (cadastro completo, com foto de perfil) e a próxima consulta de cada um
+$st = $pdo->prepare("SELECT p.*, (SELECT COUNT(*) FROM consulta c WHERE c.id_paciente = p.id_paciente AND c.status = 'REALIZADA') AS atend,
+                            (SELECT MIN(c.data) FROM consulta c WHERE c.id_paciente = p.id_paciente AND c.data >= ? AND c.status IN ('AGENDADA','CONFIRMADA')) AS proxima
+                     FROM paciente p WHERE p.foto IS NOT NULL AND p.cpf IS NOT NULL AND p.cep IS NOT NULL ORDER BY p.criado_em LIMIT 8");
+$st->execute([$hoje]);
+$fieis = array_values(array_filter($st->fetchAll(), 'cadastro_completo'));
 
 $titulo = 'Visão geral';
 $pagina = 'painel';
@@ -94,6 +100,7 @@ include __DIR__ . '/include/admin_topo.php';
             <?php foreach ($proximas as $c): ?>
                 <div class="d-flex align-items-center gap-3 py-2 border-bottom">
                     <div class="text-center" style="width:44px"><div class="fw-bold text-navy lh-1"><?= date('d', strtotime($c['data'])) ?></div><div class="small text-muted"><?= ['dom','seg','ter','qua','qui','sex','sáb'][(int) date('w', strtotime($c['data']))] ?></div></div>
+                    <?= avatar_paciente($c, 'xs', 'paciente') ?>
                     <div class="small flex-grow-1 lh-sm min-w-0"><strong class="d-block text-truncate"><?= e($c['paciente']) ?></strong><span class="text-muted"><?= hm($c['hora_inicio']) ?> · <?= e($c['procedimento']) ?></span></div>
                     <span class="avatar avatar-xs" style="--c:<?= e($c['cor']) ?>" title="<?= e($c['dentista']) ?>"><?= e(iniciais($c['dentista'])) ?></span>
                 </div>
@@ -101,6 +108,25 @@ include __DIR__ . '/include/admin_topo.php';
         </div>
     </div>
 </div>
+
+<?php if ($fieis): ?>
+<div class="card-soft panel mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="panel-title">Pacientes de longa data <span class="text-muted fw-normal small">· cadastro completo</span></h2>
+        <a href="pacientes.php" class="small fw-semibold">Todos os pacientes <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    <div class="pac-destaque">
+        <?php foreach ($fieis as $p): ?>
+            <a href="paciente_resumo.php?id=<?= (int) $p['id_paciente'] ?>">
+                <?= avatar_paciente($p, 'lg') ?>
+                <span class="nm"><?= e($p['nome']) ?></span>
+                <span class="paciente-desde"><i class="bi bi-award" aria-hidden="true"></i> desde <?= date('Y', strtotime($p['criado_em'])) ?></span>
+                <span class="mt"><?= (int) $p['atend'] ?> atendimentos<?= $p['proxima'] ? ' · próxima ' . date('d/m', strtotime($p['proxima'])) : '' ?></span>
+            </a>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>
 
 <?= modal_pagamento('painel.php') ?>
 <?php include __DIR__ . '/include/admin_fim.php'; ?>

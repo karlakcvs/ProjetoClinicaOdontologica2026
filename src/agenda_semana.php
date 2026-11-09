@@ -7,6 +7,8 @@ $ehDentista = perfil_atual() === 'DENTISTA';
 $ref = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['semana'] ?? '') ? $_GET['semana'] : date('Y-m-d');
 $seg = date('Y-m-d', strtotime('monday this week', strtotime($ref)));
 $filtroDent = $ehDentista ? (int) $_SESSION['id_dentista'] : (int) ($_GET['dentista'] ?? 0);
+// Cores: por tipo de procedimento (padrão do dentista) ou por dentista (padrão da secretaria)
+$corPor = in_array($_GET['cor'] ?? '', ['tipo', 'dentista'], true) ? $_GET['cor'] : ($ehDentista || $filtroDent ? 'tipo' : 'dentista');
 
 $dentistas = $pdo->query("SELECT id_dentista, nome, cor FROM dentista ORDER BY id_dentista")->fetchAll();
 $temSabado = (int) $pdo->query("SELECT COUNT(*) FROM horario_atendimento WHERE dia_semana = 6")->fetchColumn() > 0;
@@ -57,7 +59,7 @@ function colunas_sobrepostas(array $lista) {
 $hoje = date('Y-m-d');
 $dw = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 $ant = date('Y-m-d', strtotime("$seg -7 days")); $prox = date('Y-m-d', strtotime("$seg +7 days"));
-$q = fn($s) => 'agenda_semana.php?' . http_build_query(array_filter(['semana' => $s, 'dentista' => $ehDentista ? null : ($filtroDent ?: null)]));
+$q = fn($s, $c = null) => 'agenda_semana.php?' . http_build_query(array_filter(['semana' => $s, 'dentista' => $ehDentista ? null : ($filtroDent ?: null), 'cor' => $c ?? $corPor]));
 $total = array_sum(array_map('count', $porDia));
 $diaAtivo = in_array($hoje, $dias, true) ? $hoje : $dias[0];
 
@@ -73,9 +75,13 @@ include __DIR__ . '/include/admin_topo.php';
         <a href="<?= e($q($prox)) ?>" class="btn btn-icon btn-ghost" aria-label="Próxima semana"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
     </div>
     <strong class="px-1"><?= date('d/m', strtotime($dias[0])) ?> a <?= date('d/m/Y', strtotime(end($dias))) ?> <span class="text-muted fw-normal small">· <?= $total ?> consulta(s)</span></strong>
+    <div class="btn-group btn-group-sm ms-md-auto" role="group" aria-label="Colorir a agenda por">
+        <a href="<?= e($q($seg, 'tipo')) ?>" class="btn <?= $corPor === 'tipo' ? 'btn-navy' : 'btn-ghost' ?>" <?= $corPor === 'tipo' ? 'aria-current="true"' : '' ?>>Cor por tipo</a>
+        <?php if (!$ehDentista): ?><a href="<?= e($q($seg, 'dentista')) ?>" class="btn <?= $corPor === 'dentista' ? 'btn-navy' : 'btn-ghost' ?>" <?= $corPor === 'dentista' ? 'aria-current="true"' : '' ?>>Cor por dentista</a><?php endif; ?>
+    </div>
     <?php if (!$ehDentista): ?>
-    <form method="GET" class="ms-md-auto d-flex gap-2 align-items-center">
-        <input type="hidden" name="semana" value="<?= e($seg) ?>">
+    <form method="GET" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="semana" value="<?= e($seg) ?>"><input type="hidden" name="cor" value="<?= e($corPor) ?>">
         <label class="visually-hidden" for="fDent">Filtrar por dentista</label>
         <select id="fDent" name="dentista" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value="">Toda a clínica</option>
@@ -117,9 +123,11 @@ include __DIR__ . '/include/admin_topo.php';
                     $top = max(0, ($ini - $h0 * 60) / 60 * $PX); $alt = max(26, ($fim - $ini) / 60 * $PX - 3);
                     [$colI, $nCols] = $pos[$i]; $w = 100 / $nCols; $left = $colI * $w;
                     $link = $ehDentista ? 'dent_paciente.php?id=' . (int) $c['id_paciente'] : 'editar.php?id=' . (int) $c['id_consulta'];
-                    $stt = $STATUS_CONSULTA[$c['status']][0] ?? $c['status']; ?>
+                    $stt = $STATUS_CONSULTA[$c['status']][0] ?? $c['status'];
+                    $cat = categoria_proc($c['procedimento']);
+                    $corEv = $corPor === 'tipo' ? CATEGORIAS_PROC[$cat][1] : $c['cor']; ?>
                     <a href="<?= $link ?>" role="listitem" class="cal-ev st-<?= strtolower($c['status']) ?>"
-                       style="--c:<?= e($c['cor']) ?>;top:<?= round($top) ?>px;height:<?= round($alt) ?>px;left:calc(<?= $left ?>% + 4px);right:auto;width:calc(<?= $w ?>% - 8px)"
+                       style="--c:<?= e($corEv) ?>;top:<?= round($top) ?>px;height:<?= round($alt) ?>px;left:calc(<?= $left ?>% + 4px);right:auto;width:calc(<?= $w ?>% - 8px)"
                        title="<?= e(hm($c['hora_inicio']) . '–' . hm($c['hora_fim']) . ' · ' . $c['paciente'] . ' · ' . $c['procedimento'] . ' · ' . $c['dentista'] . ' · ' . $stt) ?>">
                         <b><?= hm($c['hora_inicio']) ?></b>
                         <span class="nm"><?= e($c['paciente']) ?></span>
@@ -134,7 +142,9 @@ include __DIR__ . '/include/admin_topo.php';
 </div>
 
 <div class="cal-legend mt-3">
-    <?php if (!$ehDentista): foreach ($dentistas as $d): ?><span><span class="legend-dot me-1" style="background:<?= e($d['cor']) ?>"></span><?= e($d['nome']) ?></span><?php endforeach; endif; ?>
+    <?php if ($corPor === 'tipo'): foreach (CATEGORIAS_PROC as [$rot, $cor]): ?><span><span class="legend-dot me-1" style="background:<?= e($cor) ?>"></span><?= e($rot) ?></span><?php endforeach;
+          else: foreach ($dentistas as $d): ?><span><span class="legend-dot me-1" style="background:<?= e($d['cor']) ?>"></span><?= e($d['nome']) ?></span><?php endforeach; endif; ?>
+    <span><span class="legend-dot me-1" style="background:#fff;border:1px dashed #9aa5b1"></span>cancelada / faltou (apagada)</span>
     <span><i class="bi bi-check2-circle text-success" aria-hidden="true"></i> confirmada</span>
     <span><i class="bi bi-patch-check" style="color:#217a3c" aria-hidden="true"></i> realizada</span>
     <span><i class="bi bi-stars" aria-hidden="true"></i> 1ª consulta</span>

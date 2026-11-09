@@ -12,7 +12,7 @@ function card_consulta($c, $voltar, $mostrarData = false) {
         </div>
         <div class="min-w-0">
             <div class="d-flex flex-wrap align-items-center gap-2">
-                <span class="who"><?= e($c['paciente']) ?></span>
+                <span class="who-wrap"><?= avatar_paciente($c, 'xs', 'paciente') ?><a href="paciente_resumo.php?id=<?= (int) $c['id_paciente'] ?>" class="who text-reset" title="Ver resumo do paciente"><?= e($c['paciente']) ?></a></span>
                 <span class="status <?= $classe ?>"><i class="bi <?= $icone ?>"></i><?= $rotulo ?></span>
                 <?php if ($c['origem'] === 'SITE'): ?><span class="tag" title="Agendado pelo próprio paciente no site"><i class="bi bi-globe2" aria-hidden="true"></i> site</span><?php endif; ?>
                 <?php if (!empty($c['primeira_consulta'])): ?><span class="tag tag-navy" title="Primeira consulta na clínica"><i class="bi bi-stars" aria-hidden="true"></i> 1ª consulta</span><?php endif; ?>

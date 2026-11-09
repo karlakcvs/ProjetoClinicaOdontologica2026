@@ -109,8 +109,9 @@ $pacientesLista = $modoSecretaria ? $pdo->query("SELECT id_paciente, nome, telef
                         <div class="form-text" id="dicaPrim" <?= $prePrimeira ? '' : 'hidden' ?>>Na primeira consulta o especialista faz a avaliação completa e apresenta o plano de tratamento com valores. Traga um documento com foto.</div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label" for="nome">Nome completo</label>
-                        <div class="input-icon"><i class="bi bi-person"></i><input type="text" id="nome" name="nome_paciente" class="form-control" required maxlength="120" placeholder="Como devemos chamar você?" autocomplete="name"></div>
+                        <label class="form-label" for="nome">Nome completo <span class="text-danger" aria-hidden="true">*</span></label>
+                        <div class="input-icon"><i class="bi bi-person"></i><input type="text" id="nome" name="nome_paciente" class="form-control" required maxlength="120" placeholder="Nome e sobrenome" autocomplete="name" pattern="\S+(\s+\S+)+" title="Digite o nome completo (nome e sobrenome)" aria-describedby="nomeDica"></div>
+                        <div class="form-text" id="nomeDica">Como está no documento: nome e sobrenome.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="tel">Telefone / WhatsApp</label>
@@ -125,7 +126,7 @@ $pacientesLista = $modoSecretaria ? $pdo->query("SELECT id_paciente, nome, telef
                         <textarea id="obs" name="observacoes" class="form-control" rows="2" maxlength="500" placeholder="Ex.: sinto sensibilidade ao frio, prefiro ser avisado por WhatsApp..."></textarea>
                     </div>
                     <?php if (!$modoSecretaria): ?>
-                    <div class="col-12"><?= captcha_campo('agendamento') ?></div>
+                    <div class="col-12"><?= protecao_campo('agendamento') ?></div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -157,4 +158,4 @@ window.AGENDA = {
     diasAFrente: 30
 };
 </script>
-<script src="assets/js/agendar.js?v=10"></script>
+<script src="assets/js/agendar.js?v=11"></script>
