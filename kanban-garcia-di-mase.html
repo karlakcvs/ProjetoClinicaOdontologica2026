@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kanban de testes · Garcia Di Mase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#06244b; --navy-2:#0b3a75; --teal:#12a3a0; --teal-700:#0b6f6d; --teal-50:#e9f7f6; --teal-100:#d3efed;
+  --bg:#f3f7f9; --card:#fff; --line:#e3ebef; --ink:#1b2b3a; --muted:#5d6e80;
+  --alta:#d9534f; --media:#e0a100; --baixa:#5d6e80;
+  --font-d:"Fraunces",Georgia,serif; --font-b:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font-b);background:var(--bg);color:var(--ink);font-size:14px}
+h1,h2,h3{font-family:var(--font-d);font-weight:600;margin:0;color:var(--navy)}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+.topo{background:var(--navy);color:#fff;padding:22px 28px 18px}
+.topo-linha{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between}
+.topo h1{color:#fff;font-size:28px;line-height:1.1}
+.topo h1 em{color:#5cd0bf;font-style:italic}
+.topo p{margin:6px 0 0;color:rgba(255,255,255,.75)}
+.kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#8fd3c9;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.kicker:before{content:"";width:26px;height:2px;background:var(--teal)}
+.acoes{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1.5px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.prim{background:var(--teal);border-color:var(--teal)}
+.btn.prim:hover{background:var(--teal-700)}
+.metricas{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+.met{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px}
+.met b{display:block;font-family:var(--font-d);font-size:24px;color:#fff}
+.met span{font-size:12px;color:rgba(255,255,255,.7)}
+.barra{height:8px;background:rgba(255,255,255,.15);border-radius:8px;overflow:hidden;margin-top:8px}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),#5cd0bf);width:0;transition:width .4s}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.filtros label{font-weight:600;color:var(--muted);font-size:12px;margin-right:2px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;cursor:pointer;color:var(--ink);font-weight:500}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.filtros input[type=search]{border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:200px;margin-left:auto}
+.quadro{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:16px;padding:18px 28px 28px;align-items:start;overflow-x:auto}
+.col{background:#eaf0f3;border-radius:12px;padding:10px;min-height:200px;display:flex;flex-direction:column}
+.col.drop{outline:2px dashed var(--teal);outline-offset:-4px;background:var(--teal-50)}
+.col-cab{display:flex;justify-content:space-between;align-items:center;padding:4px 6px 10px}
+.col-cab h2{font-size:17px}
+.col-cab small{display:block;color:var(--muted);font-family:var(--font-b);font-size:11px;font-weight:500;margin-top:2px}
+.cont{background:#fff;border-radius:999px;padding:2px 9px;font-weight:700;font-size:12px;color:var(--navy)}
+.cont.estouro{background:var(--alta);color:#fff}
+.wip-aviso{display:none;background:#fdecea;color:#8a2a26;border-radius:8px;padding:6px 8px;font-size:12px;margin:0 2px 8px}
+.col.estouro .wip-aviso{display:block}
+.cards{display:flex;flex-direction:column;gap:8px;flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--baixa);border-radius:10px;padding:10px 12px;cursor:grab;box-shadow:0 2px 6px -4px rgba(6,36,75,.25)}
+.card.p-alta{border-left-color:var(--alta)} .card.p-media{border-left-color:var(--media)}
+.card.ok{opacity:.85;background:#fbfefd}
+.card.arrastando{opacity:.45}
+.card-top{display:flex;gap:8px;align-items:flex-start}
+.card-top input{width:18px;height:18px;margin-top:2px;accent-color:var(--teal);cursor:pointer;flex:0 0 18px}
+.card h3{font-family:var(--font-b);font-size:14px;font-weight:600;color:var(--ink);line-height:1.35}
+.card.ok h3{text-decoration:line-through;text-decoration-color:rgba(18,163,160,.6);color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0 0 26px}
+.tag{font-size:11px;font-weight:600;border-radius:5px;padding:2px 7px;background:var(--teal-50);color:var(--teal-700)}
+.tag.pr{background:#f3f5f7;color:var(--muted)}
+.tag.okt{background:#e5f6ec;color:#1d7a46}
+.det{margin:8px 0 0 26px;font-size:12.5px;color:var(--muted);display:none}
+.card.aberto .det{display:block}
+.det b{color:var(--ink)}
+.det ol{margin:4px 0 6px;padding-left:18px}
+.det textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px;min-height:46px;resize:vertical;margin-top:4px}
+.det .linha-btn{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.mini{border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px}
+.mini:hover{border-color:var(--teal);color:var(--teal-700)}
+.mini.del:hover{border-color:var(--alta);color:var(--alta)}
+.mais{margin-left:auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:12px;padding:0 0 0 6px;white-space:nowrap}
+.add{margin-top:8px;border:1.5px dashed #b9c8d1;background:transparent;border-radius:10px;padding:8px;color:var(--muted);cursor:pointer;font-weight:600}
+.add:hover{border-color:var(--teal);color:var(--teal-700);background:#fff}
+.lean{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;padding:0 28px 32px}
+.painel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.painel h2{font-size:18px;margin-bottom:8px}
+.painel p,.painel li{color:var(--muted);line-height:1.55}
+.painel ul{padding-left:18px;margin:6px 0}
+.pdca{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.pdca div{border-radius:8px;padding:8px 10px;background:var(--bg)}
+.pdca b{color:var(--navy);font-family:var(--font-d);font-size:15px;display:block}
+dialog{border:0;border-radius:14px;padding:0;width:min(520px,94vw);box-shadow:0 30px 80px -20px rgba(6,36,75,.5)}
+dialog::backdrop{background:rgba(6,36,75,.45)}
+.dlg{padding:20px}
+.dlg h2{margin-bottom:12px}
+.dlg label{display:block;font-weight:600;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.dlg input,.dlg select,.dlg textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px}
+.dlg textarea{min-height:70px}
+.dlg .rod{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.dlg .btn{color:var(--navy);border-color:var(--line)}
+.dlg .btn.prim{color:#fff}
+.rodape{text-align:center;color:var(--muted);font-size:12px;padding:0 0 28px}
+@media (max-width:1100px){.quadro{grid-template-columns:repeat(4,280px)}}
+@media print{
+  .filtros,.acoes,.add,.mais,.det .linha-btn{display:none!important}
+  body{background:#fff}.topo{background:#fff;color:#000}.topo h1,.met b{color:#000}.met{border-color:#ccc}
+  .quadro{grid-template-columns:repeat(4,1fr);overflow:visible}.card{break-inside:avoid}.card .det{display:block}
+}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-linha">
+    <div>
+      <div class="kicker">SanyTech · Projeto Integrador DSM 2026.2</div>
+      <h1>Kanban de testes · <em>Garcia Di Mase</em></h1>
+      <p>Tudo o que já foi feito, o que precisa ser testado e o que ainda falta. Marque <b>OK</b> em cada cartão conforme for testando.</p>
+    </div>
+    <div class="acoes">
+      <button class="btn prim" id="bNovo">+ Novo cartão</button>
+      <button class="btn" id="bExp" title="Salvar uma cópia do quadro em arquivo">Exportar</button>
+      <button class="btn" id="bImp" title="Abrir um quadro salvo">Importar</button>
+      <button class="btn" onclick="window.print()">Imprimir</button>
+      <button class="btn" id="bReset" title="Voltar o quadro ao início">Recomeçar</button>
+      <input type="file" id="arqImp" accept="application/json" hidden>
+    </div>
+  </div>
+  <div class="metricas">
+    <div class="met"><b id="mFeito">0</b><span>cartões concluídos</span><div class="barra"><i id="mBarra"></i></div></div>
+    <div class="met"><b id="mTestes">0</b><span>testes aprovados (OK)</span></div>
+    <div class="met"><b id="mWip">0/3</b><span>em teste agora (limite WIP)</span></div>
+    <div class="met"><b id="mAlta">0</b><span>pendências de prioridade alta</span></div>
+  </div>
+</header>
+
+<nav class="filtros" aria-label="Filtros">
+  <label>Área:</label>
+  <span id="fArea"></span>
+  <input type="search" id="fBusca" placeholder="Buscar cartão…" aria-label="Buscar cartão">
+</nav>
+
+<main class="quadro" id="quadro"></main>
+
+<section class="lean" aria-label="Método Lean">
+  <div class="painel">
+    <h2>Como usar este quadro (Kanban)</h2>
+    <ul>
+      <li><b>Backlog:</b> ideias e melhorias futuras, ainda sem data.</li>
+      <li><b>A testar:</b> o que já foi feito e precisa ser conferido. Puxe <i>um cartão por vez</i>.</li>
+      <li><b>Em teste:</b> no máximo <b>3 cartões</b> ao mesmo tempo (limite WIP). Termine antes de começar outro.</li>
+      <li><b>Feito ✓:</b> marque <b>OK</b> no cartão e ele vem para cá sozinho, com a data.</li>
+    </ul>
+    <p>Arraste os cartões entre as colunas. Clique em <b>detalhes</b> para ver como testar e anotar o resultado. Tudo fica salvo neste navegador; use <b>Exportar</b> para guardar uma cópia.</p>
+  </div>
+  <div class="painel">
+    <h2>Princípios Lean aplicados</h2>
+    <ul>
+      <li><b>Valor para o paciente:</b> agendar fácil, site rápido e acessível.</li>
+      <li><b>Fluxo contínuo:</b> testar logo depois de cada mudança, sem acumular.</li>
+      <li><b>Puxar, não empurrar:</b> só entra em teste quando sai outro.</li>
+      <li><b>Qualidade na fonte:</b> erro encontrado vira cartão de prioridade alta na hora.</li>
+      <li><b>Eliminar desperdício:</b> retrabalho, espera e telas que ninguém usa (ex.: o gráfico de setores removido).</li>
+    </ul>
+  </div>
+  <div class="painel">
+    <h2>Ciclo de melhoria contínua (PDCA)</h2>
+    <div class="pdca">
+      <div><b>Planejar</b>Definir a mudança e aprovar pela imagem antes de mexer no sistema.</div>
+      <div><b>Fazer</b>Aplicar a mudança aprovada, guardando backup dos arquivos.</div>
+      <div><b>Checar</b>Rodar os cartões de teste e marcar OK.</div>
+      <div><b>Agir</b>Corrigir o que falhou e registrar o aprendizado.</div>
+    </div>
+    <p style="margin-top:10px"><b>Definição de pronto:</b> funciona no computador e no celular, sem erro no console, acessível pelo teclado e aprovado na revisão visual.</p>
+  </div>
+</section>
+
+<p class="rodape">Garcia Di Mase · Odontologia Especializada · quadro atualizado em 16/11/2026 · os dados ficam só neste navegador</p>
+
+<dialog id="dlg">
+  <form class="dlg" method="dialog" id="fCard">
+    <h2 id="dTit">Novo cartão</h2>
+    <label for="cTitulo">Título</label>
+    <input id="cTitulo" required maxlength="140">
+    <label for="cArea">Área</label>
+    <select id="cArea"></select>
+    <label for="cPrio">Prioridade</label>
+    <select id="cPrio"><option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option></select>
+    <label for="cCol">Coluna</label>
+    <select id="cCol"></select>
+    <label for="cPassos">Como testar (um passo por linha)</label>
+    <textarea id="cPassos"></textarea>
+    <label for="cEsperado">Resultado esperado</label>
+    <input id="cEsperado">
+    <div class="rod">
+      <button class="btn" value="cancel" type="submit" formnovalidate>Cancelar</button>
+      <button class="btn prim" value="ok" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+const CHAVE = 'kanban_garcia_di_mase_v1';
+const COLS = [
+  {id:'backlog', nome:'Backlog', sub:'ideias e melhorias futuras'},
+  {id:'testar',  nome:'A testar', sub:'feito, falta conferir'},
+  {id:'teste',   nome:'Em teste', sub:'limite WIP: 3 cartões', wip:3},
+  {id:'feito',   nome:'Feito ✓', sub:'concluído e aprovado'}
+];
+const AREAS = ['Site','Acessibilidade','Agendamento','Financeiro','Área restrita','Segurança','Docker','GitHub/README','Celular'];
+
+// ---------- Histórico: tudo o que já foi feito (vem marcado OK) ----------
+const F = (t,a,p,data) => ({t,a,p:p||'media',c:'feito',ok:true,quando:data||'16/11/2026'});
+const T = (t,a,p,passos,esp,col) => ({t,a,p:p||'media',c:col||'testar',ok:false,passos,esp});
+const INICIAL = [
+  F('Escolhida a nova entrada (opção 1 – cinematográfica) entre 3 propostas','Site','alta'),
+  F('Foto da família ocupando a tela, texto sobre fundo azul-marinho','Site','alta'),
+  F('Logo com o símbolo original (cor verde-azulada) e nome em branco','Site'),
+  F('Menu sanduíche mantido à esquerda do logo','Site'),
+  F('Botão de WhatsApp do canto superior direito removido','Site'),
+  F('Nomes do menu mais visíveis (branco forte) e "Início" destacado','Site'),
+  F('Vírgula do título fora do rosto do pai','Site','baixa'),
+  F('Faixa de telefone do topo removida','Site'),
+  F('Menu com mais respiro no topo e alinhado ao logo','Site','baixa'),
+  F('Espaço entre botões e números (3 · 5,0 · Seg–Sex) reduzido','Site'),
+  F('Parte de baixo mantida igual ao site original','Site'),
+  F('Menu cabe na tela, com margem igual dos dois lados','Site','alta'),
+  F('Entrada inteira visível sem rolar (até a nota 5,0)','Site','alta'),
+  F('Botões Contraste, A− e A+ colocados no menu','Acessibilidade','alta'),
+  F('Gráfico de setores removido do financeiro','Financeiro'),
+  F('Gráfico de barras "Faturamento mês a mês" ampliado para a largura toda','Financeiro'),
+  F('Ajustes anteriores preservados (logo maior, sem botão Agendar no topo, sem Ticket médio)','Financeiro'),
+  F('Backup dos arquivos antigos em _backup_antes_nova_entrada','Docker','baixa'),
+  F('Projeto completo zipado (DW2_final_modificado.zip)','Docker'),
+  F('README renovado: diagramas, tabela de segurança, novidades e caminhos das imagens corrigidos','GitHub/README'),
+
+  // ---------- Testes que precisam ser feitos ----------
+  F('Projeto rodando no localhost com a nova entrada (docker compose up -d --build)','Docker','alta'),
+  T('Entrada sem rolar no notebook (1366×768)','Site','alta',
+    ['Abrir o site no notebook com o navegador maximizado','Não rolar a página'],
+    'Dá para ver título, texto, botões e a nota 5,0 sem rolar'),
+  T('Entrada em monitor grande (1920×1080)','Site','media',
+    ['Abrir o site em tela cheia no monitor grande'],
+    'Foto bonita, texto alinhado, nada esticado ou cortado'),
+  T('Menu não corta à direita em nenhuma largura','Site','alta',
+    ['Diminuir e aumentar a janela devagar','Testar com zoom do navegador em 100%, 110% e 125%'],
+    'Contraste, A− e A+ sempre visíveis, margem igual dos dois lados'),
+  T('Menu fica branco ao rolar e volta ao topo','Site','media',
+    ['Rolar a página para baixo','Voltar ao topo'],
+    'Ao rolar: fundo branco e logo colorido. No topo: transparente sobre a foto'),
+  T('Links do menu levam às seções certas','Site','media',
+    ['Clicar em Especialistas, Tratamentos, Avaliações, Dúvidas e Contato'],
+    'Cada link rola até a seção correta'),
+  T('Botões "Agendar consulta" e "Conhecer especialistas"','Site','alta',
+    ['Clicar em Agendar consulta','Voltar e clicar em Conhecer especialistas'],
+    'Abre agendar.php / rola até os especialistas'),
+  T('Menu sanduíche abre e fecha','Site','media',
+    ['Clicar no ☰','Clicar nos links do menu lateral','Fechar no X e com a tecla Esc'],
+    'Menu lateral abre, links funcionam, fecha normalmente'),
+  T('Outras páginas com o menu normal (branco)','Site','alta',
+    ['Abrir especialista.php, agendar.php, avaliacoes.php e contato.php'],
+    'Menu branco com logo colorido, sem faixa de telefone, nada sobreposto'),
+  T('Alto contraste liga, desliga e continua ligado ao trocar de página','Acessibilidade','alta',
+    ['Clicar em Contraste (◐)','Trocar de página','Clicar de novo para desligar'],
+    'Contraste fica ativo entre páginas e o texto da entrada continua legível'),
+  T('A− e A+ mudam o tamanho do texto','Acessibilidade','media',
+    ['Clicar em A+ três vezes','Clicar em A− até voltar'],
+    'Texto aumenta e diminui, layout não quebra'),
+  T('Navegação só pelo teclado','Acessibilidade','media',
+    ['Apertar Tab desde o começo da página','Usar Enter nos botões'],
+    'Aparece "Pular para o conteúdo"; o foco é visível em todos os itens'),
+  T('Entrada e menu no celular','Celular','alta',
+    ['Abrir o site no celular (ou F12 → modo celular)','Rolar a página e abrir o ☰'],
+    'Foto no fundo, texto legível, botões cabem, ícones de acessibilidade visíveis'),
+  T('Agendamento completo em 4 passos','Agendamento','alta',
+    ['Escolher procedimento → especialista → data/horário → dados','Confirmar'],
+    'Consulta aparece na agenda semanal da secretaria'),
+  T('Horários respeitam a duração do procedimento','Agendamento','media',
+    ['Agendar um procedimento longo','Tentar agendar outro logo em seguida no mesmo dentista'],
+    'Horários ocupados não aparecem como livres'),
+  T('Financeiro: gráfico de barras na largura toda','Financeiro','alta',
+    ['Entrar como secretaria','Abrir o Financeiro'],
+    'Sem gráfico de setores; barras ocupam a largura toda e mostram o total por mês'),
+  T('Financeiro: demais gráficos e filtros','Financeiro','media',
+    ['Trocar o mês e o ano','Ver o comparativo por ano e o faturamento diário','Abrir F12 → Console'],
+    'Tudo atualiza e não aparece erro vermelho no console'),
+  T('Login de cada perfil e permissões','Área restrita','alta',
+    ['Definir as senhas com redefinir_senha.php','Entrar como secretaria, cada dentista e SanyTech'],
+    'Cada perfil vê só o que é seu (dentista vê apenas os próprios pacientes)'),
+  T('Prontuário: odontograma e arquivos','Área restrita','media',
+    ['Abrir um paciente como dentista','Enviar uma foto/PDF','Tentar abrir o arquivo deslogada'],
+    'Arquivo salva e só abre para o dentista logado'),
+  T('Limite de tentativas no login','Segurança','media',
+    ['Errar a senha várias vezes'],
+    'Login é bloqueado por um tempo com contagem regressiva'),
+  T('.env, mysql-data e uploads fora do GitHub','Segurança','alta',
+    ['Abrir o repositório no GitHub','Procurar .env, mysql-data e src/uploads/prontuario'],
+    'Nenhum desses arquivos aparece (nem no histórico de commits)'),
+  T('Repositório público conferido','GitHub/README','alta',
+    ['Deixar o repositório público','Abrir em uma janela anônima'],
+    'Página abre para qualquer pessoa e sem dados sensíveis'),
+  T('README no GitHub: imagens e diagramas','GitHub/README','media',
+    ['Abrir a página do repositório','Conferir prints, logo e os 3 diagramas "Como funciona"'],
+    'Tudo aparece; os diagramas são desenhados pelo GitHub'),
+  T('phpMyAdmin só no próprio computador','Docker','baixa',
+    ['Abrir http://localhost:8888'],
+    'Abre no seu computador e pede usuário/senha do .env'),
+
+  // ---------- Backlog / melhorias ----------
+  T('Trocar o print inicio.jpg do README pela nova entrada','GitHub/README','media',
+    ['Tirar print da nova página inicial','Salvar por cima de README-com-imagens/docs/screenshots/inicio.jpg'],
+    'README mostra o site novo','backlog'),
+  T('Foto da entrada em alta resolução e formato leve (WebP)','Site','baixa',
+    ['Exportar hero-principal em WebP (~300 KB)','Salvar como assets/img/fotos/hero-principal.webp'],
+    'Página abre mais rápido, foto nítida','backlog'),
+  T('Testar velocidade da página inicial (Lighthouse)','Site','baixa',
+    ['F12 → Lighthouse → Analisar página'],
+    'Desempenho e acessibilidade acima de 90','backlog'),
+
+  // ---------- 16/11 – tarde: área do dentista, atestado e foto ----------
+  F('Foto da entrada movida para a direita (rosto do pai livre)','Site','alta'),
+  F('Foto da entrada mais nítida (nova versão em JPG, 2400 px)','Site'),
+  F('Modo contraste sem escurecer a foto (fundo preto só atrás do texto)','Acessibilidade','alta'),
+  F('Painel do dentista: agenda de hoje no topo, sem valores na entrada','Área restrita','alta'),
+  F('Menu lateral do dentista com "Financeiro" e "Atestados"','Área restrita'),
+  F('Página Meu financeiro do dentista (resumo, 12 meses, procedimentos, pagamentos, a receber, recebidos)','Financeiro','alta'),
+  F('Gerador de atestado (comparecimento ou afastamento) com impressão/PDF','Área restrita','alta'),
+  T('Foto da entrada: rosto do pai aparece inteiro','Site','alta',
+    ['Abrir o site no computador e no notebook','Conferir se o texto não cobre o rosto do pai'],
+    'Família inteira visível, texto só sobre o fundo azul'),
+  T('Contraste: foto continua nítida','Acessibilidade','media',
+    ['Ligar o Contraste na página inicial'],
+    'Fundo preto atrás do texto e foto colorida e nítida à direita'),
+  T('Painel do dentista: agenda de hoje primeiro','Área restrita','alta',
+    ['Entrar como dentista','Ver a Visão geral'],
+    'Agenda de hoje no topo, "Próximo" destacado, nenhum valor em R$ na entrada'),
+  T('Meu financeiro do dentista','Financeiro','alta',
+    ['Menu lateral → Financeiro','Trocar o mês','Conferir gráfico, procedimentos, pagamentos e tabelas'],
+    'Mostra só os atendimentos do dentista logado, gráfico aparece e valores batem'),
+  T('Atestado puxando a consulta de hoje','Área restrita','alta',
+    ['Na agenda de hoje, clicar no ícone de atestado de um paciente','Conferir nome, CPF, horário e procedimento'],
+    'Atestado já vem preenchido e o nome do dentista e o CRO aparecem embaixo'),
+  T('Atestado digitando o paciente e com dias de afastamento','Área restrita','media',
+    ['Menu → Atestados','Digitar um nome','Escolher "Afastamento" e 3 dias','Preencher o código do procedimento'],
+    'Texto mostra "3 (três) dias" e o código do procedimento'),
+  T('Atestado: imprimir e salvar em PDF','Área restrita','alta',
+    ['Clicar em Imprimir atestado','Escolher "Salvar como PDF"'],
+    'Sai só a folha do atestado, em uma página A4, sem o menu'),
+  T('Botão Atestado no prontuário do paciente','Área restrita','baixa',
+    ['Abrir um paciente','Clicar em Atestado no topo'],
+    'Abre o atestado com o nome do paciente preenchido'),
+
+  // ---------- 16/11 – fim da tarde: entrada com margem menor ----------
+  F('Entrada com margem lateral menor (sem buraco à esquerda) e foto colada no texto','Site','alta'),
+  F('Novo título: "Seu sorriso merece cuidado especializado."','Site'),
+  F('Destaques quadrados e divisória antes da acessibilidade no menu','Site','baixa'),
+  T('Entrada nova em tela grande, notebook e celular','Site','alta',
+    ['Abrir o site em tela cheia, no notebook e no celular'],
+    'Sem buraco à esquerda, família inteira visível, menu sem cortes')
+];
+
+let estado;
+const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch(e) {} };
+const carregar = () => {
+  try {
+    const s = JSON.parse(localStorage.getItem(CHAVE));
+    if (s && Array.isArray(s.cards)) {
+      // cartões novos de versões mais recentes do quadro entram sem apagar suas marcações
+      INICIAL.forEach((c, i) => { if (!s.cards.some(x => x.id === 'c' + i)) s.cards.push(Object.assign({ id: 'c' + i, nota: '' }, c)); });
+      return s;
+    }
+  } catch(e) {}
+  return { cards: INICIAL.map((c,i) => Object.assign({ id: 'c' + i, nota: '' }, c)) };
+};
+estado = carregar();
+
+let filtroArea = 'Todas', busca = '', editando = null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const hoje = () => new Date().toLocaleDateString('pt-BR');
+
+function filtros() {
+  $('#fArea').innerHTML = ['Todas', ...AREAS].map(a => `<button class="chip ${a === filtroArea ? 'on' : ''}" data-area="${a}">${a}</button>`).join(' ');
+}
+function visivel(c) {
+  return (filtroArea === 'Todas' || c.a === filtroArea) && (!busca || (c.t + ' ' + (c.nota || '')).toLowerCase().includes(busca));
+}
+function cardHTML(c) {
+  const passos = (c.passos || []).length ? `<b>Como testar</b><ol>${c.passos.map(p => `<li>${esc(p)}</li>`).join('')}</ol>` : '';
+  const esp = c.esp ? `<b>Resultado esperado:</b> ${esc(c.esp)}<br>` : '';
+  return `<article class="card p-${c.p} ${c.ok ? 'ok' : ''}" draggable="true" data-id="${c.id}">
+    <div class="card-top">
+      <input type="checkbox" ${c.ok ? 'checked' : ''} data-ok="${c.id}" aria-label="Marcar OK: ${esc(c.t)}">
+      <h3>${esc(c.t)}</h3>
+      <button class="mais" data-abrir="${c.id}" aria-expanded="false">detalhes</button>
+    </div>
+    <div class="tags"><span class="tag">${esc(c.a)}</span><span class="tag pr">${c.p === 'alta' ? 'Alta' : c.p === 'media' ? 'Média' : 'Baixa'}</span>${c.ok ? `<span class="tag okt">OK · ${esc(c.quando || '')}</span>` : ''}</div>
+    <div class="det">${passos}${esp}
+      <label><b>Anotações / resultado</b><textarea data-nota="${c.id}" placeholder="O que aconteceu no teste?">${esc(c.nota)}</textarea></label>
+      <div class="linha-btn"><button class="mini" data-editar="${c.id}">Editar</button><button class="mini del" data-apagar="${c.id}">Apagar</button></div>
+    </div>
+  </article>`;
+}
+function render() {
+  const q = $('#quadro');
+  q.innerHTML = COLS.map(col => {
+    const todos = estado.cards.filter(c => c.c === col.id);
+    const lista = todos.filter(visivel);
+    const estouro = col.wip && todos.length > col.wip;
+    return `<section class="col ${estouro ? 'estouro' : ''}" data-col="${col.id}" aria-label="${col.nome}">
+      <div class="col-cab"><div><h2>${col.nome}</h2><small>${col.sub}</small></div><span class="cont ${estouro ? 'estouro' : ''}">${todos.length}${col.wip ? '/' + col.wip : ''}</span></div>
+      <div class="wip-aviso">Limite WIP passou de ${col.wip}. Termine um teste antes de puxar outro.</div>
+      <div class="cards">${lista.map(cardHTML).join('')}</div>
+      <button class="add" data-novo="${col.id}">+ Adicionar cartão</button>
+    </section>`;
+  }).join('');
+  const total = estado.cards.length, feitos = estado.cards.filter(c => c.c === 'feito').length;
+  const testes = estado.cards.filter(c => c.ok && c.passos && c.passos.length).length;
+  const totalTestes = estado.cards.filter(c => c.passos && c.passos.length && c.c !== 'backlog').length;
+  const wip = estado.cards.filter(c => c.c === 'teste').length;
+  $('#mFeito').textContent = feitos + ' de ' + total;
+  $('#mBarra').style.width = (total ? Math.round(feitos / total * 100) : 0) + '%';
+  $('#mTestes').textContent = testes + ' de ' + totalTestes;
+  $('#mWip').textContent = wip + '/3';
+  $('#mAlta').textContent = estado.cards.filter(c => !c.ok && c.p === 'alta').length;
+  filtros();
+}
+
+function marcarOk(id, ok) {
+  const c = estado.cards.find(x => x.id === id); if (!c) return;
+  c.ok = ok;
+  if (ok) { c.quando = hoje(); c.c = 'feito'; }
+  else { c.quando = ''; if (c.c === 'feito') c.c = 'testar'; }
+  salvar(); render();
+}
+function mover(id, col) {
+  const c = estado.cards.find(x => x.id === id); if (!c || c.c === col) return;
+  c.c = col;
+  if (col === 'feito' && !c.ok) { c.ok = true; c.quando = hoje(); }
+  if (col !== 'feito' && c.ok) { c.ok = false; c.quando = ''; }
+  salvar(); render();
+}
+
+// ---------- eventos ----------
+document.addEventListener('change', e => {
+  if (e.target.dataset.ok) marcarOk(e.target.dataset.ok, e.target.checked);
+});
+document.addEventListener('input', e => {
+  if (e.target.dataset.nota) { const c = estado.cards.find(x => x.id === e.target.dataset.nota); if (c) { c.nota = e.target.value; salvar(); } }
+});
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-area],[data-abrir],[data-apagar],[data-editar],[data-novo]');
+  if (!t) return;
+  if (t.dataset.area) { filtroArea = t.dataset.area; render(); }
+  else if (t.dataset.abrir) { const card = t.closest('.card'); const ab = card.classList.toggle('aberto'); t.textContent = ab ? 'fechar' : 'detalhes'; t.setAttribute('aria-expanded', ab); }
+  else if (t.dataset.apagar) { if (confirm('Apagar este cartão?')) { estado.cards = estado.cards.filter(c => c.id !== t.dataset.apagar); salvar(); render(); } }
+  else if (t.dataset.editar) abrirDialogo(estado.cards.find(c => c.id === t.dataset.editar));
+  else if (t.dataset.novo) abrirDialogo(null, t.dataset.novo);
+});
+$('#fBusca').addEventListener('input', e => { busca = e.target.value.trim().toLowerCase(); render(); });
+
+// arrastar e soltar
+let arrastado = null;
+document.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (!c) return; arrastado = c.dataset.id; c.classList.add('arrastando'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', arrastado); } catch(_) {} });
+document.addEventListener('dragend', e => { const c = e.target.closest('.card'); if (c) c.classList.remove('arrastando'); document.querySelectorAll('.col.drop').forEach(x => x.classList.remove('drop')); });
+document.addEventListener('dragover', e => { const col = e.target.closest('.col'); if (!col || !arrastado) return; e.preventDefault(); document.querySelectorAll('.col.drop').forEach(x => x !== col && x.classList.remove('drop')); col.classList.add('drop'); });
+document.addEventListener('drop', e => { const col = e.target.closest('.col'); if (!col || !arrastado) return; e.preventDefault(); mover(arrastado, col.dataset.col); arrastado = null; });
+
+// diálogo novo/editar
+const dlg = $('#dlg');
+$('#cArea').innerHTML = AREAS.map(a => `<option>${a}</option>`).join('');
+$('#cCol').innerHTML = COLS.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+function abrirDialogo(card, col) {
+  editando = card ? card.id : null;
+  $('#dTit').textContent = card ? 'Editar cartão' : 'Novo cartão';
+  $('#cTitulo').value = card ? card.t : '';
+  $('#cArea').value = card ? card.a : (filtroArea !== 'Todas' ? filtroArea : 'Site');
+  $('#cPrio').value = card ? card.p : 'media';
+  $('#cCol').value = card ? card.c : (col || 'testar');
+  $('#cPassos').value = card && card.passos ? card.passos.join('\n') : '';
+  $('#cEsperado').value = card ? (card.esp || '') : '';
+  dlg.showModal();
+}
+dlg.addEventListener('close', () => {
+  if (dlg.returnValue !== 'ok') return;
+  const dados = { t: $('#cTitulo').value.trim(), a: $('#cArea').value, p: $('#cPrio').value, c: $('#cCol').value,
+    passos: $('#cPassos').value.split('\n').map(s => s.trim()).filter(Boolean), esp: $('#cEsperado').value.trim() };
+  if (!dados.t) return;
+  if (editando) Object.assign(estado.cards.find(c => c.id === editando), dados);
+  else estado.cards.unshift(Object.assign({ id: 'n' + Date.now(), ok: false, nota: '', quando: '' }, dados));
+  if (dados.c === 'feito') { const c = estado.cards.find(x => x.id === (editando || estado.cards[0].id)); if (!c.ok) { c.ok = true; c.quando = hoje(); } }
+  salvar(); render();
+});
+$('#bNovo').addEventListener('click', () => abrirDialogo(null, 'testar'));
+
+// exportar / importar / recomeçar
+$('#bExp').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(estado, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'kanban-garcia-di-mase-' + new Date().toISOString().slice(0, 10) + '.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+$('#bImp').addEventListener('click', () => $('#arqImp').click());
+$('#arqImp').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  f.text().then(txt => { try { const s = JSON.parse(txt); if (!Array.isArray(s.cards)) throw 0; estado = s; salvar(); render(); } catch(_) { alert('Arquivo inválido.'); } });
+  e.target.value = '';
+});
+$('#bReset').addEventListener('click', () => {
+  if (!confirm('Voltar o quadro ao início? Suas marcações e anotações serão perdidas (exporte antes se quiser guardar).')) return;
+  try { localStorage.removeItem(CHAVE); } catch(e) {}
+  estado = carregar(); render();
+});
+
+render();
+})();
+</script>
+</body>
+</html>

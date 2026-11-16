@@ -115,4 +115,12 @@
     const b = $('[type="submit"]', f);
     if (b && f.checkValidity()) { b.disabled = true; b.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>' + f.dataset.enviando; }
   }));
+
+  // ---------- Página inicial: menu transparente sobre a foto, fica branco ao rolar ----------
+  const navHero = $('.nav-hero');
+  if (navHero) {
+    const ajustarNav = () => navHero.classList.toggle('rolou', window.scrollY > 40);
+    ajustarNav();
+    window.addEventListener('scroll', ajustarNav, { passive: true });
+  }
 })();

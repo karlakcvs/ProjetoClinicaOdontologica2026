@@ -10,16 +10,8 @@ $titulo_pagina = $titulo . ' · ' . $nome_clinica;
 <?php include __DIR__ . '/head.php'; ?>
     <meta name="description" content="<?= e($nome_clinica) ?> – <?= e($slogan_clinica) ?>. Ortodontia, implantes e estética dental em Araras/SP. Agende sua consulta online.">
 </head>
-<body>
+<body<?= $pagina === 'inicio' ? ' class="pagina-inicio"' : '' ?>>
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
-
-<div class="site-topstrip">
-    <div class="container d-flex justify-content-between align-items-center gap-2 py-1">
-        <span class="d-none d-md-inline"><i class="bi bi-telephone me-1" aria-hidden="true"></i><?= e($contato) ?> · <i class="bi bi-clock ms-2 me-1" aria-hidden="true"></i>Seg a Sex, 07h30 às 19h</span>
-        <span class="d-md-none small"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>Atendimento presencial</span>
-        <?php include __DIR__ . '/acessibilidade.php'; ?>
-    </div>
-</div>
 
 <?php
 $links_menu = [
@@ -31,17 +23,18 @@ $links_menu = [
     ['index.php#contato', 'Contato', 'bi-chat-dots', false],
 ];
 ?>
-<nav class="navbar site-nav sticky-top py-2" aria-label="Menu do site">
+<nav class="navbar site-nav sticky-top py-2<?= $pagina === 'inicio' ? ' nav-hero' : '' ?>" aria-label="Menu do site">
     <div class="container flex-nowrap gap-2">
         <button class="menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuSite" aria-controls="menuSite" aria-label="Abrir menu">
             <span class="menu-btn-linhas" aria-hidden="true"></span>
         </button>
-        <a class="navbar-brand me-auto me-lg-0" href="index.php" aria-label="<?= e($nome_clinica) ?> – página inicial"><?= logo_clinica() ?></a>
+        <a class="navbar-brand me-auto me-lg-0" href="index.php" aria-label="<?= e($nome_clinica) ?> – página inicial"><?= logo_clinica() ?><?php if ($pagina === 'inicio'): ?><img src="assets/img/logo-horizontal-hero.png" alt="" class="brand-logo-img logo-sobre-foto" width="268" height="46" aria-hidden="true"><?php endif; ?></a>
         <ul class="nav-desktop d-none d-lg-flex ms-auto">
             <?php foreach ($links_menu as [$href, $txt, $ico, $ativo]): ?>
                 <li><a class="nav-link <?= $ativo ? 'active' : '' ?>" href="<?= $href ?>" <?= $ativo ? 'aria-current="page"' : '' ?>><?= $txt ?></a></li>
             <?php endforeach; ?>
         </ul>
+        <div class="nav-a11y ms-auto ms-lg-3"><?php include __DIR__ . '/acessibilidade.php'; ?></div>
     </div>
 </nav>
 

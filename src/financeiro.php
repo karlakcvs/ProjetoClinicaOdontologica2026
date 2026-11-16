@@ -148,7 +148,7 @@ include __DIR__ . '/include/admin_topo.php';
                     <?php foreach ($porDentista as $d): ?><span><span class="legend-dot me-1" style="background:<?= e($d['cor']) ?>"></span><?= e(primeiro_nome($d['nome'])) ?></span><?php endforeach; ?>
                 </div>
             </div>
-            <div class="chart-box"><canvas id="gMeses" role="img" aria-label="Gráfico de barras: faturamento de cada mês nos últimos 12 meses, por dentista"></canvas></div>
+            <div class="chart-box" style="height:340px"><canvas id="gMeses" role="img" aria-label="Gráfico de barras: faturamento de cada mês nos últimos 12 meses, por dentista"></canvas></div>
         </div>
     </div>
 </div>

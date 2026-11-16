@@ -22,6 +22,8 @@ if ($perfil === 'TI') {
         ['dent_painel',        'Visão geral',        'bi-grid-1x2'],
         ['agenda_semana',      'Agenda',             'bi-calendar-week'],
         ['dent_pacientes',     'Meus pacientes',     'bi-people'],
+        ['dent_atestado',      'Atestados',          'bi-file-earmark-medical'],
+        ['dent_financeiro',    'Financeiro',         'bi-graph-up-arrow'],
         ['Meu perfil no site', null, null],
         ['dent_perfil',        'Editar perfil',      'bi-person-badge'],
         ['dent_avaliacoes',    'Minhas avaliações',  'bi-star', (int) $stPend->fetchColumn()],

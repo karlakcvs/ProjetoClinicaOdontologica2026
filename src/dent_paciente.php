@@ -149,7 +149,8 @@ $url = fn($a) => 'dent_paciente.php?id=' . $idPac . '&amp;aba=' . $a;
 
 $titulo = 'Prontuário';
 $pagina = 'dent_pacientes';
-$acoes_topo = '<a href="dent_pacientes.php" class="btn btn-ghost btn-sm"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Pacientes</span></a>';
+$acoes_topo = '<a href="dent_pacientes.php" class="btn btn-ghost btn-sm"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Pacientes</span></a>'
+            . '<a href="dent_atestado.php?paciente=' . $idPac . '" class="btn btn-ghost btn-sm"><i class="bi bi-file-earmark-medical me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Atestado</span></a>';
 include __DIR__ . '/include/admin_topo.php';
 ?>
 <div class="card-soft pac-head mb-4">

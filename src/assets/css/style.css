@@ -1013,3 +1013,228 @@ html.alto-contraste .faq-item summary, html.alto-contraste .faq-resp, html.alto-
 @media (max-width: 991.98px) { .site-nav .brand-logo-img { height: 46px; } }
 @media (max-width: 400px) { .site-nav .brand-logo-img { height: 36px; } }
 .pizza-leg strong { margin-left: auto; }
+
+/* =====================================================================
+   INÍCIO · Hero v5: foto da família ocupando a tela (aprovado em 16/11)
+   O restante do site continua com as cores claras de sempre.
+   ===================================================================== */
+.pagina-inicio { --hero-escuro: #06244b; --nav-h: 80px; }
+.pagina-inicio .site-topstrip { background: var(--hero-escuro); }
+
+/* Menu transparente sobre a foto; fica branco (logo colorido) ao rolar */
+.nav-hero { transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.nav-hero .logo-sobre-foto { display: none; }
+.nav-hero:not(.rolou) { background: transparent; backdrop-filter: none; border-bottom-color: transparent; }
+.nav-hero:not(.rolou) .brand-logo-img:not(.logo-sobre-foto) { display: none; }
+.nav-hero:not(.rolou) .logo-sobre-foto { display: block; }
+.nav-hero:not(.rolou) .nav-link { color: #fff; font-weight: 600; text-shadow: 0 1px 8px rgba(0,0,0,.45); }
+.nav-hero:not(.rolou) .nav-link:hover { color: #fff; background: rgba(255,255,255,.14); }
+.nav-hero:not(.rolou) .nav-link.active { color: #fff; background: var(--teal); text-shadow: none; }
+.nav-hero:not(.rolou) .menu-btn { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.45); color: #fff; }
+.nav-hero:not(.rolou) .menu-btn:hover { background: rgba(255,255,255,.18); }
+.nav-hero.rolou { box-shadow: 0 6px 24px -14px rgba(6,36,75,.35); }
+
+/* Hero */
+.hero-v5 { position: relative; min-height: min(100vh, 900px); margin-top: calc(var(--nav-h) * -1); padding: calc(var(--nav-h) + 4rem) 0 3rem;
+  background: var(--hero-escuro); color: #fff; overflow: hidden; display: flex; }
+.hero-v5-foto { position: absolute; top: 0; right: 0; bottom: 0; width: 79%; background-size: cover; background-position: 0% 25%; background-repeat: no-repeat; }
+.hero-v5-sombra { position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--hero-escuro) 0%, var(--hero-escuro) 34%, rgba(6,36,75,.88) 42%, rgba(6,36,75,.45) 52%, rgba(6,36,75,0) 64%),
+    linear-gradient(0deg, rgba(6,36,75,.75) 0%, rgba(6,36,75,0) 28%),
+    linear-gradient(180deg, rgba(6,36,75,.85) 0%, rgba(6,36,75,.5) 12%, rgba(6,36,75,0) 24%); }
+.hero-v5-conteudo { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; gap: 3rem; }
+.hero-v5-texto { max-width: 40rem; }
+.hero-v5 .hero-kicker { display: inline-flex; align-items: center; gap: .7rem; background: none; padding: 0; color: #8fd3c9; letter-spacing: .22em; }
+.hero-v5 .hero-kicker::before { content: ""; width: 34px; height: 2px; background: var(--teal); }
+.hero-v5 h1 { color: #fff; font-size: clamp(2.4rem, 4.6vw, 4.1rem); line-height: 1.06; margin: 1.3rem 0 1.4rem; max-width: 11.5em; }
+.hero-v5 h1 em { color: #5cd0bf; }
+.hero-v5 .lead { color: rgba(255,255,255,.82); font-size: 1.2rem; max-width: 32rem; margin-bottom: 2rem; }
+.btn-contorno-claro { color: #fff; border: 1.5px solid rgba(255,255,255,.4); background: transparent; }
+.btn-contorno-claro:hover, .btn-contorno-claro:focus { color: #fff; border-color: #fff; background: rgba(255,255,255,.1); }
+.hero-v5 .hero-stats { margin: 0; gap: 3rem; }
+.hero-v5 .hero-stats div { border-left-color: var(--teal); }
+.hero-v5 .hero-stats dt { color: #fff; }
+.hero-v5 .hero-stats dd { color: rgba(255,255,255,.65); }
+.hero-v5 .estrela-ico { color: #f5b941; }
+.hero-v5::after { display: none; }
+
+/* Telas médias e celular: foto no fundo inteiro, escurecida para o texto aparecer */
+@media (max-width: 991.98px) {
+  .pagina-inicio { --nav-h: 70px; }
+  .hero-v5 { min-height: 0; padding: calc(var(--nav-h) + 2.5rem) 0 2.5rem; }
+  .hero-v5-foto { width: 100%; background-position: 40% 20%; }
+  .hero-v5-sombra { background: linear-gradient(180deg, rgba(6,36,75,.75) 0%, rgba(6,36,75,.55) 40%, rgba(6,36,75,.92) 100%); }
+  .hero-v5 .hero-stats { gap: 1.6rem; }
+}
+html.alto-contraste .hero-v5-sombra { background: rgba(0,0,0,.85); }
+
+/* Início: menu com mais respiro no topo, logo e links alinhados pelo centro */
+.pagina-inicio { --nav-h: 112px; }
+.nav-hero:not(.rolou) { padding-top: 1.6rem !important; padding-bottom: 1.6rem !important; }
+.nav-hero .container { align-items: center !important; }
+.nav-hero .navbar-brand, .nav-hero .menu-btn { align-self: center; }
+.nav-hero .navbar-brand { display: flex; align-items: center; }
+.nav-hero .nav-desktop { align-items: center; margin-top: 0; margin-bottom: 0; }
+@media (max-width: 991.98px) {
+  .pagina-inicio { --nav-h: 90px; }
+  .nav-hero:not(.rolou) { padding-top: 1.1rem !important; padding-bottom: 1.1rem !important; }
+}
+
+/* Início: números logo abaixo dos botões (sem o espaço grande no meio) */
+.hero-v5 { min-height: min(92vh, 820px); align-items: center; padding-bottom: 4rem; }
+.hero-v5-conteudo { justify-content: center; gap: 0; }
+.hero-v5 .hero-stats { margin-top: 2.6rem; }
+@media (max-width: 991.98px) { .hero-v5 { min-height: 0; } .hero-v5 .hero-stats { margin-top: 2rem; } }
+
+/* Acessibilidade (contraste e tamanho do texto) no menu do site, à direita */
+.nav-a11y { flex: 0 0 auto; }
+.nav-a11y .a11y-bar { gap: .25rem; }
+.nav-a11y .a11y-btn { padding: .3rem .55rem; font-size: .78rem; }
+.nav-hero:not(.rolou) .nav-a11y .a11y-btn { background: rgba(255,255,255,.06); color: #fff; border-color: rgba(255,255,255,.4); }
+.nav-hero:not(.rolou) .nav-a11y .a11y-btn:hover { background: rgba(255,255,255,.16); border-color: #fff; color: #fff; }
+.nav-hero:not(.rolou) .nav-a11y .a11y-btn[aria-pressed="true"] { background: #fff; color: var(--navy-900); }
+@media (max-width: 1199.98px) { .nav-a11y .a11y-txt { display: none; } }
+@media (max-width: 400px) { .nav-a11y .a11y-btn { padding: .25rem .4rem; } }
+
+/* =====================================================================
+   Ajuste 16/11 (2): menu não pode passar da tela + entrada cabe inteira
+   na tela (até a nota) sem precisar rolar, em notebooks e monitores
+   ===================================================================== */
+.site-nav .container { min-width: 0; }
+.site-nav .nav-desktop { flex: 0 1 auto; min-width: 0; flex-wrap: nowrap; }
+.site-nav .nav-link { white-space: nowrap; }
+.nav-hero .container { gap: .75rem !important; }
+.nav-hero .brand-logo-img { height: 50px; }
+@media (max-width: 1599.98px) {
+  .site-nav .nav-link { font-size: .95rem; padding: .45rem .7rem !important; }
+  .nav-a11y .a11y-txt { display: none; }
+  .nav-hero .brand-logo-img { height: 44px; }
+}
+@media (min-width: 992px) and (max-width: 1299.98px) {
+  .site-nav .nav-link { font-size: .88rem; padding: .4rem .5rem !important; }
+  .site-nav .brand-logo-img, .nav-hero .brand-logo-img { height: 38px; }
+  .site-nav .navbar-brand { margin-right: .25rem; }
+}
+
+/* Entrada sempre do tamanho da tela; textos se ajustam à altura da janela */
+.pagina-inicio { --nav-h: 92px; }
+.nav-hero:not(.rolou) { padding-top: 1.1rem !important; padding-bottom: 1.1rem !important; }
+.hero-v5 { min-height: 100vh; min-height: 100svh; padding: calc(var(--nav-h) + 1.2rem) 0 1.8rem; }
+.hero-v5 h1 { font-size: clamp(2rem, min(4.4vw, 7vh), 4rem); margin: clamp(.6rem, 1.6vh, 1.3rem) 0 clamp(.7rem, 1.8vh, 1.4rem); }
+.hero-v5 .lead { font-size: clamp(.98rem, 2.2vh, 1.2rem); margin-bottom: clamp(1rem, 2.6vh, 2rem); }
+.hero-v5 .btn-lg { padding: clamp(.55rem, 1.4vh, .85rem) 1.5rem; }
+.hero-v5 .hero-stats { margin-top: clamp(1.2rem, 3.4vh, 2.6rem); }
+.hero-v5 .hero-stats dt { font-size: clamp(1.45rem, 3.6vh, 1.9rem); }
+@media (max-width: 991.98px) {
+  .pagina-inicio { --nav-h: 80px; }
+  .hero-v5 { min-height: 0; padding: calc(var(--nav-h) + 2rem) 0 2.2rem; }
+}
+
+/* =====================================================================
+   Ajuste 16/11 (3): foto mais à direita (rosto do pai livre) e
+   modo alto contraste sem escurecer a foto
+   ===================================================================== */
+.hero-v5-foto { left: 36%; width: auto; right: 0; background-position: 10% 22%; }
+.hero-v5-sombra {
+  background:
+    linear-gradient(90deg, var(--hero-escuro) 0%, var(--hero-escuro) 36.5%, rgba(6,36,75,.82) 40%, rgba(6,36,75,.35) 46%, rgba(6,36,75,0) 54%),
+    linear-gradient(0deg, rgba(6,36,75,.6) 0%, rgba(6,36,75,0) 22%),
+    linear-gradient(180deg, rgba(6,36,75,.8) 0%, rgba(6,36,75,.4) 10%, rgba(6,36,75,0) 20%);
+}
+/* Alto contraste: fundo preto só atrás do texto, a foto continua nítida */
+html.alto-contraste .hero-v5 { background: #000 !important; }
+html.alto-contraste .hero-v5-sombra {
+  background:
+    linear-gradient(90deg, #000 0%, #000 37%, rgba(0,0,0,.6) 41%, rgba(0,0,0,0) 48%),
+    linear-gradient(180deg, rgba(0,0,0,.75) 0%, rgba(0,0,0,0) 16%) !important;
+}
+@media (max-width: 991.98px) {
+  .hero-v5-foto { left: 0; background-position: 40% 20%; }
+  html.alto-contraste .hero-v5-sombra { background: rgba(0,0,0,.72) !important; }
+}
+
+/* =====================================================================
+   Área do dentista (16/11): agenda do dia no topo, atalhos e atestado
+   ===================================================================== */
+.pac-item-acoes { grid-template-columns: auto 1fr auto; }
+.pac-item-acoes > a.min-w-0:hover .nm { color: var(--teal-700); }
+.pac-proximo { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-50); }
+.tag-proximo { background: var(--teal); color: #fff; }
+.atalhos { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.atalho { display: flex; align-items: center; gap: .75rem; padding: .9rem 1rem; color: inherit; text-decoration: none; }
+.atalho:hover { color: inherit; }
+.atalho .ico { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 3px; display: grid; place-items: center; background: var(--teal-50); color: var(--teal-700); font-size: 1.15rem; }
+.atalho strong { display: block; color: var(--navy-900); font-size: 1rem; line-height: 1.1; }
+.atalho span:last-child { font-size: .8rem; color: var(--muted); line-height: 1.25; }
+@media (max-width: 575.98px) { .atalhos { grid-template-columns: 1fr; } }
+
+/* Atestado: folha A4 na tela e na impressão */
+.atestado-wrap { background: #e9eef1; border-radius: 6px; padding: 1.5rem; position: sticky; top: 1rem; }
+.atestado-folha { background: #fff; color: #1b2b3a; width: 100%; max-width: 640px; margin: 0 auto; aspect-ratio: 210 / 297; padding: 7% 8%;
+  box-shadow: 0 10px 30px -12px rgba(6,36,75,.35); display: flex; flex-direction: column; font-size: 14px; }
+.at-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; border-bottom: 2px solid var(--teal); padding-bottom: .9rem; }
+.at-logo { height: 42px; width: auto; }
+.at-clinica { font-size: 10.5px; color: #5d6e80; text-align: right; line-height: 1.45; }
+.at-titulo { font-family: var(--font-display); color: var(--navy-900); text-align: center; text-transform: uppercase; letter-spacing: .12em;
+  font-size: 19px; margin: 2.6rem 0 2rem; }
+.at-texto { font-size: 15px; line-height: 1.9; text-align: justify; margin: 0 0 1rem; }
+.at-extra { font-size: 13.5px; color: #33475b; }
+.at-local { margin-top: 2rem; text-align: right; font-size: 14px; }
+.at-assin { margin-top: auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; color: #33475b; }
+.at-assin strong { color: var(--navy-900); font-size: 14.5px; }
+.at-linha { width: 65%; border-top: 1px solid #1b2b3a; margin-bottom: 6px; }
+.at-rod { margin-top: 1.6rem; padding-top: .7rem; border-top: 1px solid #e3ebef; text-align: center; font-size: 10px; color: #8a99a8; letter-spacing: .08em; text-transform: uppercase; }
+html.alto-contraste .atestado-folha, html.alto-contraste .atestado-folha * { background: #fff !important; color: #000 !important; }
+html.alto-contraste .atestado-wrap { background: #222 !important; }
+html.alto-contraste .atestado-folha .at-logo { filter: none !important; }
+
+@page atestado { size: A4; margin: 0; }
+@media print {
+  body.admin-body:has(.atestado-folha) * { visibility: hidden; }
+  body.admin-body:has(.atestado-folha) .atestado-folha, body.admin-body:has(.atestado-folha) .atestado-folha * { visibility: visible; }
+  body.admin-body:has(.atestado-folha) .atestado-folha { position: fixed; inset: 0; max-width: none; width: 210mm; height: 297mm; aspect-ratio: auto;
+    padding: 22mm 22mm 16mm; box-shadow: none; margin: 0; page: atestado; background: #fff !important; color: #000 !important; }
+  body.admin-body:has(.atestado-folha) .atestado-wrap { position: static; background: none; padding: 0; }
+  html.alto-contraste body.admin-body:has(.atestado-folha) .atestado-folha * { color: #000 !important; }
+}
+
+/* =====================================================================
+   Ajuste 16/11 (4): entrada com margem lateral menor (sem "buraco" à
+   esquerda), divisória antes da acessibilidade e destaques quadrados
+   ===================================================================== */
+.pagina-inicio .site-nav .container,
+.pagina-inicio .hero-v5-conteudo { max-width: none; padding-left: clamp(20px, 4.5vw, 96px); padding-right: clamp(20px, 4.5vw, 96px); }
+.nav-hero .nav-a11y { margin-left: 1.1rem !important; padding-left: 1.1rem; border-left: 1px solid rgba(255,255,255,.28); }
+.nav-hero.rolou .nav-a11y { border-left-color: var(--line); }
+.nav-hero .nav-link, .nav-hero .nav-link.active, .nav-a11y .a11y-btn, .hero-v5 .btn { border-radius: 3px !important; }
+.hero-v5 h1 { max-width: 12.5em; }
+.hero-v5 h1 em { color: #3fd6c3; }
+.hero-v5 .lead { max-width: 34rem; }
+@media (max-width: 991.98px) { .nav-hero .nav-a11y { border-left: 0; padding-left: 0; margin-left: auto !important; } }
+/* Foto encostada no texto (sem faixa vazia no meio): a foto começa logo depois do texto
+   e o degradê fica na própria foto, então a família não fica escondida atrás das letras */
+.pagina-inicio { --mx: clamp(20px, 4.5vw, 96px); }
+@media (min-width: 992px) {
+  .hero-v5-foto { left: calc(var(--mx) + 500px); background-position: 10% 22%; }
+  .hero-v5-foto::before { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--hero-escuro) 0%, rgba(6,36,75,.75) 7%, rgba(6,36,75,.3) 15%, rgba(6,36,75,0) 24%); }
+  .hero-v5-sombra { background:
+    linear-gradient(0deg, rgba(6,36,75,.55) 0%, rgba(6,36,75,0) 22%),
+    linear-gradient(180deg, rgba(6,36,75,.8) 0%, rgba(6,36,75,.4) 10%, rgba(6,36,75,0) 20%); }
+  html.alto-contraste .hero-v5-foto::before { background: linear-gradient(90deg, #000 0%, rgba(0,0,0,.6) 7%, rgba(0,0,0,0) 18%); }
+  html.alto-contraste .hero-v5-sombra { background: linear-gradient(180deg, rgba(0,0,0,.75) 0%, rgba(0,0,0,0) 16%) !important; }
+}
+/* Celular e tablet: foto no fundo inteiro, escurecida por igual; menu compacto */
+@media (max-width: 991.98px) {
+  .hero-v5-foto { left: 0; background-position: 42% 20%; }
+  .hero-v5-sombra { background: linear-gradient(180deg, rgba(6,36,75,.82) 0%, rgba(6,36,75,.62) 45%, rgba(6,36,75,.94) 100%) !important; }
+  html.alto-contraste .hero-v5-sombra { background: rgba(0,0,0,.78) !important; }
+  .nav-hero .brand-logo-img, .site-nav .brand-logo-img { height: 38px; }
+  .nav-hero .container { gap: .5rem !important; }
+}
+@media (max-width: 480px) {
+  .nav-hero .brand-logo-img, .site-nav .brand-logo-img { height: 30px; }
+  .nav-a11y .a11y-btn { padding: .2rem .35rem; font-size: .72rem; }
+  .hero-v5 .hero-kicker { letter-spacing: .14em; font-size: .7rem; }
+}

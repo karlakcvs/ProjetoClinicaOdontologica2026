@@ -119,3 +119,18 @@ podem aparecer com o mesmo IP, então o bloqueio vale para todos.
 [ ] Painel da secretaria mostra "Pacientes de longa data" com fotos
 [ ] Agenda da semana de 23/11 está cheia
 [ ] Teste no celular (abra pelo IP do computador na mesma rede)
+
+
+Conta	E-mail	Nova senha
+Secretaria	secretaria@garciadimase.example	Sorriso#1236JL*
+Dra. Helena	helena.duarte@garciadimase.example	Clinica#9625AT@
+Dr. Rafael	rafael.monteiro@garciadimase.example	Dente#3829CU%
+Dra. Camila	camila.nogueira@garciadimase.example	Agenda#5780CN*
+SanyTech (TI)	ti@sanytech.example	Tecnico#9027PX%
+
+
+docker exec -it php_apache php /var/www/html/include/redefinir_senha.php secretaria@garciadimase.example "Sorriso#1236JL*"
+docker exec -it php_apache php /var/www/html/include/redefinir_senha.php helena.duarte@garciadimase.example "Clinica#9625AT@"
+docker exec -it php_apache php /var/www/html/include/redefinir_senha.php rafael.monteiro@garciadimase.example "Dente#3829CU%"
+docker exec -it php_apache php /var/www/html/include/redefinir_senha.php camila.nogueira@garciadimase.example "Agenda#5780CN*"
+docker exec -it php_apache php /var/www/html/include/redefinir_senha.php ti@sanytech.example "Tecnico#9027PX%"

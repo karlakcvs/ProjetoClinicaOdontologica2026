@@ -1,0 +1,23 @@
+ALTERAÇÕES (16/11/2026)
+=======================
+Site (página inicial)
+- Nova entrada: foto da família ocupando a tela, texto sobre fundo azul-marinho.
+- Logo com o símbolo original e nome em branco sobre a foto (assets/img/logo-horizontal-hero.png).
+- Menu transparente sobre a foto; fica branco com o logo colorido ao rolar a página.
+- Faixa de telefone do topo removida.
+- Botões de acessibilidade (Contraste, A-, A+) agora ficam no menu, à direita.
+- O restante do site continua igual (cores claras).
+
+Sistema (financeiro)
+- Gráfico de setores (Receita por procedimento) removido.
+- Gráfico de barras "Faturamento mês a mês" ampliado para a largura toda.
+
+Mantidos os ajustes anteriores (pasta ajustes_site): cabeçalho sem o botão Agendar,
+logo maior, cartão Ticket médio removido.
+
+Arquivos alterados: src/index.php, src/financeiro.php, src/include/cabecalho.php,
+src/include/head.php, src/assets/css/style.css, src/assets/js/site.js,
+src/assets/img/logo-horizontal-hero.png (novo).
+
+Obs.: a pasta mysql-data (banco local) não vai no zip; o banco é recriado pelo
+database/demo-data.sql ao subir o Docker.

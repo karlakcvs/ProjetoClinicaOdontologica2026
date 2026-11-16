@@ -34,32 +34,25 @@ $pagina = 'inicio';
 include __DIR__ . '/include/cabecalho.php';
 ?>
 
-<!-- HERO: dentista da clínica com pacientes sorridentes -->
-<header class="hero hero-v4">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <span class="hero-kicker">Odontologia especializada em Araras/SP</span>
-                <h1 class="mt-3 mb-3">Sorrisos saudáveis, cuidados por <em>especialistas</em>.</h1>
-<p class="lead mb-4">Ortodontia, implantes e estética dental em um só lugar. Escolha o procedimento, o profissional e o melhor horário.<br>A gente cuida do resto.</p>                <div class="d-flex flex-wrap gap-2">
-                    <a href="agendar.php" class="btn btn-teal btn-lg"><i class="bi bi-calendar2-check me-2" aria-hidden="true"></i>Agendar consulta</a>
-                    <a href="#especialistas" class="btn btn-ghost btn-lg">Conhecer especialistas</a>
-                </div>
-                <dl class="hero-stats">
-                    <div><dt><?= count($dentistas) ?></dt><dd>especialistas</dd></div>
-                    <?php if ($resumo['qtd']): ?><div><dt><?= number_format((float) $resumo['media'], 1, ',', '') ?><span class="estrela-ico" aria-hidden="true">★</span></dt><dd><?= (int) $resumo['qtd'] ?> avaliações</dd></div><?php endif; ?>
-                    <div><dt>Seg–Sex</dt><dd>07h30 às 19h</dd></div>
-                </dl>
-            </div>
-            <div class="col-lg-6">
-                <div class="hero-fotos hero-uma">
-                    <span class="hf-fundo" aria-hidden="true"></span>
-                    <figure class="hf-main m-0">
-                        <img src="<?= e(foto_site('hero-principal', 1400)) ?>" alt="Dentista da clínica conversando com mãe e filha sorridentes no consultório" width="1400" height="933" fetchpriority="high" onerror="this.closest('figure').classList.add('sem-foto')">
-                    </figure>
-                </div>
+<!-- HERO: foto da família ocupando a tela, texto sobre o fundo escuro -->
+<header class="hero hero-v5">
+    <div class="hero-v5-foto" role="img" aria-label="Família sorridente: pai, mãe, filho e filha abraçados ao ar livre" style="background-image:url('<?= e(foto_site('hero-principal', 1800)) ?>')"></div>
+    <div class="hero-v5-sombra" aria-hidden="true"></div>
+    <div class="container hero-v5-conteudo">
+        <div class="hero-v5-texto">
+            <span class="hero-kicker">Odontologia especializada em Araras/SP</span>
+            <h1>Seu sorriso merece cuidado <em>especializado</em>.</h1>
+            <p class="lead">Ortodontia, implantes e estética dental em um só lugar.<br>Escolha seu especialista e agende seu atendimento.</p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="agendar.php" class="btn btn-teal btn-lg"><i class="bi bi-calendar2-check me-2" aria-hidden="true"></i>Agendar consulta</a>
+                <a href="#especialistas" class="btn btn-contorno-claro btn-lg">Conhecer especialistas <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a>
             </div>
         </div>
+        <dl class="hero-stats">
+            <div><dt><?= count($dentistas) ?></dt><dd>especialistas</dd></div>
+            <?php if ($resumo['qtd']): ?><div><dt><?= number_format((float) $resumo['media'], 1, ',', '') ?><span class="estrela-ico" aria-hidden="true">★</span></dt><dd><?= (int) $resumo['qtd'] ?> avaliações</dd></div><?php endif; ?>
+            <div><dt>Seg–Sex</dt><dd>07h30 às 19h</dd></div>
+        </dl>
     </div>
 </header>
 
@@ -305,7 +298,7 @@ include __DIR__ . '/include/cabecalho.php';
     <div class="container">
         <div class="text-center mb-4 mb-lg-5">
             <span class="faq-kicker">Perguntas frequentes</span>
-            <h2 id="faqTit" class="faq-tit">Perguntas e Respostas.</h2>
+            <h2 id="faqTit" class="faq-tit">Perguntas. Respostas.</h2>
             <p class="section-sub mx-auto mb-0">As dúvidas que mais ouvimos na recepção. Não achou a sua? <a href="#contato">Fale com a gente</a>.</p>
         </div>
         <div class="faq-lista">
