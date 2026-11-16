@@ -44,7 +44,7 @@ include __DIR__ . '/include/admin_topo.php';
             <h2 class="h6 mb-1"><i class="bi bi-whatsapp text-success me-1" aria-hidden="true"></i>Como confirmar as consultas do dia seguinte</h2>
             <p class="small text-muted mb-0">Faça os 3 passos para cada paciente, nesta ordem:</p>
         </div>
-        <form class="d-flex gap-2 align-items-center">
+        <form class="d-flex flex-wrap gap-2 align-items-center">
             <label class="small text-muted text-nowrap" for="fData">Consultas do dia</label>
             <input id="fData" type="date" name="data" class="form-control" value="<?= e($data) ?>">
             <button class="btn btn-navy">Ver</button>

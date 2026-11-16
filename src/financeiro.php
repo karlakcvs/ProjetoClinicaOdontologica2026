@@ -206,7 +206,7 @@ include __DIR__ . '/include/admin_topo.php';
         <a href="?<?= http_build_query(['dia' => $dia, 'mes' => $mes, 'lanc' => 'mes', 'dentista' => $filtroDent]) ?>#lancamentos" class="btn btn-sm <?= $verLanc === 'mes' ? 'btn-navy' : 'btn-ghost' ?>">Mês</a>
         <?php if ($filtroDent): ?><a href="?<?= http_build_query(['dia' => $dia, 'mes' => $mes, 'lanc' => $verLanc]) ?>#lancamentos" class="btn btn-sm btn-soft">Todos os dentistas</a><?php endif; ?>
     </div>
-    <div>
+    <div class="table-responsive">
         <table class="table table-clean table-stack">
             <thead><tr><th>Data</th><th>Paciente</th><th>Procedimento</th><th>Dentista</th><th>Pagamento</th><th class="text-end">Valor</th></tr></thead>
             <tbody>

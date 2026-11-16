@@ -1046,7 +1046,6 @@ html.alto-contraste .faq-item summary, html.alto-contraste .faq-resp, html.alto-
 .hero-v5-conteudo { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; gap: 3rem; }
 .hero-v5-texto { max-width: 40rem; }
 .hero-v5 .hero-kicker { display: inline-flex; align-items: center; gap: .7rem; background: none; padding: 0; color: #8fd3c9; letter-spacing: .22em; }
-.hero-v5 .hero-kicker::before { content: ""; width: 34px; height: 2px; background: var(--teal); }
 .hero-v5 h1 { color: #fff; font-size: clamp(2.4rem, 4.6vw, 4.1rem); line-height: 1.06; margin: 1.3rem 0 1.4rem; max-width: 11.5em; }
 .hero-v5 h1 em { color: #5cd0bf; }
 .hero-v5 .lead { color: rgba(255,255,255,.82); font-size: 1.2rem; max-width: 32rem; margin-bottom: 2rem; }
@@ -1238,3 +1237,33 @@ html.alto-contraste .atestado-folha .at-logo { filter: none !important; }
   .nav-a11y .a11y-btn { padding: .2rem .35rem; font-size: .72rem; }
   .hero-v5 .hero-kicker { letter-spacing: .14em; font-size: .7rem; }
 }
+
+/* =====================================================================
+   Ajuste 16/11 (5): no alto contraste a página inicial segue o padrão
+   do contraste (fundo preto, texto branco, destaques amarelos). A foto
+   fica só como textura escura ao fundo, sem competir com o texto.
+   ===================================================================== */
+html.alto-contraste .hero-v5 { background: #000 !important; }
+html.alto-contraste .hero-v5 .hero-kicker { color: #ffe14d !important; }
+html.alto-contraste .hero-v5 h1, html.alto-contraste .hero-v5 .lead,
+html.alto-contraste .hero-v5 .hero-stats dt, html.alto-contraste .hero-v5 .hero-stats dd { color: #fff !important; }
+html.alto-contraste .hero-v5 h1 em { color: #ffe14d !important; }
+html.alto-contraste .hero-v5 .hero-stats div { border-left-color: #ffe14d !important; }
+html.alto-contraste .hero-v5 .btn-contorno-claro { background: #000 !important; color: #fff !important; border: 2px solid #fff !important; }
+html.alto-contraste .nav-hero:not(.rolou) .nav-link { text-shadow: none; }
+html.alto-contraste .nav-hero:not(.rolou) .nav-link.active { background: #ffe14d !important; color: #000 !important; }
+
+/* Ajuste 16/11 (6): responsividade conferida para os testes */
+/* Atestado no celular: cabeçalho da folha empilhado, sem cortar o endereço */
+@media screen and (max-width: 575.98px) {
+  .atestado-folha { aspect-ratio: auto; min-height: 0; padding: 1.4rem 1.1rem; font-size: 13px; }
+  .at-cab { flex-direction: column; align-items: flex-start; }
+  .at-clinica { text-align: left; }
+  .at-titulo { font-size: 15px; letter-spacing: .08em; margin: 1.6rem 0 1.2rem; }
+  .at-texto { font-size: 13.5px; line-height: 1.75; text-align: left; }
+}
+/* Lembretes e filtros: campo de data não empurra o botão para fora da tela */
+form.d-flex.flex-wrap > .form-control[type="date"] { flex: 1 1 150px; min-width: 0; }
+/* Odontograma e listas: o conteúdo rola dentro do cartão, nunca a página */
+.odonto { max-width: 100%; }
+.col-xl-7, .col-xl-5, .col-lg-8, .col-lg-4 { min-width: 0; }

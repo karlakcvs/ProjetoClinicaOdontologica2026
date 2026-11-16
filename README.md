@@ -4,379 +4,330 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="src/assets/img/logo-horizontal-branco.png">
-  <img src="src/assets/img/logo-horizontal.png" alt="Garcia Di Mase – Odontologia Especializada" width="460">
+  <img src="src/assets/img/logo-horizontal.png" alt="Garcia Di Mase – Odontologia Especializada" width="420">
 </picture>
 
-<h2>Seu sorriso merece cuidado <i>especializado</i>.</h2>
+### Sistema web de agendamento e gestão para clínica odontológica
 
-<p>
-  <b>Sistema de agendamento e gestão para clínica odontológica</b><br>
-  Site para pacientes &nbsp;·&nbsp; Área restrita para secretaria, dentistas e equipe técnica
-</p>
+Site para pacientes · Área restrita para secretaria, dentistas e equipe técnica
 
 <br>
 
-![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
-![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-0E7C7B?style=flat-square)
-![Projeto](https://img.shields.io/badge/Fatec%20Araras-DSM%20·%20PI%202026.2-0B3C5D?style=flat-square)
-![Acessibilidade](https://img.shields.io/badge/acessibilidade-contraste%20·%20A−%20A%2B-12A3A0?style=flat-square)
-![Responsivo](https://img.shields.io/badge/responsivo-celular%20·%20tablet%20·%20PC-12A3A0?style=flat-square)
-![GitHub last commit](https://img.shields.io/github/last-commit/karlakcvs/ProjetoClinicaOdontologica2026?style=flat-square&color=0E7C7B)
+[![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat-square&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=flat-square&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
+![Status](https://img.shields.io/badge/status-vers%C3%A3o%20final-0E7C7B?style=flat-square)
+![Fatec Araras](https://img.shields.io/badge/Fatec%20Araras-DSM%20%C2%B7%20PI%202026.2-0B3C5D?style=flat-square)
 
 <br>
 
-<a href="#-sobre-o-projeto">Sobre</a> &nbsp;•&nbsp;
-<a href="#-funcionalidades">Funcionalidades</a> &nbsp;•&nbsp;
-<a href="#-telas">Telas</a> &nbsp;•&nbsp;
-<a href="#-como-funciona">Como funciona</a> &nbsp;•&nbsp;
-<a href="#-como-executar">Como executar</a> &nbsp;•&nbsp;
-<a href="#-perfis-de-acesso">Acesso</a> &nbsp;•&nbsp;
-<a href="#-segurança">Segurança</a> &nbsp;•&nbsp;
-<a href="#-documentação-do-projeto">Documentação</a> &nbsp;•&nbsp;
-<a href="#-novidades">Novidades</a>
+[Visão geral](#visão-geral) ·
+[Funcionalidades](#funcionalidades) ·
+[Telas](#telas) ·
+[Arquitetura](#arquitetura) ·
+[Como executar](#como-executar) ·
+[Perfis de acesso](#perfis-de-acesso) ·
+[Segurança](#segurança) ·
+[Documentação](#documentação)
+
+<br>
+
+<img src="README-com-imagens/docs/screenshots/inicio.jpg" alt="Página inicial do site Garcia Di Mase" width="100%">
 
 </div>
-
-<br>
-
-<div align="center">
-<img src="README-com-imagens/docs/screenshots/inicio.jpg" alt="Página inicial do site Garcia Di Mase" width="92%">
-</div>
-
-<br>
-
-<table align="center">
-<tr>
-<td align="center" width="20%"><h2>4</h2><sub>passos para agendar<br>uma consulta online</sub></td>
-<td align="center" width="20%"><h2>3</h2><sub>especialistas com<br>agenda própria</sub></td>
-<td align="center" width="20%"><h2>4</h2><sub>perfis de acesso<br>separados</sub></td>
-<td align="center" width="20%"><h2>1 clique</h2><sub>para emitir um<br>atestado em PDF</sub></td>
-<td align="center" width="20%"><h2>100%</h2><sub>responsivo: celular,<br>tablet e computador</sub></td>
-</tr>
-</table>
 
 ---
 
-## 🦷 Sobre o projeto
+## Visão geral
 
-O **Garcia Di Mase** é um sistema web completo para uma clínica odontológica **fictícia** de Araras/SP.
-O paciente agenda a consulta online em poucos passos, e a clínica organiza agenda, prontuários,
-financeiro, atestados e avaliações em um só lugar.
+O **Garcia Di Mase** é um sistema web para uma clínica odontológica de Araras/SP que até então organizava as consultas em agenda de papel. Ele reúne em um só lugar o **agendamento online**, os **lembretes de consulta pelo WhatsApp** e o **acompanhamento financeiro** da clínica, além de prontuário eletrônico, gerador de atestados e uma área técnica de monitoramento.
 
-Projeto desenvolvido pela **SanyTech** no Projeto Integrador do curso de
-**Desenvolvimento de Software Multiplataforma (DSM) – Fatec Araras**, 2026.2.
+O projeto foi desenvolvido pela **SanyTech** no Projeto Integrador do curso de **Desenvolvimento de Software Multiplataforma (DSM)** da **Fatec Araras**, em 2026.
+
+| | |
+|:--|:--|
+| **4 passos** | para o paciente agendar uma consulta pelo site |
+| **3 especialistas** | cada um com agenda, preços e perfil próprios |
+| **4 perfis de acesso** | paciente, secretaria, dentista e equipe técnica |
+| **1 clique** | para emitir um atestado pronto para imprimir ou salvar em PDF |
 
 > [!NOTE]
-> Todos os dados (nomes, telefones, e-mails, CROs, endereço e pacientes) são **fictícios** e servem apenas para demonstração.
+> A clínica, os profissionais, os pacientes, os telefones e os endereços exibidos são **fictícios** e servem apenas para demonstração.
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
+
+### Site do paciente
+- Página inicial com fotografia em tela cheia e informações principais visíveis sem rolagem
+- **Agendamento online em quatro passos:** procedimento → especialista → data e horário → dados pessoais
+- Horários livres calculados pela **duração do procedimento** e pela agenda de cada dentista, com nova verificação antes de gravar
+- Página de cada especialista com formação, experiência, horários, tratamentos, preços e casos de antes e depois
+- Avaliações com estrelas (publicadas somente após aprovação), perguntas frequentes, mapa e formulário de contato
+
+### Área da secretaria
+- Visão geral do dia com pendências, agenda de hoje e faturamento por dentista
+- **Agenda semanal** da clínica, colorida por dentista ou por tipo de procedimento
+- Cadastro de pacientes com validação de **CPF** e endereço automático pelo **CEP** (ViaCEP)
+- **Lembretes pelo WhatsApp** em três etapas: enviar, marcar como enviado e confirmar presença
+- **Financeiro da clínica:** totais do dia, da semana, do mês e do ano, faturamento por dentista, gráfico mês a mês, comparativo anual, faturamento diário e formas de pagamento
+- Moderação de avaliações, mensagens do site e cadastro de dentistas, procedimentos e preços
+
+### Área do dentista
+- **Agenda de hoje** logo na entrada, com o próximo paciente em destaque e atalhos para prontuário e atestado
+- **Meu financeiro:** previsto do dia, da semana e do mês, gráfico de 12 meses, receita por procedimento, formas de pagamento, valores a receber e recebidos
+- **Gerador de atestado** de comparecimento ou de afastamento, com dados do dentista e do CRO preenchidos, código do procedimento, dias por extenso, CID opcional e impressão em A4
+- **Prontuário eletrônico** com odontograma interativo, fotos por sessão, exames (PDF ou imagem), observações e gráfico de evolução do tratamento
+- Edição do próprio perfil no site e moderação das avaliações recebidas
+- Acesso restrito aos **próprios pacientes e valores**
+
+### Área técnica SanyTech
+- Painéis de funcionamento, desempenho e segurança, sem acesso a dados de pacientes ou financeiros
+
+### Acessibilidade e responsividade
+- Alto contraste e ajuste do tamanho do texto (A− / A+) sempre visíveis no menu
+- Link para pular ao conteúdo, foco visível e navegação completa por teclado
+- Layout adaptado para celular, tablet e computador, com tabelas convertidas em cartões em telas pequenas
+
+<p align="right"><a href="#topo">voltar ao topo ↑</a></p>
+
+---
+
+## Telas
 
 <table>
 <tr>
-<td width="50%" valign="top">
-
-### 🌐 Site do paciente
-- Página inicial com **foto em tela cheia** e toda a informação principal na primeira tela
-- **Agendamento online em 4 passos**: procedimento → especialista → data/horário → dados
-- Horários livres calculados pela **duração do procedimento** e pela agenda de cada dentista
-- **Perfil de cada especialista**: formação, experiência, horários, tratamentos e antes e depois
-- **Procedimentos e valores** de referência e formas de pagamento
-- **Avaliações com estrelas**, aprovadas pela secretaria antes de aparecer no site
-- Formulário **Fale conosco**
-
-</td>
-<td width="50%" valign="top">
-
-### 🗂️ Secretaria
-- **Agenda semanal** colorida por tipo de procedimento
-- Cadastro de pacientes com **CPF** e **CEP automático** (ViaCEP)
-- **Resumo do paciente**: histórico, valores pagos e consultas
-- **Financeiro** com faturamento mês a mês, comparativo por ano e faturamento diário
-- Lembretes de consulta, mensagens do site e moderação de avaliações
-- Tabela de **procedimentos, preços e durações** editável
-
-</td>
+<td colspan="2"><b>Site do paciente</b></td>
 </tr>
 <tr>
-<td width="50%" valign="top">
-
-### 👩‍⚕️ Dentistas
-- **Agenda de hoje** logo na entrada, com o próximo paciente destacado
-- **Meu financeiro**: previsto do dia, da semana e do mês, gráfico de 12 meses, procedimentos, formas de pagamento, a receber e recebidos
-- **Gerador de atestado** (comparecimento ou afastamento): nome e CRO do dentista já preenchidos, paciente puxado da agenda ou digitado, código do procedimento, dias de afastamento e impressão em PDF
-- **Prontuário** com odontograma interativo, fotos por sessão, exames (PDF/imagem) e observações
-- Cada dentista vê **somente os seus pacientes e valores**
-
-</td>
-<td width="50%" valign="top">
-
-### 🛠️ Equipe técnica SanyTech
-- Área própria para acompanhar **funcionamento, velocidade e segurança** do sistema
-- Acesso separado do restante da clínica, com login forte
-
-### ♿ Acessibilidade
-- **Alto contraste** e ajuste do **tamanho do texto** (A− / A+) sempre visíveis no menu
-- Link "pular para o conteúdo" e navegação completa por teclado
-- Contraste que preserva a foto e mantém o texto legível
-
-</td>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/especialistas.jpg" alt="Nossos especialistas"><br><sub>Nossos especialistas</sub></td>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/perfil-especialista.jpg" alt="Perfil do especialista"><br><sub>Perfil do especialista</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/agendamento.jpg" alt="Agendamento online"><br><sub>Agendamento online em quatro passos</sub></td>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/inicio-contraste.png" alt="Modo alto contraste"><br><sub>Modo alto contraste</sub></td>
+</tr>
+<tr>
+<td colspan="2"><b>Área da secretaria</b></td>
+</tr>
+<tr>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/painel-secretaria.jpg" alt="Visão geral da secretaria"><br><sub>Visão geral</sub></td>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/agenda.jpg" alt="Agenda da clínica"><br><sub>Agenda da clínica</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/lembretes.jpg" alt="Lembretes"><br><sub>Lembretes pelo WhatsApp</sub></td>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/financeiro.jpg" alt="Financeiro da clínica"><br><sub>Financeiro da clínica</sub></td>
+</tr>
+<tr>
+<td colspan="2"><b>Área do dentista</b></td>
+</tr>
+<tr>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/painel-dentista.jpg" alt="Agenda de hoje do dentista"><br><sub>Agenda de hoje</sub></td>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/meu-financeiro.jpg" alt="Meu financeiro"><br><sub>Meu financeiro</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/atestado.jpg" alt="Gerador de atestado"><br><sub>Gerador de atestado</sub></td>
+<td width="50%"><img src="README-com-imagens/docs/screenshots/prontuario.jpg" alt="Prontuário"><br><sub>Prontuário e odontograma</sub></td>
 </tr>
 </table>
 
-<p align="right"><a href="#topo">⬆ voltar ao topo</a></p>
+<div align="center">
+<img src="README-com-imagens/docs/screenshots/login.jpg" alt="Login da área restrita" width="49%">
+&nbsp;
+<img src="README-com-imagens/docs/screenshots/inicio-celular.jpg" alt="Página inicial no celular" width="22%">
+<br>
+<sub>Login da área restrita · Página inicial no celular</sub>
+</div>
+
+<p align="right"><a href="#topo">voltar ao topo ↑</a></p>
 
 ---
 
-## 📸 Telas
-
-<table>
-<tr>
-<td align="center" width="50%"><b>Página inicial</b><br><br><img src="README-com-imagens/docs/screenshots/inicio.jpg" alt="Página inicial"></td>
-<td align="center" width="50%"><b>Nossos especialistas</b><br><br><img src="README-com-imagens/docs/screenshots/especialistas.jpg" alt="Especialistas"></td>
-</tr>
-<tr>
-<td align="center"><b>Perfil do especialista</b><br><br><img src="README-com-imagens/docs/screenshots/perfil-especialista.jpg" alt="Perfil do especialista"></td>
-<td align="center"><b>Agendamento online</b><br><br><img src="README-com-imagens/docs/screenshots/agendamento.jpg" alt="Agendamento online"></td>
-</tr>
-<tr>
-<td align="center"><b>Agenda do dentista</b><br><br><img src="README-com-imagens/docs/screenshots/agenda.jpg" alt="Agenda semanal"></td>
-<td align="center"><b>Prontuário e odontograma</b><br><br><img src="README-com-imagens/docs/screenshots/prontuario.jpg" alt="Prontuário"></td>
-</tr>
-</table>
-
----
-
-## 🔄 Como funciona
-
-### O caminho do paciente
+## Arquitetura
 
 ```mermaid
 flowchart LR
-    A([🦷 Paciente]) --> B[Escolhe o<br>procedimento]
-    B --> C[Escolhe o<br>especialista]
-    C --> D[Escolhe data<br>e horário livre]
-    D --> E[Informa<br>seus dados]
-    E --> F([✅ Consulta<br>agendada])
-    F -. um dia antes .-> G[💬 Secretaria confirma<br>pelo WhatsApp]
+    N[Navegador] -->|HTTP| W[Apache + PHP 8.2<br>container php_apache]
+    W -->|PDO · prepared statements| DB[(MySQL 8.0<br>container mysql_db)]
+    PMA[phpMyAdmin<br>acesso local] --> DB
+    W -->|consulta de CEP| V[ViaCEP]
 ```
 
-### O dia do dentista
+### Fluxo de atendimento
 
 ```mermaid
 flowchart LR
-    A[🔐 Login] --> B[📅 Agenda de hoje<br>próximo paciente em destaque]
-    B --> C[📁 Prontuário<br>odontograma, fotos, exames]
-    C --> D[📝 Atestado<br>já preenchido]
-    D --> E[🖨️ Imprime ou<br>salva em PDF]
-    B -.-> F[📊 Meu financeiro<br>no menu lateral]
+    A([Paciente]) --> B[Escolhe procedimento,<br>especialista e horário]
+    B --> C([Consulta agendada])
+    C -. véspera .-> D[Secretaria envia<br>lembrete pelo WhatsApp]
+    D --> E[Dentista atende e<br>registra o prontuário]
+    E --> F[Secretaria lança<br>o pagamento]
+    F --> G([Financeiro atualizado])
 ```
 
-### Quem acessa o quê
-
-```mermaid
-flowchart TB
-    S((🌐 Site público)) --> P[Pacientes<br>agendam, avaliam e falam com a clínica]
-    L((🔐 Área restrita)) --> SEC[🗂️ Secretaria<br>agenda, pacientes, financeiro, avaliações]
-    L --> DEN[👩‍⚕️ Dentistas<br>agenda do dia, prontuário, atestados, financeiro]
-    L --> TI[🛠️ SanyTech<br>funcionamento, velocidade, segurança]
-```
-
-### Arquitetura
-
-```mermaid
-flowchart LR
-    N[🖥️ Navegador] -->|HTTP| W[🐘 Apache + PHP 8.2<br>container php_apache]
-    W -->|PDO · prepared statements| DB[(🐬 MySQL 8.0<br>container mysql_db)]
-    PMA[🗄️ phpMyAdmin<br>só no próprio computador] --> DB
-    W -->|CEP| V[📮 ViaCEP]
-```
-
-<p align="right"><a href="#topo">⬆ voltar ao topo</a></p>
-
----
-
-## 🧰 Tecnologias
+### Tecnologias
 
 | Camada | Tecnologias |
-|---|---|
-| **Back-end** | PHP 8.2 (PDO, orientação a objetos), Apache |
-| **Banco de dados** | MySQL 8.0 · phpMyAdmin |
-| **Front-end** | HTML5, CSS3, JavaScript, Bootstrap 5.3, Bootstrap Icons, Chart.js |
-| **Tipografia** | Fraunces (títulos) e Plus Jakarta Sans (textos) |
-| **Infraestrutura** | Docker e Docker Compose |
-| **Integrações** | ViaCEP (preenchimento automático de endereço) |
+|:--|:--|
+| Back-end | PHP 8.2 (PDO, orientação a objetos) e Apache |
+| Banco de dados | MySQL 8.0 e phpMyAdmin |
+| Front-end | HTML5, CSS3, JavaScript, Bootstrap 5.3, Bootstrap Icons e Chart.js |
+| Infraestrutura | Docker e Docker Compose |
+| Integração | ViaCEP (endereço automático pelo CEP) |
+
+<p align="right"><a href="#topo">voltar ao topo ↑</a></p>
 
 ---
 
-## 🚀 Como executar
+## Como executar
 
 ### Pré-requisitos
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e aberto ("Engine running")
-- Virtualização ativada no computador (exigida pelo Docker no Windows)
-- [VS Code](https://code.visualstudio.com/) (opcional, mas recomendado)
 
-### Passo a passo
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e em execução (*Engine running*)
+- Virtualização ativada no computador (exigência do Docker no Windows)
+- [Git](https://git-scm.com/) e, opcionalmente, o [VS Code](https://code.visualstudio.com/)
 
-**1. Clone o repositório**
+### Instalação
+
 ```bash
+# 1. Clone o repositório
 git clone https://github.com/karlakcvs/ProjetoClinicaOdontologica2026.git
 cd ProjetoClinicaOdontologica2026
-```
 
-**2. Crie o arquivo de configuração**
-```bash
-cp .env.example .env        # Windows (CMD): copy .env.example .env
-```
-Abra o `.env` e troque as senhas `change-this-...` por senhas suas.
+# 2. Crie o arquivo de configuração e defina suas próprias senhas
+cp .env.example .env          # Windows (CMD): copy .env.example .env
 
-**3. Suba os containers**
-```bash
+# 3. Suba os containers
 docker compose up -d --build
 ```
 
-**4. Acesse**
-
 | Serviço | Endereço |
-|---|---|
-| 🌐 Site | http://localhost |
-| 🔐 Área restrita | http://localhost/login.php |
-| 🗄️ phpMyAdmin | http://localhost:8888 (usuário `root`, senha do `.env`) |
+|:--|:--|
+| Site | http://localhost |
+| Área restrita | http://localhost/login.php |
+| phpMyAdmin | http://localhost:8888 (usuário `root` e senha definida no `.env`) |
 
 > [!TIP]
-> Na primeira visita, o sistema **cria o banco sozinho**: tabelas, dentistas, procedimentos e uma agenda de demonstração.
-> Se aparecer erro de conexão, aguarde cerca de 1 minuto (o MySQL ainda está iniciando) e atualize a página.
+> Na primeira visita, o sistema cria o banco de dados automaticamente, com dentistas, procedimentos e uma agenda de demonstração. Se aparecer erro de conexão, aguarde cerca de um minuto para o MySQL terminar de iniciar e atualize a página.
 
 <details>
-<summary><b>🧯 Problemas comuns</b></summary>
+<summary><b>Problemas comuns</b></summary>
 <br>
 
 | Problema | Solução |
-|---|---|
-| `Virtualization support not detected` | Ative a virtualização (Intel VT-x / AMD SVM) na BIOS e rode `wsl --install` no PowerShell como administrador |
-| `port is already allocated` (porta 80 ocupada) | Feche XAMPP, Skype ou outro programa que use a porta 80 e rode `docker compose up -d` de novo |
-| `container name ... is already in use` | `docker rm -f php_apache mysql_db phpmyadmin` e depois `docker compose up -d --build` |
-| Erro de conexão com o banco na primeira vez | Aguarde ~1 minuto (o MySQL ainda está iniciando) e atualize a página |
-| "E-mail ou senha inválidos" | Defina a senha com o comando da seção [Perfis de acesso](#-perfis-de-acesso) (ele também libera o bloqueio) |
-| O site não mostra as mudanças | Atualize com **Ctrl + F5** e confira se o Docker está rodando a partir desta pasta |
-| Ver o que está rodando | `docker compose ps` |
-| Ver erros do PHP | `docker compose logs web` |
-| Desligar | `docker compose down` (os dados ficam salvos) |
+|:--|:--|
+| `Virtualization support not detected` | Ative a virtualização (Intel VT-x / AMD SVM) na BIOS e execute `wsl --install` no PowerShell como administrador |
+| `port is already allocated` | Feche programas que usam a porta 80 (XAMPP, Skype etc.) e execute `docker compose up -d` novamente |
+| `container name ... is already in use` | Execute `docker compose down` e depois `docker compose up -d --build` |
+| "E-mail ou senha inválidos" | Redefina a senha com o comando da seção [Perfis de acesso](#perfis-de-acesso); ele também libera o bloqueio |
+| O site não mostra as alterações | Atualize com **Ctrl + F5** e confira se o Docker está rodando a partir desta pasta |
+
+Comandos úteis: `docker compose ps` (status), `docker compose logs web` (erros do PHP) e `docker compose down` (desliga, mantendo os dados).
 
 </details>
 
-Instruções detalhadas em [LEIA-ME.md](LEIA-ME.md). O banco de demonstração para importação está em [database/](database/).
+Instruções detalhadas em [LEIA-ME.md](LEIA-ME.md). O banco de demonstração para importação manual está em [database/](database/).
 
-<p align="right"><a href="#topo">⬆ voltar ao topo</a></p>
+<p align="right"><a href="#topo">voltar ao topo ↑</a></p>
 
 ---
 
-## 👥 Perfis de acesso
+## Perfis de acesso
 
-| Perfil | E-mail de acesso | Entra em |
-|---|---|---|
-| 🗂️ Secretaria – Juliana Prado | `secretaria@garciadimase.example` | Visão geral da clínica |
-| 👩‍⚕️ Dra. Helena Duarte – Ortodontia | `helena.duarte@garciadimase.example` | Agenda de hoje |
-| 👨‍⚕️ Dr. Rafael Monteiro – Implantodontia | `rafael.monteiro@garciadimase.example` | Agenda de hoje |
-| 👩‍⚕️ Dra. Camila Nogueira – Estética | `camila.nogueira@garciadimase.example` | Agenda de hoje |
-| 🛠️ Equipe SanyTech | `ti@sanytech.example` | Painel técnico (`/sanytech.php`) |
+| Perfil | E-mail de acesso | Página inicial |
+|:--|:--|:--|
+| Secretaria | `secretaria@garciadimase.example` | Visão geral da clínica |
+| Dra. Helena Duarte – Ortodontia | `helena.duarte@garciadimase.example` | Agenda de hoje |
+| Dr. Rafael Monteiro – Implantodontia | `rafael.monteiro@garciadimase.example` | Agenda de hoje |
+| Dra. Camila Nogueira – Estética | `camila.nogueira@garciadimase.example` | Agenda de hoje |
+| Equipe SanyTech | `ti@sanytech.example` | Painel técnico (`/sanytech.php`) |
 
-As senhas **não ficam no repositório**: o banco guarda só o *hash*. Para definir a senha de uma conta (com o site já aberto ao menos uma vez):
+As senhas **não são armazenadas no repositório**; o banco guarda apenas o *hash*. Para definir a senha de uma conta, com o site já aberto ao menos uma vez:
 
 ```bash
 docker exec -it php_apache php /var/www/html/include/redefinir_senha.php secretaria@garciadimase.example "SuaSenha#Forte2026"
 ```
 
-A senha precisa ter no mínimo **10 caracteres**, com maiúscula, minúscula, número e símbolo. O comando também libera o login bloqueado por excesso de tentativas.
+A senha deve ter no mínimo 10 caracteres, com letra maiúscula, letra minúscula, número e símbolo.
 
 ---
 
-## 📁 Estrutura do projeto
+## Estrutura do projeto
 
 ```
-📦 ProjetoClinicaOdontologica2026
- ┣ 📂 database                  → banco de demonstração (dados fictícios)
- ┣ 📂 README-com-imagens        → imagens deste README
- ┣ 📂 src
- ┃ ┣ 📂 api                     → horários livres (JSON)
- ┃ ┣ 📂 assets                  → CSS, JavaScript e imagens
- ┃ ┣ 📂 classes                 → agendamento, financeiro e prontuário (POO)
- ┃ ┣ 📂 include                 → configuração, segurança e migrações (bloqueada ao navegador)
- ┃ ┣ 📂 uploads                 → fotos e arquivos enviados (não versionados)
- ┃ ┣ 📜 index.php               → página inicial
- ┃ ┣ 📜 agendar.php             → agendamento online
- ┃ ┣ 📜 financeiro.php          → financeiro da secretaria
- ┃ ┣ 📜 dent_painel.php         → dentista: agenda de hoje
- ┃ ┣ 📜 dent_financeiro.php     → dentista: meu financeiro
- ┃ ┣ 📜 dent_atestado.php       → dentista: gerador de atestado
- ┃ ┗ 📜 ...                     → demais painéis da secretaria, dos dentistas e da SanyTech
- ┣ 📄 gestao-software-sanytech-garcia-di-mase.html → registro de alterações e plano de testes
- ┣ 🐳 Dockerfile
- ┣ 🐳 docker-compose.yml
- ┗ 📄 .env.example              → modelo de configuração
+ProjetoClinicaOdontologica2026/
+├── database/                 Banco de demonstração (dados fictícios)
+├── README-com-imagens/       Telas usadas neste README
+├── src/
+│   ├── api/                  Horários livres (JSON)
+│   ├── assets/               CSS, JavaScript e imagens
+│   ├── classes/              Agendamento, financeiro e prontuário (POO)
+│   ├── include/              Configuração, segurança e migrações (bloqueada ao navegador)
+│   ├── uploads/              Arquivos enviados (não versionados)
+│   ├── index.php             Página inicial
+│   ├── agendar.php           Agendamento online
+│   ├── painel.php            Secretaria: visão geral
+│   ├── financeiro.php        Secretaria: financeiro da clínica
+│   ├── dent_painel.php       Dentista: agenda de hoje
+│   ├── dent_financeiro.php   Dentista: meu financeiro
+│   ├── dent_atestado.php     Dentista: gerador de atestado
+│   └── ...                   Demais telas da secretaria, dos dentistas e da SanyTech
+├── gestao-software-sanytech-garcia-di-mase.html   Registro de alterações e plano de testes
+├── docker-compose.yml
+├── Dockerfile
+└── .env.example              Modelo de configuração
 ```
 
 ---
 
-## 🔒 Segurança
+## Segurança
 
-| Proteção | Como funciona |
-|---|---|
-| 🔑 **Senhas** | Guardadas apenas como **hash** (`password_hash`) |
-| 🛡️ **Formulários** | **Proteção CSRF** em todos eles e **sessão protegida** |
-| 🤖 **Robôs e força bruta** | **Limite de 4 tentativas** no login e nos formulários públicos |
-| 💉 **SQL injection** | Consultas com **prepared statements** |
-| 👩‍⚕️ **Dados por dentista** | Agenda, prontuário, atestado e financeiro mostram só os dados do dentista logado |
-| 📁 **Arquivos** | Pastas internas e prontuários **bloqueados** ao acesso direto pelo navegador |
-| 🏠 **Banco de dados** | MySQL e phpMyAdmin acessíveis **somente no próprio computador** (`127.0.0.1`) |
-| 🧱 **Servidor** | Cabeçalhos de segurança no Apache e versão do servidor oculta |
+| Proteção | Implementação |
+|:--|:--|
+| Senhas | Armazenadas apenas como *hash* (`password_hash`) |
+| Formulários | Token CSRF em todos os formulários e sessão protegida |
+| Força bruta | Bloqueio após 4 tentativas no login e nos formulários públicos; limite de requisições na API (HTTP 429) |
+| SQL injection | Consultas com *prepared statements* (PDO) |
+| Controle de acesso | Cada perfil acessa apenas as próprias telas; o dentista vê somente os próprios pacientes, atestados e valores |
+| Arquivos | Pastas internas e arquivos do prontuário bloqueados ao acesso direto |
+| Banco de dados | MySQL e phpMyAdmin acessíveis somente no próprio computador |
+| Servidor | Cabeçalhos de segurança no Apache e versão do PHP oculta |
 
 Detalhes em [SEGURANCA.md](SEGURANCA.md).
 
 > [!WARNING]
-> Nunca publique o arquivo `.env`, a pasta `mysql-data/` nem o conteúdo de `src/uploads/`:
-> eles podem conter senhas, dados pessoais e informações de saúde. O `.gitignore` do projeto já os deixa de fora.
+> Nunca publique o arquivo `.env`, a pasta `mysql-data/` ou o conteúdo de `src/uploads/`: eles podem conter senhas, dados pessoais e informações de saúde. O `.gitignore` do projeto já os exclui.
 
 ---
 
-## 📑 Documentação do projeto
+## Documentação
 
 | Documento | Conteúdo |
-|---|---|
-| [gestao-software-sanytech-garcia-di-mase.html](gestao-software-sanytech-garcia-di-mase.html) | Organização e gestão do software: registro de alterações com motivos, arquivos alterados e plano de testes (baixe e abra no navegador) |
+|:--|:--|
+| [gestao-software-sanytech-garcia-di-mase.html](gestao-software-sanytech-garcia-di-mase.html) | Organização e Gestão de Software: registro de alterações com motivos, arquivos alterados, plano de testes e aprovação (baixe e abra no navegador) |
 | [LEIA-ME.md](LEIA-ME.md) | Instalação detalhada e histórico de versões |
 | [SEGURANCA.md](SEGURANCA.md) | Medidas de segurança do sistema |
 | [database/README.md](database/README.md) | Banco de demonstração |
 
----
-
-## 🆕 Novidades
-
-**Novembro de 2026**
-- 🖼️ **Nova página inicial**: foto da família em tela cheia, título "Seu sorriso merece cuidado especializado." e toda a informação principal visível sem rolar
-- 🧭 **Menu sobre a foto**: transparente no topo, fica branco com o logo colorido ao rolar a página
-- ♿ **Acessibilidade sempre à mão**: Contraste, A− e A+ no próprio menu; o contraste preserva a foto
-- 🦷 **Área do dentista reorganizada**: agenda do dia no topo e financeiro em página própria no menu lateral
-- 📝 **Atestado odontológico**: comparecimento ou afastamento, pronto para imprimir ou salvar em PDF
-- 📊 **Financeiro da secretaria mais limpo**: gráfico de barras "Faturamento mês a mês" na largura toda
-
-<p align="right"><a href="#topo">⬆ voltar ao topo</a></p>
+### Versão final · novembro de 2026
+- Nova página inicial com fotografia em tela cheia e menu transparente sobre a imagem
+- Contraste e tamanho do texto sempre visíveis no menu principal; no alto contraste, a página inicial segue o padrão do contraste (fundo preto, texto branco e destaques amarelos)
+- Revisão de responsividade em celular, tablet e computador
+- Área do dentista reorganizada: agenda do dia na entrada, página **Meu financeiro** e **gerador de atestados**
+- Financeiro da secretaria simplificado, com o gráfico mês a mês em largura total
+- Utilitário de recriação de senha desativado; senhas definidas apenas por `redefinir_senha.php`
 
 ---
 
-## 👩‍💻 Autora
+## Autoria
 
 <table>
 <tr>
 <td align="center">
 <a href="https://github.com/karlakcvs">
-<img src="https://github.com/karlakcvs.png" width="120" alt="Karla Carolina Vicente de Sousa"><br>
+<img src="https://github.com/karlakcvs.png" width="100" alt="Karla Carolina Vicente de Sousa"><br>
 <sub><b>Karla Carolina Vicente de Sousa</b></sub>
 </a><br>
 <sub>Desenvolvimento full stack</sub>
@@ -384,14 +335,11 @@ Detalhes em [SEGURANCA.md](SEGURANCA.md).
 </tr>
 </table>
 
-Desenvolvido com 💙 pela **SanyTech** · Projeto Integrador · DSM · Fatec Araras · 2026.2
-
----
+Desenvolvido pela **SanyTech** · Projeto Integrador · Desenvolvimento de Software Multiplataforma · Fatec Araras · 2026
 
 <div align="center">
-
-<img src="src/assets/img/logo-simbolo.png" alt="" width="56">
-
-<sub>Projeto acadêmico · Clínica, profissionais e pacientes são fictícios · Fotos ilustrativas</sub>
-
+<br>
+<img src="src/assets/img/logo-simbolo.png" alt="" width="48">
+<br>
+<sub>Projeto acadêmico. Clínica, profissionais e pacientes são fictícios; as fotografias são ilustrativas.</sub>
 </div>

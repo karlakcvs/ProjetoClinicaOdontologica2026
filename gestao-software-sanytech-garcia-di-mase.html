@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organização e Gestão de Software · SanyTech · Cliente Garcia Di Mase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#06244b; --navy-2:#0b3a75; --teal:#12a3a0; --teal-700:#0b6f6d; --teal-50:#e9f7f6;
+  --bg:#f3f7f9; --line:#e3ebef; --ink:#1b2b3a; --muted:#5d6e80;
+  --ok:#1d7a46; --ok-bg:#e5f6ec; --pend:#8a5a00; --pend-bg:#fdf3df;
+  --fd:"Fraunces",Georgia,serif; --fb:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.55 var(--fb)}
+h1,h2,h3{font-family:var(--fd);font-weight:600;color:var(--navy);margin:0}
+a{color:var(--teal-700)}
+.pagina{max-width:1180px;margin:0 auto;padding:0 28px 48px}
+/* capa */
+.capa{background:var(--navy);color:#fff;padding:40px 0 34px}
+.capa .pagina{padding-bottom:0}
+.empresa{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#8fd3c9;font-weight:700}
+.empresa:before{content:"";width:30px;height:2px;background:var(--teal)}
+.capa h1{color:#fff;font-size:clamp(28px,4vw,42px);line-height:1.1;margin:14px 0 6px}
+.capa h1 em{color:#5cd0bf;font-style:italic}
+.capa .sub{color:rgba(255,255,255,.78);font-size:16px;margin:0}
+.ficha{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:26px}
+.ficha div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:10px 14px}
+.ficha span{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.ficha b{color:#fff;font-weight:600}
+/* barra */
+.barra{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.barra .pagina{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:10px 28px}
+.barra nav a{color:var(--ink);text-decoration:none;font-weight:600;font-size:13px;margin-right:14px}
+.barra nav a:hover{color:var(--teal-700)}
+.barra .acoes{margin-left:auto;display:flex;gap:8px}
+.btn{border:1.5px solid var(--line);background:#fff;color:var(--navy);border-radius:3px;padding:7px 12px;font-weight:600;cursor:pointer;font:600 13px var(--fb)}
+.btn:hover{border-color:var(--teal);color:var(--teal-700)}
+.btn.prim{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.prim:hover{background:var(--teal-700)}
+/* seções */
+section{margin-top:34px}
+section > h2{font-size:24px;margin-bottom:6px;display:flex;align-items:baseline;gap:10px}
+section > h2 small{font-family:var(--fb);font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--teal-700);text-transform:uppercase}
+.lead{color:var(--muted);margin:0 0 16px;max-width:860px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:16px 18px}
+.card b{display:block;font-family:var(--fd);font-size:30px;color:var(--navy);line-height:1.1}
+.card span{color:var(--muted);font-size:13px}
+.progresso{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:10px}
+.progresso i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),#5cd0bf);width:0;transition:width .4s}
+.caixa{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:#f7fafb;text-align:left;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.id{font-weight:700;color:var(--navy);white-space:nowrap;font-size:13px}
+td.mod{white-space:nowrap}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:3px;padding:2px 8px;background:var(--teal-50);color:var(--teal-700);white-space:nowrap}
+.st{display:inline-block;font-size:11.5px;font-weight:700;border-radius:3px;padding:3px 9px;white-space:nowrap}
+.st.ok{background:var(--ok-bg);color:var(--ok)}
+.st.pend{background:var(--pend-bg);color:var(--pend)}
+.motivo{color:var(--muted);font-size:13.5px}
+.arq{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#33475b;line-height:1.6}
+td ol{margin:0;padding-left:18px}
+.filtros{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:3px;padding:5px 11px;cursor:pointer;font:600 12.5px var(--fb);color:var(--ink)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.marca{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.marca input{width:18px;height:18px;accent-color:var(--teal);cursor:pointer}
+.obs{width:100%;min-width:150px;border:1px solid var(--line);border-radius:3px;padding:5px 7px;font:13px var(--fb);resize:vertical;min-height:34px}
+.assin{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px;margin-top:20px}
+.assin div{padding-top:56px;border-bottom:1px solid var(--ink);text-align:center;font-size:13px;color:var(--muted);position:relative}
+.assin div span{position:absolute;bottom:-24px;left:0;right:0}
+.rodape{text-align:center;color:var(--muted);font-size:12px;margin-top:56px}
+@media (max-width:860px){
+  .tabela-resp thead{display:none}
+  .tabela-resp tr{display:block;border-bottom:1px solid var(--line);padding:8px 0}
+  .tabela-resp td{display:block;border:0;padding:4px 14px}
+  .tabela-resp td[data-l]:before{content:attr(data-l) ": ";font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  body{background:#fff;font-size:11.5px}
+  .barra,.filtros,.no-print{display:none!important}
+  .capa{background:#fff;color:#000;border-bottom:3px solid var(--teal);padding:0 0 14px}
+  .capa h1,.ficha b{color:#000}.capa h1 em{color:var(--teal-700)}.capa .sub,.ficha span{color:#444}
+  .ficha div{border-color:#ccc;background:#fff}.empresa{color:var(--teal-700)}
+  .pagina{max-width:none;padding:0}
+  section{break-inside:auto}tr{break-inside:avoid}
+  .obs{border:0;padding:0;resize:none;min-height:0}
+  .caixa,.card{border-color:#ccc}
+  tr.oculto{display:table-row!important}
+}
+</style>
+</head>
+<body>
+
+<header class="capa">
+  <div class="pagina">
+    <div class="empresa">SanyTech · Documentação do projeto</div>
+    <h1>Organização e Gestão de Software<br><em>Cliente: Garcia Di Mase</em></h1>
+    <p class="sub">Registro de alterações, motivos e plano de testes do sistema de agendamento e gestão da clínica.</p>
+    <div class="ficha">
+      <div><span>Desenvolvedora</span><b>SanyTech</b></div>
+      <div><span>Cliente</span><b>Garcia Di Mase – Odontologia Especializada</b></div>
+      <div><span>Sistema</span><b>Site do paciente + área restrita</b></div>
+      <div><span>Versão do documento</span><b>1.0 · 16/11/2026</b></div>
+    </div>
+  </div>
+</header>
+
+<div class="barra">
+  <div class="pagina">
+    <nav aria-label="Seções"><a href="#resumo">Resumo</a><a href="#alteracoes">Alterações</a><a href="#arquivos">Arquivos</a><a href="#testes">Testes</a><a href="#aprovacao">Aprovação</a></nav>
+    <div class="acoes"><button class="btn" id="bLimpar" title="Desfaz as marcações feitas neste navegador">Limpar marcações</button><button class="btn prim" onclick="window.print()">Imprimir / salvar PDF</button></div>
+  </div>
+</div>
+
+<main class="pagina">
+
+<section id="resumo">
+  <h2><small>1</small> Resumo</h2>
+  <p class="lead">Nesta etapa a página inicial do site foi redesenhada, a área do dentista foi reorganizada com financeiro próprio e gerador de atestados, e o financeiro da secretaria foi simplificado. Todas as alterações abaixo estão concluídas; os testes pendentes podem ser marcados neste documento conforme forem realizados.</p>
+  <div class="cards">
+    <div class="card"><b id="nAlt">0</b><span>alterações realizadas</span></div>
+    <div class="card"><b id="nArq">0</b><span>arquivos alterados ou criados</span></div>
+    <div class="card"><b id="nOk">0</b><span>testes aprovados</span></div>
+    <div class="card"><b id="nPend">0</b><span>testes pendentes</span><div class="progresso"><i id="pBar"></i></div></div>
+  </div>
+</section>
+
+<section id="alteracoes">
+  <h2><small>2</small> Registro de alterações</h2>
+  <p class="lead">Cada alteração com o módulo atingido, o que mudou e o motivo da mudança.</p>
+  <div class="caixa">
+    <table class="tabela-resp">
+      <thead><tr><th>ID</th><th>Data</th><th>Módulo</th><th>Alteração</th><th>Motivo</th><th>Situação</th></tr></thead>
+      <tbody id="tAlt"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="arquivos">
+  <h2><small>3</small> Arquivos alterados</h2>
+  <p class="lead">Arquivos do projeto modificados ou criados nesta etapa. Os arquivos anteriores foram guardados em <code>_backup_antes_nova_entrada/</code> para permitir a reversão.</p>
+  <div class="caixa">
+    <table class="tabela-resp">
+      <thead><tr><th>Arquivo</th><th>Tipo</th><th>Alterações relacionadas</th></tr></thead>
+      <tbody id="tArq"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="testes">
+  <h2><small>4</small> Plano de testes</h2>
+  <p class="lead">Testes já realizados e testes que ainda precisam ser feitos. Marque a caixa quando o teste for aprovado: a data é registrada automaticamente e fica salva neste navegador.</p>
+  <div class="filtros no-print" id="fTestes"></div>
+  <div class="caixa">
+    <table class="tabela-resp">
+      <thead><tr><th>Aprovado</th><th>ID</th><th>Módulo</th><th>Caso de teste</th><th>Como testar</th><th>Resultado esperado</th><th>Situação</th><th>Observações</th></tr></thead>
+      <tbody id="tTes"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="aprovacao">
+  <h2><small>5</small> Aprovação</h2>
+  <p class="lead">Declaro que as alterações acima foram apresentadas, conferidas e aprovadas.</p>
+  <div class="assin">
+    <div><span>SanyTech – responsável técnico</span></div>
+    <div><span>Garcia Di Mase – cliente</span></div>
+    <div><span>Data</span></div>
+  </div>
+</section>
+
+<p class="rodape">SanyTech · Organização e Gestão de Software · Cliente Garcia Di Mase – Odontologia Especializada · documento gerado em 16/11/2026</p>
+</main>
+
+<script>
+(function () {
+  const DATA = '16/11/2026';
+  // ---------- Registro de alterações ----------
+  const ALT = [
+    ['Site – página inicial','Nova entrada com a foto da família ocupando a tela e o texto sobre fundo azul-marinho.','A entrada anterior era clara e com foto pequena; o novo formato é mais moderno, profissional e valoriza a imagem da clínica.'],
+    ['Site – identidade visual','Logo com o símbolo original (verde-azulado) e nome em branco sobre a foto (novo arquivo logo-horizontal-hero.png).','Manter a identidade visual da clínica e garantir leitura do nome sobre o fundo escuro.'],
+    ['Site – menu','Menu transparente sobre a foto, com nomes em branco; ao rolar a página ele fica branco com o logo colorido. Menu sanduíche mantido à esquerda do logo.','Dar destaque à foto sem perder a leitura do menu; manter o acesso ao menu lateral.'],
+    ['Site – menu','Removido o botão de WhatsApp do canto superior direito.','Topo mais limpo; o contato continua disponível na seção Contato e no menu lateral.'],
+    ['Site – topo','Removida a faixa superior com telefone e horário.','A faixa quebrava o visual da nova entrada; telefone e horário seguem no menu lateral e no rodapé.'],
+    ['Acessibilidade','Botões de Contraste, A− e A+ passaram a ficar no menu principal, à direita, separados por uma divisória.','Manter os recursos de acessibilidade sempre visíveis após a remoção da faixa superior.'],
+    ['Site – responsividade','Menu ajustado para caber em qualquer largura de tela, com margens iguais; em telas menores o botão de contraste mostra só o ícone.','Correção: o menu era cortado à direita e a palavra "Contraste" não aparecia inteira.'],
+    ['Site – página inicial','Entrada inteira (título, texto, botões e números) visível sem rolar; os textos se ajustam à altura da tela.','A informação principal e a nota da clínica devem aparecer na primeira tela, inclusive em notebooks.'],
+    ['Site – página inicial','Espaço entre os botões e os números (especialistas, nota e horário) reduzido.','O espaço vazio era grande e separava informações relacionadas.'],
+    ['Site – imagem','Foto reposicionada para a direita e nova versão mais nítida (JPG de 2400 px, 0,9 MB no lugar de 2,6 MB).','O texto cobria o rosto do pai; a nova versão melhora a nitidez e o tempo de carregamento.'],
+    ['Acessibilidade','No modo alto contraste, o fundo preto fica só atrás do texto e a foto permanece nítida.','No modo contraste a foto ficava escura demais e perdia qualidade.'],
+    ['Site – página inicial','Margem lateral menor, foto encostada no texto, destaques quadrados (sem cantos arredondados) e novo título: "Seu sorriso merece cuidado especializado."','Eliminar o espaço vazio à esquerda, manter o padrão visual quadrado do sistema e deixar a mensagem mais direta.'],
+    ['Site – parte inferior','Seções abaixo da entrada mantidas como no site original (cores claras).','Preservar a identidade já aprovada do restante do site.'],
+    ['Financeiro – secretaria','Removido o gráfico de setores (receita por procedimento); o gráfico de barras "Faturamento mês a mês" passou a ocupar a largura toda. Mantidos os ajustes anteriores (sem o cartão Ticket médio e sem a opção de 12 meses no gráfico de setores).','Simplificar a leitura do financeiro e dar mais espaço ao gráfico principal.'],
+    ['Área do dentista','Visão geral reorganizada: agenda de hoje no topo, próximo paciente destacado, resumo do dia sem valores e atalhos rápidos.','A tela inicial do dentista deve focar no atendimento do dia; valores financeiros não ficam expostos na entrada.'],
+    ['Área do dentista','Nova página "Meu financeiro" no menu lateral: previsto do dia, semana e mês, ticket médio, gráfico de 12 meses, receita por procedimento, formas de pagamento, valores a receber e atendimentos recebidos.','Reunir os detalhes financeiros do dentista em um local próprio, com mais informações do que antes.'],
+    ['Área do dentista','Novo gerador de atestado odontológico (comparecimento ou afastamento), com dados do dentista e CRO já preenchidos, paciente puxado da agenda, da lista ou digitado, código do procedimento, dias de afastamento, CID opcional e impressão/PDF em A4.','Agilizar a emissão de atestados, evitar erros de digitação e padronizar o documento da clínica.'],
+    ['Área do dentista','Atalhos para emitir atestado na agenda do dia e no prontuário do paciente.','Emitir o atestado direto do atendimento, sem precisar procurar o paciente.'],
+    ['Segurança','Atestado e financeiro do dentista mostram apenas pacientes e valores do próprio dentista logado.','Manter a regra do sistema: cada dentista acessa somente os seus dados.'],
+    ['Documentação','README do repositório atualizado: diagramas de funcionamento, tabela de segurança, novidades e caminhos das imagens corrigidos; guia de instalação com Docker.','Facilitar a instalação e a apresentação do projeto; as imagens do README não apareciam.'],
+    ['Gestão do projeto','Backup dos arquivos anteriores e pacote completo do projeto atualizado.','Permitir reverter alterações e entregar o projeto completo ao cliente.'],
+    ['Acessibilidade','No alto contraste, a página inicial passou a seguir o padrão do contraste: fundo preto, textos brancos, destaques amarelos e foto escurecida apenas como fundo (substitui a ALT-11).','A foto nítida competia com o texto; no modo contraste a prioridade é a legibilidade, como no restante do sistema.'],
+    ['Responsividade','Revisão em 360, 390, 768, 1024, 1366 e 1920 px: folha do atestado empilhada no celular, filtro de data dos Lembretes quebrando linha e tabela de lançamentos do Financeiro com rolagem própria.','No celular o endereço do atestado e o botão "Ver" eram cortados; em tablet a tabela de lançamentos passava da tela.']
+  ];
+  // ---------- Arquivos ----------
+  const ARQ = [
+    ['src/index.php','Alterado','ALT-01, 08, 09, 12'],
+    ['src/include/cabecalho.php','Alterado','ALT-03, 04, 05, 06'],
+    ['src/include/head.php','Alterado','Versão do estilo atualizada'],
+    ['src/assets/css/style.css','Alterado','ALT-01 a 12, 15 a 18'],
+    ['src/assets/js/site.js','Alterado','ALT-03 (menu ao rolar)'],
+    ['src/assets/img/logo-horizontal-hero.png','Criado','ALT-02'],
+    ['src/assets/img/fotos/hero-principal.jpg','Criado','ALT-10'],
+    ['src/financeiro.php','Alterado','ALT-14'],
+    ['src/dent_painel.php','Alterado','ALT-15, 18'],
+    ['src/dent_financeiro.php','Criado','ALT-16, 19'],
+    ['src/dent_atestado.php','Criado','ALT-17, 19'],
+    ['src/dent_paciente.php','Alterado','ALT-18'],
+    ['src/include/admin_topo.php','Alterado','ALT-16, 17 (menu lateral)'],
+    ['README.md e README-com-imagens/README.md','Alterado','ALT-20'],
+    ['src/lembretes.php','Alterado','ALT-23'],
+    ['src/assets/css/style.css (contraste e responsividade)','Alterado','ALT-22, 23']
+  ];
+  // ---------- Testes: [módulo, caso, passos, esperado, realizado(true/false), observação] ----------
+  const TES = [
+    // realizados
+    ['Código','Verificação de sintaxe de todos os arquivos PHP',['Executar php -l em todos os arquivos .php'],'Nenhum erro de sintaxe',true,'Aprovado: nenhum erro encontrado.'],
+    ['Site – página inicial','Layout em notebook e monitor',['Abrir a página em 1366×640, 1500×690 e 1920×940'],'Sem rolagem horizontal; família visível; texto sem cobrir rostos',true,'Aprovado nas três resoluções.'],
+    ['Site – menu','Menu sem cortes',['Conferir o menu nas larguras acima'],'Contraste, A− e A+ visíveis, margens iguais',true,'Aprovado.'],
+    ['Site – página inicial','Entrada inteira sem rolar',['Abrir em 1366×640 e 1500×690 sem rolar'],'Título, botões e nota 5,0 visíveis na primeira tela',true,'Aprovado.'],
+    ['Acessibilidade','Modo alto contraste na entrada',['Ativar o Contraste na página inicial'],'Padrão do contraste: fundo preto, texto branco e destaques amarelos',true,'Aprovado após ajuste (ALT-22).'],
+    ['Responsividade','Telas sem corte lateral',['Abrir site, secretaria e dentista em 360, 390, 768, 1024, 1366 e 1920 px, com e sem contraste'],'Nenhum conteúdo cortado ou empurrando a página para o lado',true,'Aprovado após ajustes (ALT-23).'],
+    ['Celular','Página inicial no celular',['Abrir em 390×844'],'Sem rolagem horizontal; menu, texto e botões legíveis',true,'Aprovado após ajuste do menu.'],
+    ['Área do dentista','Páginas novas carregam sem erro',['Abrir Visão geral, Meu financeiro e Atestados com banco de teste'],'Páginas abrem sem erros de PHP ou JavaScript',true,'Aprovado.'],
+    ['Área do dentista','Impressão do atestado',['Gerar um atestado a partir de uma consulta','Imprimir em PDF'],'Somente a folha do atestado, em uma página A4',true,'Aprovado: uma página A4, sem menu.'],
+    ['Instalação','Projeto rodando no Docker com a nova entrada',['docker compose up -d --build','Abrir http://localhost'],'Nova página inicial aparece no localhost',true,'Aprovado em 16/11/2026.'],
+    // pendentes
+    ['Site – página inicial','Entrada final em tela grande, notebook e celular',['Abrir o site nos três tamanhos após a última atualização'],'Sem espaço vazio à esquerda, família inteira visível, menu sem cortes',false,''],
+    ['Site – menu','Zoom do navegador',['Testar com zoom de 100%, 110% e 125%'],'Menu continua inteiro e alinhado',false,''],
+    ['Site – menu','Menu muda ao rolar',['Rolar a página para baixo e voltar ao topo'],'Ao rolar: fundo branco e logo colorido; no topo: transparente',false,''],
+    ['Site – navegação','Links do menu',['Clicar em Especialistas, Tratamentos, Avaliações, Dúvidas e Contato'],'Cada link leva à seção correta',false,''],
+    ['Site – navegação','Botões da entrada',['Clicar em Agendar consulta','Clicar em Conhecer especialistas'],'Abre o agendamento / rola até os especialistas',false,''],
+    ['Site – navegação','Menu sanduíche',['Abrir o ☰, usar os links e fechar no X e com Esc'],'Menu lateral abre, funciona e fecha',false,''],
+    ['Site – páginas internas','Cabeçalho nas outras páginas',['Abrir especialista, agendar, avaliações e contato'],'Menu branco, sem faixa de telefone, nada sobreposto',false,''],
+    ['Acessibilidade','Contraste em todas as páginas',['Ligar o Contraste e trocar de página','Desligar'],'Contraste permanece entre páginas e desliga corretamente',false,''],
+    ['Acessibilidade','Tamanho do texto',['Clicar em A+ três vezes e depois em A−'],'Texto aumenta e diminui sem quebrar o layout',false,''],
+    ['Acessibilidade','Navegação por teclado',['Usar Tab e Enter desde o topo'],'"Pular para o conteúdo" aparece e o foco é visível',false,''],
+    ['Agendamento','Agendamento completo',['Procedimento → especialista → data/horário → dados → confirmar'],'Consulta aparece na agenda da secretaria',false,''],
+    ['Agendamento','Duração do procedimento',['Agendar um procedimento longo e tentar outro em seguida'],'Horários ocupados não aparecem como livres',false,''],
+    ['Financeiro – secretaria','Gráfico de barras na largura toda',['Entrar como secretaria e abrir o Financeiro'],'Sem gráfico de setores; barras na largura toda',false,''],
+    ['Financeiro – secretaria','Filtros e demais gráficos',['Trocar mês e ano; abrir o console (F12)'],'Tudo atualiza, sem erros no console',false,''],
+    ['Área do dentista','Visão geral',['Entrar como dentista'],'Agenda de hoje no topo, "Próximo" destacado, sem valores',false,''],
+    ['Área do dentista','Meu financeiro com dados reais',['Menu → Financeiro; trocar o mês'],'Só os atendimentos do dentista logado; gráfico aparece; valores conferem',false,''],
+    ['Área do dentista','Atestado digitado com afastamento',['Menu → Atestados; digitar um nome; escolher Afastamento e 3 dias; informar código'],'Texto mostra "3 (três) dias" e o código do procedimento',false,''],
+    ['Área do dentista','Atestado pelo prontuário',['Abrir um paciente e clicar em Atestado'],'Atestado abre com o nome do paciente preenchido',false,''],
+    ['Área restrita','Login e permissões',['Definir senhas e entrar como secretaria, cada dentista e SanyTech'],'Cada perfil vê apenas o que lhe pertence',false,''],
+    ['Área restrita','Prontuário e arquivos',['Enviar foto/PDF ao prontuário','Tentar abrir o arquivo sem login'],'Arquivo salvo e acessível só ao dentista logado',false,''],
+    ['Segurança','Limite de tentativas de login',['Errar a senha várias vezes'],'Login bloqueado temporariamente com contagem regressiva',false,''],
+    ['Segurança','Dados sensíveis fora do repositório',['Conferir o GitHub (arquivos e histórico)'],'.env, mysql-data e uploads não aparecem',false,''],
+    ['Documentação','README no GitHub',['Abrir a página do repositório'],'Imagens, logo e diagramas aparecem corretamente',false,''],
+    ['Instalação','phpMyAdmin restrito ao computador local',['Abrir http://localhost:8888'],'Abre localmente e pede usuário e senha',false,'']
+  ];
+
+  const CH = 'gestao_sanytech_garcia_testes_v1';
+  let marc = {}; try { marc = JSON.parse(localStorage.getItem(CH)) || {}; } catch (e) {}
+  const salvar = () => { try { localStorage.setItem(CH, JSON.stringify(marc)); } catch (e) {} };
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const pad = n => String(n).padStart(2, '0');
+  const hoje = () => { const d = new Date(); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); };
+
+  document.getElementById('tAlt').innerHTML = ALT.map((a, i) =>
+    `<tr><td class="id" data-l="ID">ALT-${pad(i + 1)}</td><td data-l="Data">${DATA}</td><td class="mod" data-l="Módulo"><span class="tag">${esc(a[0])}</span></td>
+     <td data-l="Alteração">${esc(a[1])}</td><td class="motivo" data-l="Motivo">${esc(a[2])}</td><td data-l="Situação"><span class="st ok">Concluída</span></td></tr>`).join('');
+  document.getElementById('tArq').innerHTML = ARQ.map(a =>
+    `<tr><td class="arq" data-l="Arquivo">${esc(a[0])}</td><td data-l="Tipo"><span class="tag">${a[1]}</span></td><td data-l="Alterações">${esc(a[2])}</td></tr>`).join('');
+
+  let filtro = 'Todos';
+  const situacao = (t, i) => t[4] ? { ok: true, data: DATA } : (marc['t' + i] && marc['t' + i].ok ? { ok: true, data: marc['t' + i].data } : { ok: false });
+
+  function render() {
+    const mods = ['Todos', 'Aprovados', 'Pendentes'];
+    document.getElementById('fTestes').innerHTML = mods.map(m => `<button class="chip ${m === filtro ? 'on' : ''}" data-f="${m}">${m}</button>`).join('');
+    document.getElementById('tTes').innerHTML = TES.map((t, i) => {
+      const s = situacao(t, i);
+      const oculto = (filtro === 'Aprovados' && !s.ok) || (filtro === 'Pendentes' && s.ok);
+      const obs = t[4] ? esc(t[5]) : `<textarea class="obs" data-obs="${i}" placeholder="Resultado / observação">${esc((marc['t' + i] || {}).obs || '')}</textarea>`;
+      return `<tr class="${oculto ? 'oculto' : ''}" ${oculto ? 'style="display:none"' : ''}>
+        <td data-l="Aprovado"><label class="marca"><input type="checkbox" data-t="${i}" ${s.ok ? 'checked' : ''} ${t[4] ? 'disabled' : ''} aria-label="Aprovado: ${esc(t[1])}"></label></td>
+        <td class="id" data-l="ID">TST-${pad(i + 1)}</td>
+        <td class="mod" data-l="Módulo"><span class="tag">${esc(t[0])}</span></td>
+        <td data-l="Caso de teste"><b>${esc(t[1])}</b></td>
+        <td data-l="Como testar"><ol>${t[2].map(p => `<li>${esc(p)}</li>`).join('')}</ol></td>
+        <td class="motivo" data-l="Esperado">${esc(t[3])}</td>
+        <td data-l="Situação">${s.ok ? `<span class="st ok">Aprovado · ${s.data}</span>` : '<span class="st pend">Pendente</span>'}</td>
+        <td data-l="Observações">${obs}</td></tr>`;
+    }).join('');
+    const ok = TES.filter((t, i) => situacao(t, i).ok).length;
+    document.getElementById('nAlt').textContent = ALT.length;
+    document.getElementById('nArq').textContent = ARQ.length;
+    document.getElementById('nOk').textContent = ok;
+    document.getElementById('nPend').textContent = TES.length - ok;
+    document.getElementById('pBar').style.width = Math.round(ok / TES.length * 100) + '%';
+  }
+  document.addEventListener('change', e => {
+    const i = e.target.dataset.t; if (i === undefined) return;
+    const k = 't' + i; marc[k] = Object.assign(marc[k] || {}, { ok: e.target.checked, data: e.target.checked ? hoje() : '' });
+    salvar(); render();
+  });
+  document.addEventListener('input', e => {
+    const i = e.target.dataset.obs; if (i === undefined) return;
+    const k = 't' + i; marc[k] = Object.assign(marc[k] || {}, { obs: e.target.value }); salvar();
+  });
+  document.addEventListener('click', e => { const f = e.target.dataset.f; if (f) { filtro = f; render(); } });
+  document.getElementById('bLimpar').addEventListener('click', () => {
+    if (!confirm('Desfazer as marcações e observações feitas neste navegador?')) return;
+    marc = {}; salvar(); render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
