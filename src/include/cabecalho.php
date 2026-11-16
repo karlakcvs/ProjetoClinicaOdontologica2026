@@ -27,6 +27,7 @@ $links_menu = [
     ['index.php#especialistas', 'Especialistas', 'bi-person-badge', $pagina === 'especialista'],
     ['index.php#procedimentos', 'Tratamentos', 'bi-clipboard2-pulse', false],
     ['index.php#avaliacoes', 'Avaliações', 'bi-star', false],
+    ['index.php#duvidas', 'Dúvidas', 'bi-question-circle', false],
     ['index.php#contato', 'Contato', 'bi-chat-dots', false],
 ];
 ?>
@@ -36,12 +37,11 @@ $links_menu = [
             <span class="menu-btn-linhas" aria-hidden="true"></span>
         </button>
         <a class="navbar-brand me-auto me-lg-0" href="index.php" aria-label="<?= e($nome_clinica) ?> – página inicial"><?= logo_clinica() ?></a>
-        <ul class="nav-desktop d-none d-lg-flex mx-auto">
+        <ul class="nav-desktop d-none d-lg-flex ms-auto">
             <?php foreach ($links_menu as [$href, $txt, $ico, $ativo]): ?>
                 <li><a class="nav-link <?= $ativo ? 'active' : '' ?>" href="<?= $href ?>" <?= $ativo ? 'aria-current="page"' : '' ?>><?= $txt ?></a></li>
             <?php endforeach; ?>
         </ul>
-        <a href="agendar.php" class="btn btn-teal btn-sm text-nowrap nav-agendar" aria-label="Agendar consulta"><i class="bi bi-calendar2-plus" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Agendar consulta</span></a>
     </div>
 </nav>
 

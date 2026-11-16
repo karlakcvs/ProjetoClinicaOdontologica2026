@@ -5,6 +5,12 @@ require_once __DIR__ . '/include/conexao.php';
 $dentistas = $pdo->query("SELECT * FROM dentista WHERE ativo = 1 ORDER BY id_dentista")->fetchAll();
 // "Avaliação / Primeira consulta" sempre em primeiro; o resto por valor
 $procedimentos = $pdo->query("SELECT * FROM procedimento ORDER BY CASE WHEN nome LIKE '%Primeira consulta%' THEN 0 ELSE 1 END, valor, nome")->fetchAll();
+// cada dentista pode ter o próprio preço: o site mostra o menor ("a partir de")
+$aPartir = $pdo->query("SELECT dp.id_procedimento, MIN(COALESCE(dp.valor, p.valor)) AS v FROM dentista_procedimento dp
+                        JOIN procedimento p ON p.id_procedimento = dp.id_procedimento JOIN dentista d ON d.id_dentista = dp.id_dentista AND d.ativo = 1
+                        GROUP BY dp.id_procedimento")->fetchAll(PDO::FETCH_KEY_PAIR);
+foreach ($procedimentos as &$pp) $pp['valor'] = $aPartir[$pp['id_procedimento']] ?? $pp['valor'];
+unset($pp);
 
 // horários de cada dentista agrupados (ex.: 08:00–12:00 / 13:30–18:00)
 $turnos = [];
@@ -51,9 +57,6 @@ include __DIR__ . '/include/cabecalho.php';
                     <figure class="hf-main m-0">
                         <img src="<?= e(foto_site('hero-principal', 1400)) ?>" alt="Dentista da clínica conversando com mãe e filha sorridentes no consultório" width="1400" height="933" fetchpriority="high" onerror="this.closest('figure').classList.add('sem-foto')">
                     </figure>
-                    <?php if ($resumo['qtd']): ?>
-                    <div class="hf-chip hf-c1"><span class="hf-chip-ico"><i class="bi bi-star-fill" aria-hidden="true"></i></span><div><strong><?= number_format((float) $resumo['media'], 1, ',', '') ?> de 5</strong><small><?= (int) $resumo['qtd'] ?> avaliações de pacientes</small></div></div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -150,7 +153,7 @@ include __DIR__ . '/include/cabecalho.php';
     </div>
 </section>
 
-<!-- AGENDAMENTO RÁPIDO: foto ao lado (estilo do exemplo enviado) -->
+<!-- AGENDAMENTO RÁPIDO: foto ao lado -->
 <section class="section" id="agende" aria-labelledby="agendeTit">
     <div class="container">
         <div class="agende-split">
@@ -179,7 +182,7 @@ include __DIR__ . '/include/cabecalho.php';
                         <label class="form-label" for="agProc">Tratamento</label>
                         <select id="agProc" name="procedimento" class="form-select form-linha">
                             <option value="">Selecione o tratamento</option>
-                            <?php foreach ($procedimentos as $p): ?><option value="<?= (int) $p['id_procedimento'] ?>"><?= e($p['nome']) ?> · <?= moeda($p['valor']) ?></option><?php endforeach; ?>
+                            <?php foreach ($procedimentos as $p): ?><option value="<?= (int) $p['id_procedimento'] ?>"><?= e($p['nome']) ?> · a partir de <?= moeda($p['valor']) ?></option><?php endforeach; ?>
                         </select>
                     </div>
                     <div class="col-12">
@@ -246,11 +249,11 @@ include __DIR__ . '/include/cabecalho.php';
             <?php foreach ($avaliacoes as $a): ?>
             <div class="col-md-6 col-lg-4">
                 <figure class="card-soft review m-0">
-                    <div class="d-flex justify-content-between align-items-center gap-2"><?= estrelas($a['nota']) ?><?php if ($a['demo']): ?><span class="demo-tag" title="Avaliação de exemplo para demonstração do sistema">exemplo</span><?php endif; ?></div>
+                    <div class="d-flex justify-content-between align-items-center gap-2"><?= estrelas($a['nota']) ?><span class="review-data"><?= e(mes_ano($a['criado_em'])) ?></span></div>
                     <blockquote>“<?= e($a['comentario']) ?>”</blockquote>
                     <figcaption class="who">
                         <span class="avatar avatar-xs" style="--c:#4f7cc4" aria-hidden="true"><?= e(iniciais($a['nome'])) ?></span>
-                        <span><strong><?= e($a['nome']) ?></strong><?php if ($a['dentista']): ?><br><span class="text-muted">sobre <?= e($a['dentista']) ?></span><?php endif; ?></span>
+                        <span><strong><?= e($a['nome']) ?></strong><?php if ($a['paciente_desde']): ?> <span class="paciente-desde"><i class="bi bi-award" aria-hidden="true"></i> paciente desde <?= (int) $a['paciente_desde'] ?></span><?php endif; ?><?php if ($a['dentista']): ?><br><span class="text-muted">sobre <?= e($a['dentista']) ?></span><?php endif; ?></span>
                     </figcaption>
                 </figure>
             </div>
@@ -278,8 +281,12 @@ include __DIR__ . '/include/cabecalho.php';
                                 <span class="star-label small fw-semibold text-muted" aria-live="polite"></span>
                             </div>
                         </div>
-                        <div class="col-md-6"><label class="form-label" for="avNome">Seu nome</label><input id="avNome" name="nome" class="form-control" required maxlength="60" placeholder="Ex.: Maria S." value="<?= e(antigo('avaliacao', 'nome')) ?>"></div>
-                        <div class="col-md-6"><label class="form-label" for="avDent">Especialista <span class="text-muted fw-normal">(opcional)</span></label>
+                        <div class="col-md-4"><label class="form-label" for="avNome">Seu nome</label><input id="avNome" name="nome" class="form-control" required maxlength="60" placeholder="Ex.: Maria S." value="<?= e(antigo('avaliacao', 'nome')) ?>"></div>
+                        <div class="col-md-4"><label class="form-label" for="avDesde">Paciente desde <span class="text-muted fw-normal">(opcional)</span></label>
+                            <select id="avDesde" name="paciente_desde" class="form-select"><option value="">Primeira vez</option>
+                                <?php for ($ano = (int) date('Y'); $ano >= 2010; $ano--): ?><option value="<?= $ano ?>" <?= (int) antigo('avaliacao', 'paciente_desde') === $ano ? 'selected' : '' ?>><?= $ano ?></option><?php endfor; ?>
+                            </select></div>
+                        <div class="col-md-4"><label class="form-label" for="avDent">Especialista <span class="text-muted fw-normal">(opcional)</span></label>
                             <select id="avDent" name="id_dentista" class="form-select"><option value="">Clínica em geral</option>
                                 <?php foreach ($dentistas as $d): ?><option value="<?= (int) $d['id_dentista'] ?>" <?= (string) antigo('avaliacao', 'id_dentista') === (string) $d['id_dentista'] ? 'selected' : '' ?>><?= e($d['nome']) ?></option><?php endforeach; ?>
                             </select></div>
@@ -289,6 +296,25 @@ include __DIR__ . '/include/cabecalho.php';
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- PERGUNTAS FREQUENTES -->
+<section class="section faq-sec" id="duvidas" aria-labelledby="faqTit">
+    <div class="container">
+        <div class="text-center mb-4 mb-lg-5">
+            <span class="faq-kicker">Perguntas frequentes</span>
+            <h2 id="faqTit" class="faq-tit">Perguntas e Respostas.</h2>
+            <p class="section-sub mx-auto mb-0">As dúvidas que mais ouvimos na recepção. Não achou a sua? <a href="#contato">Fale com a gente</a>.</p>
+        </div>
+        <div class="faq-lista">
+            <?php foreach ($FAQ as $i => [$perg, $resp]): ?>
+            <details class="faq-item" <?= $i === 0 ? 'open' : '' ?>>
+                <summary><span><?= e($perg) ?></span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                <div class="faq-resp"><p class="mb-0"><?= e($resp) ?></p></div>
+            </details>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
@@ -305,6 +331,7 @@ include __DIR__ . '/include/cabecalho.php';
                     <li class="d-flex gap-3"><span class="feature-ico"><i class="bi bi-geo-alt" aria-hidden="true"></i></span><div><strong>Endereço</strong><br><span class="text-muted"><?= e($endereco) ?></span></div></li>
                     <li class="d-flex gap-3"><span class="feature-ico"><i class="bi bi-telephone" aria-hidden="true"></i></span><div><strong>Telefone</strong><br><span class="text-muted"><?= e($contato) ?></span></div></li>
                     <li class="d-flex gap-3"><span class="feature-ico"><i class="bi bi-whatsapp" aria-hidden="true"></i></span><div><strong>WhatsApp</strong><br><a href="https://wa.me/<?= e($whatsapp) ?>" target="_blank" rel="noopener">Conversar agora</a></div></li>
+                    <li class="d-flex gap-3"><span class="feature-ico"><i class="bi bi-clock" aria-hidden="true"></i></span><div><strong>Horário</strong><br><span class="text-muted">Segunda a sexta, 07h30 às 19h00</span></div></li>
                 </ul>
             </div>
             <div class="col-lg-7">
@@ -329,6 +356,16 @@ include __DIR__ . '/include/cabecalho.php';
                         </div>
                     </div>
                 </form>
+            </div>
+            <div class="col-12">
+                <div class="mapa-box">
+                    <iframe src="<?= e($mapa_embed) ?>" title="Mapa com a localização da clínica <?= e($nome_clinica) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                    <div class="mapa-card">
+                        <strong><i class="bi bi-geo-alt-fill text-teal me-1" aria-hidden="true"></i><?= e($nome_clinica) ?></strong>
+                        <span class="small text-muted"><?= e($endereco) ?></span>
+                        <a href="<?= e($mapa_link) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-ghost mt-2 align-self-start"><i class="bi bi-sign-turn-right me-1" aria-hidden="true"></i>Como chegar</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -103,7 +103,8 @@
   function atualizarResumo() {
     const p = proc(), d = dent();
     $('#rProc').innerHTML = p ? `${esc(p.dataset.nome)}<br><small class="text-muted">${esc(p.dataset.dur)} min</small>` : '—';
-    $('#rValor').textContent = p ? p.dataset.valor : '—';
+    const precoDent = p && d && cfg.precos && cfg.precos[p.value] ? cfg.precos[p.value][d.value] : null;
+    $('#rValor').textContent = precoDent || (p ? p.dataset.valor : '—');
     $('#rDent').innerHTML = d ? `${esc(d.dataset.nome)}<br><small class="text-muted">${esc(d.dataset.esp)}</small>` : '—';
     if (inpData.value) {
       const [y, m, dd] = inpData.value.split('-').map(Number);

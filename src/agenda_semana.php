@@ -8,7 +8,8 @@ $ref = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['semana'] ?? '') ? $_GET['seman
 $seg = date('Y-m-d', strtotime('monday this week', strtotime($ref)));
 $filtroDent = $ehDentista ? (int) $_SESSION['id_dentista'] : (int) ($_GET['dentista'] ?? 0);
 // Cores: por tipo de procedimento (padrão do dentista) ou por dentista (padrão da secretaria)
-$corPor = in_array($_GET['cor'] ?? '', ['tipo', 'dentista'], true) ? $_GET['cor'] : ($ehDentista || $filtroDent ? 'tipo' : 'dentista');
+$corPor = $ehDentista ? 'tipo' : (in_array($_GET['cor'] ?? '', ['tipo', 'dentista'], true) ? $_GET['cor'] : ($filtroDent ? 'tipo' : 'dentista'));
+$corDent = array_column($pdo->query("SELECT id_dentista, cor FROM dentista")->fetchAll(), 'cor', 'id_dentista');
 
 $dentistas = $pdo->query("SELECT id_dentista, nome, cor FROM dentista ORDER BY id_dentista")->fetchAll();
 $temSabado = (int) $pdo->query("SELECT COUNT(*) FROM horario_atendimento WHERE dia_semana = 6")->fetchColumn() > 0;
@@ -75,10 +76,15 @@ include __DIR__ . '/include/admin_topo.php';
         <a href="<?= e($q($prox)) ?>" class="btn btn-icon btn-ghost" aria-label="Próxima semana"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
     </div>
     <strong class="px-1"><?= date('d/m', strtotime($dias[0])) ?> a <?= date('d/m/Y', strtotime(end($dias))) ?> <span class="text-muted fw-normal small">· <?= $total ?> consulta(s)</span></strong>
-    <div class="btn-group btn-group-sm ms-md-auto" role="group" aria-label="Colorir a agenda por">
-        <a href="<?= e($q($seg, 'tipo')) ?>" class="btn <?= $corPor === 'tipo' ? 'btn-navy' : 'btn-ghost' ?>" <?= $corPor === 'tipo' ? 'aria-current="true"' : '' ?>>Cor por tipo</a>
-        <?php if (!$ehDentista): ?><a href="<?= e($q($seg, 'dentista')) ?>" class="btn <?= $corPor === 'dentista' ? 'btn-navy' : 'btn-ghost' ?>" <?= $corPor === 'dentista' ? 'aria-current="true"' : '' ?>>Cor por dentista</a><?php endif; ?>
+    <?php if (!$ehDentista): ?>
+    <div class="d-flex align-items-center gap-2 ms-md-auto">
+        <span class="small text-muted">Colorir por</span>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Colorir a agenda por">
+            <a href="<?= e($q($seg, 'dentista')) ?>" class="btn <?= $corPor === 'dentista' ? 'btn-navy' : 'btn-ghost' ?>" <?= $corPor === 'dentista' ? 'aria-current="true"' : '' ?>><i class="bi bi-person-badge me-1" aria-hidden="true"></i>Dentista</a>
+            <a href="<?= e($q($seg, 'tipo')) ?>" class="btn <?= $corPor === 'tipo' ? 'btn-navy' : 'btn-ghost' ?>" <?= $corPor === 'tipo' ? 'aria-current="true"' : '' ?>><i class="bi bi-palette me-1" aria-hidden="true"></i>Tipo de procedimento</a>
+        </div>
     </div>
+    <?php endif; ?>
     <?php if (!$ehDentista): ?>
     <form method="GET" class="d-flex gap-2 align-items-center">
         <input type="hidden" name="semana" value="<?= e($seg) ?>"><input type="hidden" name="cor" value="<?= e($corPor) ?>">
@@ -129,11 +135,13 @@ include __DIR__ . '/include/admin_topo.php';
                     <a href="<?= $link ?>" role="listitem" class="cal-ev st-<?= strtolower($c['status']) ?>"
                        style="--c:<?= e($corEv) ?>;top:<?= round($top) ?>px;height:<?= round($alt) ?>px;left:calc(<?= $left ?>% + 4px);right:auto;width:calc(<?= $w ?>% - 8px)"
                        title="<?= e(hm($c['hora_inicio']) . '–' . hm($c['hora_fim']) . ' · ' . $c['paciente'] . ' · ' . $c['procedimento'] . ' · ' . $c['dentista'] . ' · ' . $stt) ?>">
-                        <b><?= hm($c['hora_inicio']) ?></b>
+                        <b><?= hm($c['hora_inicio']) ?><?php if (!$ehDentista && $corPor === 'tipo'): ?> <span class="ev-dent" style="--d:<?= e($corDent[$c['id_dentista']] ?? '#999') ?>" title="<?= e($c['dentista']) ?>"><?= e(iniciais($c['dentista'])) ?></span><?php elseif (!$ehDentista): ?> <span class="ev-tipo" style="--t:<?= e(CATEGORIAS_PROC[$cat][1]) ?>" title="<?= e(CATEGORIAS_PROC[$cat][0]) ?>"></span><?php endif; ?></b>
                         <span class="nm"><?= e($c['paciente']) ?></span>
-                        <?php if ($alt > 50): ?><span class="pr"><?= e($c['procedimento']) ?></span><?php endif; ?>
+                        <?php if ($c['status'] === 'CANCELADA'): ?><span class="ev-st ev-cancel"><i class="bi bi-x-circle-fill" aria-hidden="true"></i> Cancelada</span>
+                        <?php elseif ($c['status'] === 'FALTOU'): ?><span class="ev-st ev-falta"><i class="bi bi-person-x-fill" aria-hidden="true"></i> Faltou</span>
+                        <?php elseif ($alt > 50): ?><span class="pr"><?= e($c['procedimento']) ?></span><?php endif; ?>
                         <span class="visually-hidden"><?= e($c['dentista'] . ', ' . $stt) ?></span>
-                        <?php if ($c['status'] === 'CONFIRMADA'): ?><i class="bi bi-check2-circle ico text-success" aria-hidden="true"></i><?php elseif ($c['status'] === 'REALIZADA'): ?><i class="bi bi-patch-check ico" style="color:#217a3c" aria-hidden="true"></i><?php elseif ($c['primeira_consulta']): ?><i class="bi bi-stars ico" aria-hidden="true"></i><?php endif; ?>
+                        <?php if ($c['status'] === 'CONFIRMADA'): ?><i class="bi bi-check2-circle ico text-success" aria-hidden="true"></i><?php elseif ($c['status'] === 'REALIZADA'): ?><i class="bi bi-patch-check ico" style="color:#217a3c" aria-hidden="true"></i><?php elseif ($c['primeira_consulta'] && !in_array($c['status'], ['CANCELADA', 'FALTOU'], true)): ?><i class="bi bi-stars ico" aria-hidden="true"></i><?php endif; ?>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -141,14 +149,26 @@ include __DIR__ . '/include/admin_topo.php';
     </div>
 </div>
 
-<div class="cal-legend mt-3">
-    <?php if ($corPor === 'tipo'): foreach (CATEGORIAS_PROC as [$rot, $cor]): ?><span><span class="legend-dot me-1" style="background:<?= e($cor) ?>"></span><?= e($rot) ?></span><?php endforeach;
-          else: foreach ($dentistas as $d): ?><span><span class="legend-dot me-1" style="background:<?= e($d['cor']) ?>"></span><?= e($d['nome']) ?></span><?php endforeach; endif; ?>
-    <span><span class="legend-dot me-1" style="background:#fff;border:1px dashed #9aa5b1"></span>cancelada / faltou (apagada)</span>
-    <span><i class="bi bi-check2-circle text-success" aria-hidden="true"></i> confirmada</span>
-    <span><i class="bi bi-patch-check" style="color:#217a3c" aria-hidden="true"></i> realizada</span>
-    <span><i class="bi bi-stars" aria-hidden="true"></i> 1ª consulta</span>
-    <span class="text-muted">Clique na consulta para <?= $ehDentista ? 'abrir o prontuário do paciente' : 'editar ou remarcar' ?>.</span>
+<div class="card-soft cal-legenda mt-3">
+    <div class="leg-grupo">
+        <h2 class="leg-tit"><?= $corPor === 'tipo' ? 'Cor = tipo de procedimento' : 'Cor = dentista' ?></h2>
+        <div class="leg-itens">
+        <?php if ($corPor === 'tipo'): foreach (CATEGORIAS_PROC as [$rot, $cor]): ?><span><span class="leg-cor" style="--c:<?= e($cor) ?>"></span><?= e($rot) ?></span><?php endforeach;
+              else: foreach ($dentistas as $d): ?><span><span class="leg-cor" style="--c:<?= e($d['cor']) ?>"></span><?= e($d['nome']) ?></span><?php endforeach; endif; ?>
+        </div>
+        <?php if (!$ehDentista): ?><p class="small text-muted mb-0 mt-2"><?= $corPor === 'tipo' ? 'A bolinha com as iniciais mostra o dentista.' : 'O pontinho ao lado do horário mostra o tipo de procedimento.' ?></p><?php endif; ?>
+    </div>
+    <div class="leg-grupo">
+        <h2 class="leg-tit">Situação da consulta</h2>
+        <div class="leg-itens">
+            <span><i class="bi bi-check2-circle text-success" aria-hidden="true"></i> Confirmada</span>
+            <span><i class="bi bi-patch-check" style="color:#217a3c" aria-hidden="true"></i> Realizada</span>
+            <span><i class="bi bi-stars" aria-hidden="true"></i> 1ª consulta</span>
+            <span><span class="leg-st ev-cancel"><i class="bi bi-x-circle-fill" aria-hidden="true"></i> Cancelada</span> riscada</span>
+            <span><span class="leg-st ev-falta"><i class="bi bi-person-x-fill" aria-hidden="true"></i> Faltou</span> fundo vermelho</span>
+        </div>
+    </div>
+    <p class="small text-muted mb-0 w-100"><i class="bi bi-hand-index me-1" aria-hidden="true"></i>Clique na consulta para <?= $ehDentista ? 'abrir o prontuário do paciente' : 'editar ou remarcar' ?>.</p>
 </div>
 <?php
 $scripts_extra = '<script>

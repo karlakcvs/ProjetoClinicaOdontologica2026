@@ -17,6 +17,38 @@ $dominio_login  = "garciadimase.example";
 $instagram      = "#";
 $facebook       = "#";     // usado nos logins: secretaria@garciadimase.example (domínio fictício)
 
+// Mapa da seção "Contato" (Google Maps). Local HIPOTÉTICO: região central de Araras/SP.
+// Para trocar, mude só as coordenadas (latitude, longitude) abaixo.
+$mapa_coord     = "-22.3573,-47.3842";
+$mapa_embed     = "https://maps.google.com/maps?q=" . $mapa_coord . "&z=16&hl=pt-BR&output=embed";
+$mapa_link      = "https://www.google.com/maps/search/?api=1&query=" . $mapa_coord;
+
+// Perguntas frequentes do site (baseadas nas dúvidas mais comuns em sites de clínicas odontológicas)
+$FAQ = [
+    ['Vocês estão aceitando novos pacientes?',
+     'Sim. Atendemos crianças, adultos e idosos. Você pode agendar pelo site em poucos passos ou falar com a recepção pelo WhatsApp; normalmente conseguimos uma primeira consulta na mesma semana.'],
+    ['O que acontece na primeira consulta?',
+     'O especialista faz uma avaliação completa da boca, conversa sobre o que te incomoda e, se necessário, pede radiografias. No fim você recebe o plano de tratamento com as etapas e os valores, sem compromisso. Traga um documento com foto e exames anteriores, se tiver.'],
+    ['Quais são as formas de pagamento? Dá para parcelar?',
+     'O pagamento é feito na clínica, no dia do atendimento: PIX, dinheiro, cartão de débito ou de crédito. Tratamentos com várias sessões (aparelho, implantes, lentes) podem ser parcelados no cartão de crédito.'],
+    ['Vocês atendem convênio?',
+     'O atendimento é particular. Se o seu plano odontológico oferece reembolso, emitimos recibo e relatório do tratamento para você solicitar o ressarcimento.'],
+    ['A partir de que idade a criança pode ir ao ortodontista?',
+     'A primeira avaliação ortodôntica é indicada por volta dos 7 anos, quando começam a nascer os dentes permanentes. Nessa fase dá para corrigir a mordida e o crescimento dos ossos com tratamentos mais simples.'],
+    ['Quanto tempo dura o tratamento com aparelho ou alinhadores?',
+     'Depende de cada caso: em geral de 12 a 36 meses, com consultas de manutenção a cada 30 a 45 dias. Depois que o aparelho sai, a contenção é obrigatória para os dentes não voltarem para a posição antiga.'],
+    ['O implante dentário dói? Quanto tempo leva?',
+     'A cirurgia é feita com anestesia local e o paciente não sente dor durante o procedimento; nos dias seguintes o desconforto costuma ser leve e controlado com medicação. O implante leva de 2 a 6 meses para se integrar ao osso antes da coroa definitiva — em alguns casos é possível fazer carga imediata.'],
+    ['O clareamento deixa os dentes sensíveis? O resultado dura?',
+     'Pode haver sensibilidade passageira, que o dentista controla ajustando o gel e com produtos dessensibilizantes. Antes de clarear é feita uma avaliação para tratar cáries e gengiva. Com boa higiene, limpezas regulares e moderação no café e no vinho, o resultado dura anos.'],
+    ['De quanto em quanto tempo devo fazer limpeza?',
+     'Para a maioria das pessoas, a cada 6 meses. Quem usa aparelho, tem gengivite ou implantes pode precisar voltar a cada 3 ou 4 meses — o dentista indica o intervalo ideal para você.'],
+    ['Como remarco ou cancelo minha consulta?',
+     'Pelo WhatsApp ou telefone da clínica, de preferência com 24 horas de antecedência. Um dia antes da consulta nossa secretaria envia um lembrete pelo WhatsApp para você confirmar.'],
+    ['Vocês atendem urgência, como dor de dente?',
+     'Sim. Em caso de dor, inchaço ou dente quebrado, chame no WhatsApp: encaixamos o atendimento no mesmo dia sempre que a agenda permitir.'],
+];
+
 // Mantido do projeto original (cabecalho antigo usava $nome_barbearia)
 $nome_barbearia = $nome_clinica;
 
@@ -198,6 +230,13 @@ function duracao_txt($min) {
     if ($min < 60) return $min . ' min';
     $h = intdiv($min, 60); $m = $min % 60;
     return $h . 'h' . ($m ? str_pad($m, 2, '0', STR_PAD_LEFT) : '');
+}
+
+// "2026-03-14 10:00:00" -> "março de 2026"
+function mes_ano($data) {
+    if (!$data) return '';
+    $t = strtotime((string) $data);
+    return mb_strtolower(nome_mes(date('n', $t))) . ' de ' . date('Y', $t);
 }
 
 function nome_mes($n) {

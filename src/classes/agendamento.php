@@ -218,12 +218,13 @@ class Agendamento {
     private function sqlBase() {
         return "SELECT c.*, p.nome AS paciente, p.telefone, p.email, p.cpf, p.cep, p.logradouro, p.numero, p.cidade, p.data_nascimento, p.foto AS foto_paciente, p.criado_em AS paciente_desde,
                        d.nome AS dentista, d.especialidade, d.cor,
-                       pr.nome AS procedimento, pr.valor AS valor_tabela, pr.duracao_min,
+                       pr.nome AS procedimento, COALESCE(dp.valor, pr.valor) AS valor_tabela, pr.duracao_min,
                        f.valor AS valor_pago, f.forma_pagamento
                 FROM consulta c
                 JOIN paciente p ON p.id_paciente = c.id_paciente
                 JOIN dentista d ON d.id_dentista = c.id_dentista
                 JOIN procedimento pr ON pr.id_procedimento = c.id_procedimento
+                LEFT JOIN dentista_procedimento dp ON dp.id_dentista = c.id_dentista AND dp.id_procedimento = c.id_procedimento
                 LEFT JOIN registro_financeiro f ON f.id_consulta = c.id_consulta";
     }
 

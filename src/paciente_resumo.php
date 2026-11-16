@@ -10,8 +10,9 @@ $st->execute([$id]);
 $p = $st->fetch();
 if (!$p) { flash('Paciente não encontrado.', 'danger'); header('Location: pacientes.php'); exit; }
 
-$st = $pdo->prepare("SELECT c.*, d.nome AS dentista, d.cor, pr.nome AS procedimento, pr.valor AS valor_tabela, f.valor AS valor_pago, f.forma_pagamento
+$st = $pdo->prepare("SELECT c.*, d.nome AS dentista, d.cor, pr.nome AS procedimento, COALESCE(dp.valor, pr.valor) AS valor_tabela, f.valor AS valor_pago, f.forma_pagamento
                      FROM consulta c JOIN dentista d ON d.id_dentista = c.id_dentista JOIN procedimento pr ON pr.id_procedimento = c.id_procedimento
+                     LEFT JOIN dentista_procedimento dp ON dp.id_dentista = c.id_dentista AND dp.id_procedimento = c.id_procedimento
                      LEFT JOIN registro_financeiro f ON f.id_consulta = c.id_consulta
                      WHERE c.id_paciente = ? ORDER BY c.data DESC, c.hora_inicio DESC");
 $st->execute([$id]);

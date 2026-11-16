@@ -44,6 +44,7 @@ function cabecalhos_seguranca() {
          . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
          . "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
          . "img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com; connect-src 'self' https://viacep.com.br; "
+         . "frame-src https://www.google.com https://maps.google.com; "
          . "frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'");
     if (https_ativo()) header('Strict-Transport-Security: max-age=31536000');
 }

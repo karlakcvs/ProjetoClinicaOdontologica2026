@@ -15,8 +15,9 @@ if (!$idPac || !$pr->podeAcessar($idPac)) {
 $aba = in_array($_GET['aba'] ?? '', ['resumo', 'sessoes', 'exames', 'notas', 'consultas'], true) ? $_GET['aba'] : 'resumo';
 
 // consultas deste paciente com este dentista (para vincular fotos/observações à sessão)
-$st = $pdo->prepare("SELECT c.id_consulta, c.data, c.hora_inicio, c.status, c.primeira_consulta, pr.nome AS procedimento, pr.valor
+$st = $pdo->prepare("SELECT c.id_consulta, c.data, c.hora_inicio, c.status, c.primeira_consulta, pr.nome AS procedimento, COALESCE(dp.valor, pr.valor) AS valor
                      FROM consulta c JOIN procedimento pr ON pr.id_procedimento = c.id_procedimento
+                     LEFT JOIN dentista_procedimento dp ON dp.id_dentista = c.id_dentista AND dp.id_procedimento = c.id_procedimento
                      WHERE c.id_paciente = ? AND c.id_dentista = ? ORDER BY c.data DESC, c.hora_inicio DESC");
 $st->execute([$idPac, $ID_DENTISTA]);
 $consultas = $st->fetchAll();
@@ -121,6 +122,17 @@ $porAno = [];
 foreach ($realizadas as $c) { $a = substr($c['data'], 0, 4); $porAno[$a]['n'] = ($porAno[$a]['n'] ?? 0) + 1; }
 foreach ($pagamentos as $pg) { $a = substr($pg['data'], 0, 4); $porAno[$a]['v'] = ($porAno[$a]['v'] ?? 0) + (float) $pg['valor']; }
 ksort($porAno);
+// sessões por ano separadas por tipo de procedimento (gráfico "Evolução do tratamento")
+$evolCat = [];
+foreach ($realizadas as $c) { $a = substr($c['data'], 0, 4); $k = categoria_proc($c['procedimento']); $evolCat[$k][$a] = ($evolCat[$k][$a] ?? 0) + 1; }
+$evolAnos = array_keys($porAno);
+$evolDatasets = [];
+foreach (CATEGORIAS_PROC as $k => [$rot, $cor]) {
+    if (empty($evolCat[$k])) continue;
+    $evolDatasets[] = ['label' => $rot, 'data' => array_map(fn($a) => $evolCat[$k][$a] ?? 0, $evolAnos), 'backgroundColor' => $cor, 'borderRadius' => 3, 'maxBarThickness' => 46];
+}
+$evolValores = array_map(fn($a) => round($porAno[$a]['v'] ?? 0, 2), $evolAnos);
+$linhaTempo = array_slice($realizadas, 0, 6);   // últimas sessões (mais recentes primeiro)
 $porProc = [];
 foreach ($realizadas as $c) $porProc[$c['procedimento']] = ($porProc[$c['procedimento']] ?? 0) + 1;
 arsort($porProc);
@@ -190,8 +202,21 @@ include __DIR__ . '/include/admin_topo.php';
             <?php endif; ?>
         </div>
         <div class="card-soft panel">
-            <h2 class="panel-title mb-3">Evolução do tratamento <span class="text-muted fw-normal small">· sessões e valores por ano</span></h2>
-            <?php if ($porAno): ?><div class="chart-box" style="height:260px"><canvas id="gEvol" role="img" aria-label="Gráfico de sessões e valores pagos por ano"></canvas></div>
+            <h2 class="panel-title mb-1">Evolução do tratamento</h2>
+            <p class="small text-muted mb-3">Quantas sessões o paciente fez com você em cada ano. A cor mostra o tipo de procedimento e o número em cima da barra é o total do ano.</p>
+            <?php if ($porAno): ?>
+            <div class="chart-box" style="height:250px"><canvas id="gEvol" role="img" aria-label="Gráfico de barras: sessões realizadas por ano, por tipo de procedimento"></canvas></div>
+            <div class="evol-anos mt-3">
+                <?php foreach ($evolAnos as $i => $a): ?>
+                    <div><span class="ano"><?= $a ?></span><?php $nS = (int) ($porAno[$a]['n'] ?? 0); ?><strong><?= $nS ?> <?= $nS === 1 ? 'sessão' : 'sessões' ?></strong><span class="text-muted"><?= moeda($evolValores[$i]) ?> pagos</span></div>
+                <?php endforeach; ?>
+            </div>
+            <h3 class="small fw-bold text-uppercase text-muted mt-4 mb-2" style="letter-spacing:.06em">Últimas sessões</h3>
+            <ol class="timeline-sessoes">
+                <?php foreach ($linhaTempo as $c): $cat = categoria_proc($c['procedimento']); ?>
+                    <li style="--c:<?= e(CATEGORIAS_PROC[$cat][1]) ?>"><span class="dt"><?= data_br($c['data']) ?></span><span class="pr"><?= e($c['procedimento']) ?></span></li>
+                <?php endforeach; ?>
+            </ol>
             <?php else: ?><p class="small text-muted mb-0">Ainda não há sessões realizadas.</p><?php endif; ?>
         </div>
     </div>
@@ -394,10 +419,25 @@ document.getElementById("mDente")?.addEventListener("show.bs.modal", ev => {
   document.getElementById("fObs").value = b.dataset.obs || "";
 });
 const gE = document.getElementById("gEvol");
-if (gE && window.Chart) new Chart(gE, { data: { labels: ' . js(array_keys($porAno)) . ', datasets: [
-  { type: "bar", label: "Sessões", data: ' . js(array_map(fn($a) => $a['n'] ?? 0, array_values($porAno))) . ', backgroundColor: "rgba(12,127,124,.35)", borderColor: "#0c7f7c", borderWidth: 1, yAxisID: "y" },
-  { type: "line", label: "Valor pago (R$)", data: ' . js(array_map(fn($a) => round($a['v'] ?? 0, 2), array_values($porAno))) . ', borderColor: "#0b3a75", backgroundColor: "#0b3a75", tension: .3, yAxisID: "y1" } ] },
-  options: { maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, y1: { beginAtZero: true, position: "right", grid: { drawOnChartArea: false } } } } });
+const evolValores = ' . js($evolValores) . ';
+const totalTopo = { id: "totalTopo", afterDatasetsDraw(ch) {
+  const ctx = ch.ctx, metas = ch.data.datasets.map((_, i) => ch.getDatasetMeta(i)).filter(m => !m.hidden);
+  ctx.save(); ctx.font = "700 12px Plus Jakarta Sans, sans-serif"; ctx.fillStyle = "#06244b"; ctx.textAlign = "center";
+  ch.data.labels.forEach((_, j) => {
+    const tot = ch.data.datasets.reduce((s, d, i) => s + (ch.getDatasetMeta(i).hidden ? 0 : (d.data[j] || 0)), 0);
+    if (!tot || !metas.length) return;
+    const topo = Math.min(...metas.map(m => m.data[j].y));
+    ctx.fillText(tot, metas[0].data[j].x, topo - 6);
+  });
+  ctx.restore();
+} };
+if (gE && window.Chart) new Chart(gE, { type: "bar", data: { labels: ' . js($evolAnos) . ', datasets: ' . js($evolDatasets) . ' },
+  plugins: [totalTopo],
+  options: { maintainAspectRatio: false, layout: { padding: { top: 18 } },
+    plugins: { legend: { position: "bottom", labels: { boxWidth: 12, boxHeight: 12, font: { size: 11 } } },
+      tooltip: { callbacks: { title: it => "Ano " + it[0].label, label: c => " " + c.dataset.label + ": " + c.parsed.y + (c.parsed.y === 1 ? " sessão" : " sessões"),
+        footer: it => "Pago no ano: " + evolValores[it[0].dataIndex].toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) } } },
+    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: "Sessões" }, grid: { color: "#eef3f5" } } } } });
 </script>' : '';
 $scripts_extra = $scriptsResumo . '<script>
 (() => {

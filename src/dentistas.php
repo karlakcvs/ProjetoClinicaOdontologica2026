@@ -60,8 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     $pdo->prepare("DELETE FROM dentista_procedimento WHERE id_dentista = ?")->execute([$id]);
-    $insP = $pdo->prepare("INSERT INTO dentista_procedimento (id_dentista, id_procedimento) VALUES (?,?)");
-    foreach (($_POST['procs'] ?? []) as $p) $insP->execute([$id, (int) $p]);
+    $insP = $pdo->prepare("INSERT INTO dentista_procedimento (id_dentista, id_procedimento, valor) VALUES (?,?,?)");
+    foreach (($_POST['procs'] ?? []) as $p) {
+        $vp = trim((string) ($_POST['preco'][(int) $p] ?? ''));
+        $vp = $vp === '' ? null : (float) str_replace(',', '.', $vp);
+        if ($vp !== null && ($vp < 0 || $vp > 100000)) $vp = null;
+        $insP->execute([$id, (int) $p, $vp]);
+    }
     $pdo->commit();
     flash('Dados de ' . trim($_POST['nome']) . ' atualizados.');
     header('Location: dentistas.php');
@@ -77,7 +82,8 @@ foreach ($pdo->query("SELECT * FROM horario_atendimento ORDER BY hora_inicio")->
     $horarios[$h['id_dentista']][$k] = [hm($h['hora_inicio']), hm($h['hora_fim'])];
 }
 $dp = [];
-foreach ($pdo->query("SELECT * FROM dentista_procedimento")->fetchAll() as $r) $dp[$r['id_dentista']][$r['id_procedimento']] = true;
+$dpValor = [];
+foreach ($pdo->query("SELECT * FROM dentista_procedimento")->fetchAll() as $r) { $dp[$r['id_dentista']][$r['id_procedimento']] = true; $dpValor[$r['id_dentista']][$r['id_procedimento']] = $r['valor']; }
 $logins = [];
 foreach ($pdo->query("SELECT id_dentista, email, ultimo_acesso FROM usuario WHERE perfil = 'DENTISTA'")->fetchAll() as $u) $logins[$u['id_dentista']] = $u;
 
@@ -104,7 +110,7 @@ include __DIR__ . '/include/admin_topo.php';
             </div>
             <div class="small mb-3"><i class="bi bi-clock text-teal me-1"></i><?= e(implode(' · ', array_map(fn($x) => $x[0] . '–' . $x[1], $turnos))) ?></div>
             <div class="d-flex flex-wrap gap-1 mb-3">
-                <?php foreach ($procedimentos as $p) if (!empty($dp[$d['id_dentista']][$p['id_procedimento']])): ?><span class="tag tag-navy"><?= e($p['nome']) ?> · <?= duracao_txt($p['duracao_min']) ?></span><?php endif; ?>
+                <?php foreach ($procedimentos as $p) if (!empty($dp[$d['id_dentista']][$p['id_procedimento']])): ?><span class="tag tag-navy"><?= e($p['nome']) ?> · <?= moeda($dpValor[$d['id_dentista']][$p['id_procedimento']] ?? $p['valor']) ?></span><?php endif; ?>
             </div>
             <button class="btn btn-soft w-100" type="button" data-bs-toggle="collapse" data-bs-target="#ed<?= $d['id_dentista'] ?>" aria-expanded="false" aria-controls="ed<?= $d['id_dentista'] ?>"><i class="bi bi-pencil me-1"></i> Editar dados e horários</button>
             <form method="POST" enctype="multipart/form-data" class="collapse mt-3" id="ed<?= $d['id_dentista'] ?>">
@@ -129,10 +135,15 @@ include __DIR__ . '/include/admin_topo.php';
                     <div class="col-6"><label class="form-label small">Manhã: fim</label><input type="time" name="m_fim" class="form-control" value="<?= e($m[1]) ?>"></div>
                     <div class="col-6"><label class="form-label small">Tarde: início</label><input type="time" name="t_ini" class="form-control" value="<?= e($t[0]) ?>"></div>
                     <div class="col-6"><label class="form-label small">Tarde: fim</label><input type="time" name="t_fim" class="form-control" value="<?= e($t[1]) ?>"></div>
-                    <div class="col-12"><label class="form-label small">Procedimentos que realiza</label>
-                        <?php foreach ($procedimentos as $p): ?>
-                            <div class="form-check small"><input class="form-check-input" type="checkbox" name="procs[]" value="<?= $p['id_procedimento'] ?>" id="p<?= $d['id_dentista'] . '_' . $p['id_procedimento'] ?>" <?= !empty($dp[$d['id_dentista']][$p['id_procedimento']]) ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="p<?= $d['id_dentista'] . '_' . $p['id_procedimento'] ?>"><?= e($p['nome']) ?> <span class="text-muted">(<?= duracao_txt($p['duracao_min']) ?>)</span></label></div>
+                    <div class="col-12"><label class="form-label small mb-0">Procedimentos que realiza e preço deste dentista</label>
+                        <div class="form-text mt-0 mb-2">Deixe o preço em branco para usar o valor da tabela geral.</div>
+                        <?php foreach ($procedimentos as $p): $chk = 'p' . $d['id_dentista'] . '_' . $p['id_procedimento']; $vp = $dpValor[$d['id_dentista']][$p['id_procedimento']] ?? null; ?>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <div class="form-check small flex-grow-1 mb-0"><input class="form-check-input" type="checkbox" name="procs[]" value="<?= $p['id_procedimento'] ?>" id="<?= $chk ?>" <?= !empty($dp[$d['id_dentista']][$p['id_procedimento']]) ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="<?= $chk ?>"><?= e($p['nome']) ?> <span class="text-muted">(<?= duracao_txt($p['duracao_min']) ?>)</span></label></div>
+                                <label class="visually-hidden" for="v<?= $chk ?>">Preço de <?= e($p['nome']) ?> com <?= e($d['nome']) ?></label>
+                                <input id="v<?= $chk ?>" type="number" name="preco[<?= (int) $p['id_procedimento'] ?>]" min="0" step="0.01" class="form-control form-control-sm" style="max-width:110px" placeholder="<?= number_format((float) $p['valor'], 0, ',', '.') ?>" value="<?= $vp !== null ? number_format((float) $vp, 2, '.', '') : '' ?>">
+                            </div>
                         <?php endforeach; ?>
                     </div>
                     <div class="col-12"><button class="btn btn-teal w-100 mt-2">Salvar</button></div>
@@ -149,14 +160,14 @@ include __DIR__ . '/include/admin_topo.php';
         <h2 class="panel-title">Tabela de procedimentos e preços</h2>
         <button class="btn btn-teal btn-sm"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Salvar preços</button>
     </div>
-    <p class="small text-muted px-3 pt-3 mb-0">Valores de referência mostrados no site ("a partir de"). Duração em minutos, de 15 em 15 — ela define os horários oferecidos.</p>
+    <p class="small text-muted px-3 pt-3 mb-0">Valor padrão de cada procedimento. Cada dentista pode ter um preço próprio (em "Editar dados e horários"); o site mostra sempre o menor deles como "a partir de". Duração em minutos, de 15 em 15 — ela define os horários oferecidos.</p>
     <table class="table table-clean table-stack">
-        <thead><tr><th>Procedimento</th><th style="width:150px">Duração (min)</th><th style="width:170px">Valor (R$)</th><th class="d-none d-md-table-cell">Realizado por</th></tr></thead>
+        <thead><tr><th>Procedimento</th><th style="width:150px">Duração (min)</th><th style="width:170px">Valor padrão (R$)</th><th class="d-none d-md-table-cell">Realizado por</th></tr></thead>
         <tbody><?php foreach ($procedimentos as $p): $pid = (int) $p['id_procedimento']; ?>
             <tr><td class="td-main"><i class="bi <?= e($p['icone']) ?> text-teal me-2" aria-hidden="true"></i><?= e($p['nome']) ?></td>
             <td data-label="Duração (min)"><label class="visually-hidden" for="du<?= $pid ?>">Duração de <?= e($p['nome']) ?></label><input id="du<?= $pid ?>" type="number" name="duracao[<?= $pid ?>]" min="15" max="480" step="15" value="<?= (int) $p['duracao_min'] ?>" class="form-control form-control-sm" style="max-width:120px"></td>
             <td data-label="Valor (R$)"><label class="visually-hidden" for="vl<?= $pid ?>">Valor de <?= e($p['nome']) ?></label><input id="vl<?= $pid ?>" type="number" name="valor[<?= $pid ?>]" min="0" step="0.01" value="<?= number_format((float) $p['valor'], 2, '.', '') ?>" class="form-control form-control-sm" style="max-width:140px"></td>
-            <td data-label="Realizado por" class="d-none d-md-table-cell small"><?= e(implode(', ', array_map(fn($d) => $d['nome'], array_filter($dentistas, fn($d) => !empty($dp[$d['id_dentista']][$p['id_procedimento']]))))) ?></td></tr>
+            <td data-label="Realizado por" class="d-none d-md-table-cell small"><?= e(implode(', ', array_map(fn($d) => primeiro_nome($d['nome']) . ($dpValor[$d['id_dentista']][$p['id_procedimento']] !== null ? ' (' . moeda($dpValor[$d['id_dentista']][$p['id_procedimento']]) . ')' : ''), array_filter($dentistas, fn($d) => !empty($dp[$d['id_dentista']][$p['id_procedimento']]))))) ?></td></tr>
         <?php endforeach; ?></tbody>
     </table>
 </form>

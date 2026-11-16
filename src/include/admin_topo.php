@@ -15,11 +15,16 @@ if ($perfil === 'TI') {
     ];
     $papel = 'SanyTech · TI';
 } elseif ($perfil === 'DENTISTA') {
+    $stPend = $pdo->prepare("SELECT COUNT(*) FROM avaliacao WHERE status = 'PENDENTE' AND id_dentista = ?");
+    $stPend->execute([(int) ($_SESSION['id_dentista'] ?? 0)]);
     $menu = [
         ['Meu consultório', null, null],
         ['dent_painel',        'Visão geral',        'bi-grid-1x2'],
         ['agenda_semana',      'Agenda',             'bi-calendar-week'],
         ['dent_pacientes',     'Meus pacientes',     'bi-people'],
+        ['Meu perfil no site', null, null],
+        ['dent_perfil',        'Editar perfil',      'bi-person-badge'],
+        ['dent_avaliacoes',    'Minhas avaliações',  'bi-star', (int) $stPend->fetchColumn()],
         ['Conta', null, null],
         ['alterar_senha',      'Alterar senha',      'bi-key'],
     ];

@@ -28,9 +28,8 @@ $procs = $rel->porProcedimento($mesIni, $mesFim);
 $verLanc = ($_GET['lanc'] ?? 'dia') === 'mes' ? 'mes' : 'dia';
 $lancamentos = $verLanc === 'mes' ? $rel->lancamentos($mesIni, $mesFim, $filtroDent) : $rel->lancamentos($dia, $dia, $filtroDent);
 
-$st = $pdo->prepare("SELECT COUNT(*) FROM consulta WHERE data BETWEEN ? AND ? AND status = 'FALTOU'");
-$st->execute([$mesIni, $mesFim]);
-$faltasMes = (int) $st->fetchColumn();
+$anoSel = (int) substr($mes, 0, 4);
+$clinAno = $rel->totalConsolidado("$anoSel-01-01", $mesFim);   // acumulado do ano até o mês escolhido
 $ticket = $clinMes['qtd'] ? $clinMes['total'] / $clinMes['qtd'] : 0;
 
 // mês anterior para comparação
@@ -57,6 +56,40 @@ foreach ($porDentista as $d) {
 }
 $totalFormas = max(1, array_sum(array_column($formas, 'total')));
 
+// ---------- Mês a mês: últimos 12 meses até o mês escolhido (barras empilhadas por dentista) ----------
+$ini12 = date('Y-m-01', strtotime("$mesIni -11 months"));
+$serieM = $rel->serieMensal($ini12, $mesFim);
+$mesesCurto = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+$labels12 = []; $chaves12 = [];
+for ($t = strtotime($ini12); $t <= strtotime($mesIni); $t = strtotime('+1 month', $t)) {
+    $chaves12[] = date('Y-m', $t);
+    $labels12[] = $mesesCurto[(int) date('n', $t) - 1] . '/' . date('y', $t);
+}
+$datasets12 = [];
+foreach ($porDentista as $d) {
+    $datasets12[] = ['label' => $d['nome'], 'data' => array_map(fn($k) => round($serieM[$k][$d['id_dentista']] ?? 0, 2), $chaves12),
+                     'backgroundColor' => $d['cor'], 'borderRadius' => 4, 'borderSkipped' => 'start', 'maxBarThickness' => 34, 'borderColor' => '#fff', 'borderWidth' => ['top' => 2]];
+}
+$total12 = array_sum(array_map(fn($k) => array_sum($serieM[$k] ?? []), $chaves12));
+
+// ---------- Comparativo por ano: uma linha por ano (jan a dez) ----------
+$ano0 = max($anoSel - 4, $rel->primeiroAno());
+$serieAnos = $rel->serieMensal("$ano0-01-01", "$anoSel-12-31");
+$datasetsAno = []; $totaisAno = [];
+$rampa = ['#bfe3e1', '#86cbc8', '#4fb1ad', '#1f8f8b', '#06244b'];   // um só tom, do mais claro (antigo) ao mais escuro (ano escolhido)
+$nAnos = $anoSel - $ano0 + 1;
+for ($a = $ano0; $a <= $anoSel; $a++) {
+    $vals = [];
+    for ($m = 1; $m <= 12; $m++) {
+        $k = sprintf('%04d-%02d', $a, $m);
+        $vals[] = ($a === $anoSel && $k > $mes) ? null : round(array_sum($serieAnos[$k] ?? []), 2);
+    }
+    $totaisAno[$a] = array_sum(array_filter($vals));
+    $cor = $rampa[count($rampa) - 1 - ($anoSel - $a)] ?? $rampa[0];
+    $datasetsAno[] = ['label' => (string) $a, 'data' => $vals, 'borderColor' => $cor, 'backgroundColor' => $cor,
+                      'borderWidth' => $a === $anoSel ? 3 : 2, 'pointRadius' => $a === $anoSel ? 4 : 0, 'pointHoverRadius' => 5, 'tension' => .3, 'spanGaps' => false];
+}
+
 $titulo = 'Financeiro';
 $pagina = 'financeiro';
 $acoes_topo = '<button onclick="window.print()" class="btn btn-ghost btn-sm d-none d-md-inline-flex"><i class="bi bi-printer me-1"></i> Imprimir</button>';
@@ -78,10 +111,10 @@ include __DIR__ . '/include/admin_topo.php';
         <div class="lab">Total de <?= nome_mes(substr($mes, 5)) ?> · <?= $clinMes['qtd'] ?> atend.
         <?php if ($variacao !== null): ?><br><span class="<?= $variacao >= 0 ? '' : '' ?>"><i class="bi bi-arrow-<?= $variacao >= 0 ? 'up' : 'down' ?>-right"></i> <?= number_format(abs($variacao), 1, ',', '.') ?>% vs mês anterior</span><?php endif; ?></div></div></div>
     <div class="col-6 col-md-6 col-xl-3"><div class="card-soft stat"><span class="ico ico-teal"><i class="bi bi-calendar-day"></i></span><div class="val"><?= moeda($clinDia['total']) ?></div><div class="lab">Dia <?= data_br($dia) ?> · <?= $clinDia['qtd'] ?> atend.</div></div></div>
-    <div class="col-6 col-md-6 col-xl-2"><div class="card-soft stat"><span class="ico ico-navy"><i class="bi bi-calendar-week"></i></span><div class="val"><?= moeda($clinSem['total']) ?></div><div class="lab">Na semana</div></div></div>
-    <div class="col-6 col-md-3 col-xl-2"><div class="card-soft stat"><span class="ico ico-gold"><i class="bi bi-receipt"></i></span><div class="val"><?= moeda($ticket) ?></div><div class="lab">Ticket médio</div></div></div>
-    <div class="col-6 col-md-3 col-xl-2"><div class="card-soft stat"><span class="ico ico-red"><i class="bi bi-person-x"></i></span><div class="val"><?= $faltasMes ?></div><div class="lab">Faltas no mês</div></div></div>
+    <div class="col-6 col-md-6 col-xl-3"><div class="card-soft stat"><span class="ico ico-navy"><i class="bi bi-calendar-week"></i></span><div class="val"><?= moeda($clinSem['total']) ?></div><div class="lab">Na semana</div></div></div>
+    <div class="col-6 col-md-6 col-xl-3"><div class="card-soft stat"><span class="ico ico-teal"><i class="bi bi-calendar3"></i></span><div class="val"><?= moeda($clinAno['total']) ?></div><div class="lab">Acumulado de <?= $anoSel ?></div></div></div>
 </div>
+<p class="small text-muted mb-4 mt-n2"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>Só entram no financeiro os atendimentos <strong>realizados e pagos</strong>. Faltas e cancelamentos não geram receita e ficam fora de todos os totais e gráficos.</p>
 
 <!-- Por dentista -->
 <h2 class="h5 mb-3" style="font-family:var(--font-body);font-weight:700">Contagem por dentista</h2>
@@ -100,10 +133,36 @@ include __DIR__ . '/include/admin_topo.php';
             </div>
             <div class="d-flex justify-content-between small text-muted mb-1"><span>Semana: <strong class="text-body"><?= moeda($d['sem']['total']) ?></strong></span><span><?= number_format($part, 1, ',', '.') ?>% da clínica</span></div>
             <div class="bar-track"><div class="bar-fill" style="width:<?= round($part) ?>%;background:<?= e($d['cor']) ?>"></div></div>
-            <div class="small text-muted mt-2"><i class="bi bi-person-x"></i> <?= $d['faltas_mes'] ?> falta(s) no mês · ticket <?= moeda($d['mes']['qtd'] ? $d['mes']['total'] / $d['mes']['qtd'] : 0) ?></div>
+            <div class="small text-muted mt-2"><i class="bi bi-receipt"></i> Ticket médio no mês: <?= moeda($d['mes']['qtd'] ? $d['mes']['total'] / $d['mes']['qtd'] : 0) ?></div>
         </div>
     </div>
     <?php endforeach; ?>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card-soft panel h-100">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                <div><h3 class="panel-title mb-1">Faturamento mês a mês</h3><p class="small text-muted mb-0">Últimos 12 meses até <?= mb_strtolower(nome_mes(substr($mes, 5))) ?>/<?= $anoSel ?> · total <?= moeda($total12) ?></p></div>
+                <div class="d-flex flex-wrap gap-3 small">
+                    <?php foreach ($porDentista as $d): ?><span><span class="legend-dot me-1" style="background:<?= e($d['cor']) ?>"></span><?= e(primeiro_nome($d['nome'])) ?></span><?php endforeach; ?>
+                </div>
+            </div>
+            <div class="chart-box"><canvas id="gMeses" role="img" aria-label="Gráfico de barras: faturamento de cada mês nos últimos 12 meses, por dentista"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="card-soft panel mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div><h3 class="panel-title mb-1">Comparativo por ano</h3><p class="small text-muted mb-0">Faturamento de cada mês, uma linha por ano. A linha mais escura é <?= $anoSel ?>.</p></div>
+        <div class="d-flex flex-wrap gap-2 small">
+            <?php for ($a = $ano0; $a <= $anoSel; $a++): $ds = $datasetsAno[$a - $ano0]; ?>
+                <span class="ano-chip"><span class="legend-dot me-1" style="background:<?= e($ds['borderColor']) ?>"></span><strong><?= $a ?></strong> <?= moeda($totaisAno[$a]) ?><?= $a === $anoSel ? ' <span class="text-muted">(até ' . $mesesCurto[(int) substr($mes, 5) - 1] . ')</span>' : '' ?></span>
+            <?php endfor; ?>
+        </div>
+    </div>
+    <div class="chart-box" style="height:300px"><canvas id="gAnos" role="img" aria-label="Gráfico de linhas: faturamento mensal de cada ano"></canvas></div>
 </div>
 
 <div class="row g-4 mb-4">
@@ -184,6 +243,23 @@ if (window.Chart) new Chart(document.getElementById("grafico"), {
       y: { stacked: true, border: { display: false }, grid: { color: "#eef3f5" }, ticks: { color: "#5d6e80", callback: v => "R$ " + v.toLocaleString("pt-BR") } }
     }
   }
+});
+const brl = v => (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const eixoY = { border: { display: false }, grid: { color: "#eef3f5" }, ticks: { color: "#5d6e80", callback: v => "R$ " + (v >= 1000 ? (v / 1000).toLocaleString("pt-BR") + " mil" : v) } };
+if (window.Chart) new Chart(document.getElementById("gMeses"), {
+  type: "bar",
+  data: { labels: ' . js($labels12) . ', datasets: ' . js($datasets12) . ' },
+  options: { maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => " " + c.dataset.label + ": " + brl(c.parsed.y),
+      footer: it => "Total do mês: " + brl(it.reduce((s, i) => s + i.parsed.y, 0)) } } },
+    scales: { x: { stacked: true, grid: { display: false }, ticks: { color: "#5d6e80" } }, y: Object.assign({ stacked: true }, eixoY) } }
+});
+if (window.Chart) new Chart(document.getElementById("gAnos"), {
+  type: "line",
+  data: { labels: ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"], datasets: ' . js($datasetsAno) . ' },
+  options: { maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+    plugins: { legend: { display: false }, tooltip: { itemSort: (a, b) => b.dataset.label - a.dataset.label, callbacks: { label: c => " " + c.dataset.label + ": " + brl(c.parsed.y) } } },
+    scales: { x: { grid: { display: false }, ticks: { color: "#5d6e80" } }, y: Object.assign({ beginAtZero: true }, eixoY) } }
 });
 </script>';
 include __DIR__ . '/include/admin_fim.php';

@@ -919,3 +919,97 @@ html.alto-contraste .dente, html.alto-contraste .rl-box { background: #0b0b0b !i
 .odonto-lado.esq { padding-left: 4px; }
 .dente { min-width: 0; padding: 4px 0; }
 .dente-forma { width: 15px; } .dente.pre .dente-forma { width: 17px; } .dente.molar .dente-forma { width: 20px; }
+
+/* =====================================================================
+   Versão 6 – ajustes finais (avaliações, FAQ, mapa, lembretes, agenda, financeiro)
+   ===================================================================== */
+.review-data { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+.review .who .paciente-desde { margin-left: .25rem; }
+
+/* Perguntas frequentes (acordeão) */
+.faq-sec { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.faq-kicker { display: inline-block; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: .8rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.faq-tit { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; letter-spacing: -.02em; color: var(--navy-900); margin: .6rem 0 .8rem; }
+.faq-lista { max-width: 920px; margin: 0 auto; background: #f4f6f8; border-radius: 16px; padding: .6rem; display: grid; gap: .6rem; }
+.faq-item { background: #fff; border-radius: 12px; transition: box-shadow .2s; }
+.faq-item:hover { box-shadow: 0 6px 20px -14px rgba(6,36,75,.35); }
+.faq-item summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem; font-size: 1.08rem; font-weight: 600; color: var(--navy-900); }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary i { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); transition: transform .25s, background .2s, color .2s; }
+.faq-item[open] summary i { transform: rotate(180deg); background: #333a40; color: #fff; }
+.faq-item summary:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; border-radius: 12px; }
+.faq-resp { padding: 0 1.5rem 1.35rem; color: var(--muted); max-width: 760px; line-height: 1.6; }
+
+/* Mapa (Google Maps) */
+.mapa-box { position: relative; border-radius: 3px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); height: 360px; background: var(--navy-50); }
+.mapa-box iframe { width: 100%; height: 100%; border: 0; display: block; }
+.mapa-card { position: absolute; left: 16px; bottom: 16px; max-width: 320px; background: #fff; border-radius: 3px; padding: .9rem 1rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: .2rem; }
+@media (max-width: 575px) { .mapa-box { height: 420px; } .mapa-card { left: 10px; right: 10px; max-width: none; } }
+
+/* Lembretes: passos numerados */
+.passos-lembrete { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; counter-reset: none; }
+.passos-lembrete li { display: flex; gap: .7rem; align-items: flex-start; background: var(--teal-50); border-radius: 3px; padding: .8rem .9rem; font-size: .86rem; }
+.passos-lembrete li strong { display: block; color: var(--navy-900); }
+.passos-lembrete li span:not(.n) { color: var(--muted); }
+.passos-lembrete .n, .passo .n { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--navy); color: #fff; font-weight: 800; font-size: .8rem; }
+@media (max-width: 767px) { .passos-lembrete { grid-template-columns: 1fr; } }
+.passos-acoes { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; align-items: center; }
+.passos-acoes form { margin: 0; }
+.passo { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--line); background: #fff; color: var(--navy-900); border-radius: 999px; padding: .3rem .8rem .3rem .3rem; font-size: .82rem; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.passo .n { flex-basis: 24px; width: 24px; height: 24px; background: #c7d2de; }
+.passo:hover { border-color: var(--teal); color: var(--teal-700); }
+.passo.atual { border-color: var(--teal); background: var(--teal-50); }
+.passo.atual .n { background: var(--teal); }
+.passo.feito { background: #eef8f1; border-color: #cfe9d7; color: #217a3c; cursor: default; }
+a.passo.feito { cursor: pointer; }
+.passo.feito .n { background: #2f9e57; }
+@media (max-width: 991px) { .lembrete-item { grid-template-columns: 70px 1fr; } .lembrete-item .passos-acoes { grid-column: 1 / -1; justify-content: flex-start; } }
+
+/* Agenda: dentista / tipo dentro do evento, cancelada e falta */
+.ev-dent { display: inline-grid; place-items: center; min-width: 20px; height: 16px; padding: 0 3px; border-radius: 8px; background: var(--d); color: #fff; font-size: .6rem; font-weight: 800; vertical-align: 1px; margin-left: 2px; }
+.ev-tipo { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--t); margin-left: 3px; vertical-align: 1px; box-shadow: 0 0 0 2px #fff; }
+.ev-st, .leg-st { display: inline-flex; align-items: center; gap: .25rem; font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; border-radius: 3px; padding: .05rem .35rem; margin-top: 2px; text-decoration: none !important; }
+.ev-cancel { background: #5d6e80; color: #fff; }
+.ev-falta { background: #c0303c; color: #fff; }
+.cal-ev.st-cancelada { opacity: 1; text-decoration: none; background: repeating-linear-gradient(135deg, #f4f5f7 0 6px, #e9ecf0 6px 12px); border-left-color: #9aa5b1; color: #6b7480; }
+.cal-ev.st-cancelada .nm { text-decoration: line-through; }
+.cal-ev.st-faltou { background: #fdecee; border-left-color: #c0303c; }
+.cal-ev.st-faltou .nm { color: #8e1f2a; }
+.cal-legenda { display: flex; flex-wrap: wrap; gap: 1rem 2.5rem; padding: 1rem 1.2rem; }
+.leg-tit { font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 .55rem; font-family: var(--font-body); }
+.leg-itens { display: flex; flex-wrap: wrap; gap: .5rem 1.1rem; font-size: .84rem; align-items: center; }
+.leg-itens > span { display: inline-flex; align-items: center; gap: .4rem; }
+.leg-cor { width: 22px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--c) 16%, #fff); border-left: 4px solid var(--c); display: inline-block; }
+
+/* Prontuário: evolução do tratamento */
+.evol-anos { display: flex; flex-wrap: wrap; gap: .5rem; }
+.evol-anos > div { display: flex; flex-direction: column; font-size: .78rem; background: #f6f8fa; border-radius: 3px; padding: .45rem .7rem; min-width: 112px; line-height: 1.3; }
+.evol-anos .ano { font-weight: 800; color: var(--navy); }
+.timeline-sessoes { list-style: none; margin: 0; padding: 0 0 0 .4rem; border-left: 2px solid var(--line); }
+.timeline-sessoes li { position: relative; padding: .25rem 0 .55rem 1rem; font-size: .84rem; display: flex; gap: .7rem; flex-wrap: wrap; }
+.timeline-sessoes li::before { content: ""; position: absolute; left: -7px; top: .55rem; width: 12px; height: 12px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px #fff; }
+.timeline-sessoes .dt { font-weight: 700; color: var(--navy-900); min-width: 82px; }
+.timeline-sessoes .pr { color: var(--muted); }
+
+/* Financeiro */
+.pizza-leg { list-style: none; padding: 0; margin: .8rem 0 0; display: grid; gap: .3rem; font-size: .82rem; }
+.pizza-leg li { display: flex; align-items: center; gap: .5rem; }
+.pizza-leg .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ano-chip { display: inline-flex; align-items: center; gap: .25rem; background: #f6f8fa; border-radius: 3px; padding: .2rem .55rem; }
+html.alto-contraste .faq-lista, html.alto-contraste .faq-item, html.alto-contraste .passos-lembrete li, html.alto-contraste .passo { background: #000 !important; color: #fff !important; border-color: #fff; }
+html.alto-contraste .faq-item summary, html.alto-contraste .faq-resp, html.alto-contraste .passos-lembrete li * { color: #fff !important; }
+
+/* Menu do site: logo maior e com respiro (o botão "Agendar" saiu do topo) */
+.site-nav { padding-top: .75rem !important; padding-bottom: .75rem !important; }
+.site-nav .container { gap: 1rem !important; }
+.site-nav .navbar-brand { flex: 0 0 auto; overflow: visible; margin-right: 1.5rem; }
+.site-nav .brand-logo-img { height: 56px; max-height: none; width: auto; max-width: none; }
+.nav-desktop { gap: .35rem; }
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .site-nav .brand-logo-img { height: 40px; }
+  .site-nav .navbar-brand { margin-right: .25rem; }
+  .site-nav .nav-link { padding: .45rem .5rem !important; font-size: .92rem; }
+}
+@media (max-width: 991.98px) { .site-nav .brand-logo-img { height: 46px; } }
+@media (max-width: 400px) { .site-nav .brand-logo-img { height: 36px; } }
+.pizza-leg strong { margin-left: auto; }

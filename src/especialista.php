@@ -14,10 +14,6 @@ $st->execute([$id]);
 $porDia = [];
 foreach ($st->fetchAll() as $h) $porDia[(int) $h['dia_semana']][] = hm($h['hora_inicio']) . '–' . hm($h['hora_fim']);
 
-$st = $pdo->prepare("SELECT p.* FROM procedimento p JOIN dentista_procedimento dp ON dp.id_procedimento = p.id_procedimento WHERE dp.id_dentista = ? ORDER BY CASE WHEN p.nome LIKE '%Primeira consulta%' THEN 0 ELSE 1 END, p.valor");
-$st->execute([$id]);
-$procs = $st->fetchAll();
-
 $st = $pdo->prepare("SELECT * FROM avaliacao WHERE id_dentista = ? AND status = 'APROVADA' ORDER BY criado_em DESC");
 $st->execute([$id]);
 $avs = $st->fetchAll();
@@ -65,17 +61,9 @@ include __DIR__ . '/include/cabecalho.php';
                     <p class="mb-0 text-muted"><?= e($d['formacao']) ?></p>
                 </div></div>
                 <?php endif; ?>
-                <div class="col-md-6"><div class="card-soft panel h-100">
+                <div class="col-12"><div class="card-soft panel">
                     <h2 class="panel-title mb-2"><i class="bi bi-people text-teal me-2" aria-hidden="true"></i>Público atendido</h2>
                     <p class="mb-0 text-muted"><?= e($d['publico'] ?: 'Consulte a clínica') ?></p>
-                </div></div>
-                <div class="col-md-6"><div class="card-soft panel h-100">
-                    <h2 class="panel-title mb-2"><i class="bi bi-clock text-teal me-2" aria-hidden="true"></i>Dias e horários</h2>
-                    <ul class="list-unstyled small mb-0 d-grid gap-1">
-                        <?php foreach ([1,2,3,4,5,6] as $di): if (empty($porDia[$di])) continue; ?>
-                            <li class="d-flex justify-content-between gap-2"><strong><?= $DIAS_SEMANA[$di] ?></strong><span class="text-muted"><?= e(implode(' · ', $porDia[$di])) ?></span></li>
-                        <?php endforeach; ?>
-                    </ul>
                 </div></div>
                 <?php if ($cond): ?>
                 <div class="col-12"><div class="card-soft panel">
@@ -93,10 +81,7 @@ include __DIR__ . '/include/cabecalho.php';
                 <?php endif; ?>
                 <?php if ($casos): ?>
                 <div class="col-12">
-                    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-                        <h2 class="h4 mb-0">Antes e depois</h2>
-                        <span class="demo-tag" title="Simulação, não é caso clínico real">simulação ilustrativa</span>
-                    </div>
+                    <h2 class="h4 mb-3">Antes e depois</h2>
                     <div class="row g-3">
                         <?php foreach ($casos as [$fAntes, $fDepois, $caso, $detalhe]): ?>
                         <div class="col-md-6"><figure class="card-soft antes-depois m-0">
@@ -108,18 +93,18 @@ include __DIR__ . '/include/cabecalho.php';
                         </figure></div>
                         <?php endforeach; ?>
                     </div>
-                    <p class="small text-muted mt-2 mb-0">Simulação ilustrativa — não é caso clínico real. Cada tratamento é avaliado individualmente e os resultados variam de pessoa para pessoa.</p>
+                    <p class="small text-muted mt-2 mb-0">Cada tratamento é avaliado individualmente e os resultados variam de pessoa para pessoa.</p>
                 </div>
                 <?php endif; ?>
-                <div class="col-12">
+                <div class="col-12" id="avaliacoes-dentista">
                     <h2 class="h4 mb-3">Avaliações</h2>
                     <?php if (!$avs): ?><p class="text-muted">Ainda não há avaliações publicadas. <a href="index.php#avaliacoes">Seja o primeiro a avaliar.</a></p><?php endif; ?>
                     <div class="row g-3">
                         <?php foreach ($avs as $a): ?>
                         <div class="col-md-6"><figure class="card-soft review m-0">
-                            <div class="d-flex justify-content-between"><?= estrelas($a['nota']) ?><?php if ($a['demo']): ?><span class="demo-tag">exemplo</span><?php endif; ?></div>
+                            <div class="d-flex justify-content-between align-items-center gap-2"><?= estrelas($a['nota']) ?><span class="review-data"><?= e(mes_ano($a['criado_em'])) ?></span></div>
                             <blockquote>“<?= e($a['comentario']) ?>”</blockquote>
-                            <figcaption class="who"><strong><?= e($a['nome']) ?></strong><span class="text-muted">· <?= data_br($a['criado_em']) ?></span></figcaption>
+                            <figcaption class="who"><strong><?= e($a['nome']) ?></strong><?php if ($a['paciente_desde']): ?><span class="paciente-desde"><i class="bi bi-award" aria-hidden="true"></i> paciente desde <?= (int) $a['paciente_desde'] ?></span><?php endif; ?></figcaption>
                         </figure></div>
                         <?php endforeach; ?>
                     </div>
@@ -128,13 +113,14 @@ include __DIR__ . '/include/cabecalho.php';
         </div>
         <div class="col-lg-4">
             <aside class="card-soft panel summary">
-                <h2 class="panel-title mb-3">Procedimentos e valores</h2>
-                <?php foreach ($procs as $i => $p): ?>
-                    <a href="agendar.php?dentista=<?= $id ?>&amp;procedimento=<?= (int) $p['id_procedimento'] ?>" class="d-flex justify-content-between gap-2 py-2 small text-reset <?= $i ? 'border-top' : '' ?>">
-                        <span><?= e($p['nome']) ?><br><span class="text-muted"><?= duracao_txt($p['duracao_min']) ?></span></span>
-                        <strong class="text-nowrap"><?= moeda($p['valor']) ?></strong>
-                    </a>
-                <?php endforeach; ?>
+                <h2 class="panel-title mb-3"><i class="bi bi-clock text-teal me-2" aria-hidden="true"></i>Dias e horários</h2>
+                <ul class="list-unstyled small mb-3 d-grid gap-2">
+                    <?php foreach ([1,2,3,4,5,6] as $di): if (empty($porDia[$di])) continue; ?>
+                        <li class="d-flex justify-content-between gap-2"><strong><?= $DIAS_SEMANA[$di] ?></strong><span class="text-muted"><?= e(implode(' · ', $porDia[$di])) ?></span></li>
+                    <?php endforeach; ?>
+                </ul>
+                <a href="agendar.php?dentista=<?= $id ?>" class="btn btn-teal w-100"><i class="bi bi-calendar2-check me-1" aria-hidden="true"></i>Ver horários livres</a>
+                <p class="small text-muted mt-3 mb-0"><i class="bi bi-tags me-1" aria-hidden="true"></i>Os tratamentos e valores de referência estão em <a href="index.php#procedimentos">Procedimentos e valores</a>. O orçamento final é confirmado na consulta.</p>
                 <div class="info-pagamento mt-3"><i class="bi bi-cash-coin" aria-hidden="true"></i><div>Pagamento na clínica: <?= e(implode(', ', $FORMAS_PAGAMENTO)) ?>.</div></div>
             </aside>
         </div>

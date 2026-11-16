@@ -7,7 +7,8 @@
 //  As tabelas antigas da barbearia (usuarios e agendamentos) não são tocadas.
 // =====================================================================
 
-const VERSAO_BANCO = 5;
+const VERSAO_BANCO = 6;
+require_once __DIR__ . '/migracao_6.php';
 
 function tabela_existe(PDO $pdo, $tabela) {
     try { $pdo->query("SELECT 1 FROM $tabela LIMIT 1"); return true; }
@@ -38,6 +39,7 @@ function versao_banco(PDO $pdo) {
 function instalar_banco(PDO $pdo) {
     $v = versao_banco($pdo);
     if ($v >= VERSAO_BANCO) return;               // caminho rápido: já está atualizado
+    @set_time_limit(300);                         // a migração 6 gera alguns milhares de registros de demonstração
 
     $motor = ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
     if ($v < 0) {
@@ -80,6 +82,13 @@ function instalar_banco(PDO $pdo) {
         try { migracao_5($pdo); $pdo->commit(); }
         catch (Throwable $t) { $pdo->rollBack(); throw $t; }
         registrar_versao($pdo, 5);
+    }
+    if ($v < 6) {
+        migracao_6_estrutura($pdo);
+        $pdo->beginTransaction();
+        try { migracao_6($pdo); $pdo->commit(); }
+        catch (Throwable $t) { $pdo->rollBack(); throw $t; }
+        registrar_versao($pdo, 6);
     }
 }
 
@@ -736,7 +745,8 @@ function atualizar_demo(PDO $pdo) {
     if (is_file($marca) && time() - filemtime($marca) < 600) return;
     @touch($marca);
     try {
-        $st = $pdo->prepare("SELECT c.id_consulta, c.id_dentista, c.data, p.valor FROM consulta c JOIN procedimento p ON p.id_procedimento = c.id_procedimento
+        $st = $pdo->prepare("SELECT c.id_consulta, c.id_dentista, c.data, COALESCE(dp.valor, p.valor) AS valor FROM consulta c JOIN procedimento p ON p.id_procedimento = c.id_procedimento
+                             LEFT JOIN dentista_procedimento dp ON dp.id_dentista = c.id_dentista AND dp.id_procedimento = c.id_procedimento
                              WHERE c.demo = 1 AND c.status IN ('AGENDADA','CONFIRMADA') AND (c.data < ? OR (c.data = ? AND c.hora_fim <= ?))");
         $st->execute([date('Y-m-d'), date('Y-m-d'), date('H:i:s')]);
         $lista = $st->fetchAll();

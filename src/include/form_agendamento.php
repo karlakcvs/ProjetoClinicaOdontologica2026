@@ -5,7 +5,15 @@ $dentistas = $pdo->query("SELECT * FROM dentista WHERE ativo = 1 ORDER BY id_den
 $procedimentos = $pdo->query("SELECT * FROM procedimento ORDER BY CASE WHEN nome LIKE '%Primeira consulta%' THEN 0 ELSE 1 END, nome")->fetchAll();
 
 $mapa = [];   // procedimento => [dentistas]
-foreach ($pdo->query("SELECT * FROM dentista_procedimento")->fetchAll() as $r) $mapa[$r['id_procedimento']][] = (int) $r['id_dentista'];
+$precos = []; // procedimento => [dentista => "R$ 150,00"] (cada dentista pode ter o próprio preço)
+$valorBase = array_column($procedimentos, 'valor', 'id_procedimento');
+foreach ($pdo->query("SELECT * FROM dentista_procedimento")->fetchAll() as $r) {
+    $mapa[$r['id_procedimento']][] = (int) $r['id_dentista'];
+    $precos[$r['id_procedimento']][(int) $r['id_dentista']] = (float) ($r['valor'] ?? $valorBase[$r['id_procedimento']] ?? 0);
+}
+foreach ($procedimentos as &$pp) if (!empty($precos[$pp['id_procedimento']])) $pp['valor'] = min($precos[$pp['id_procedimento']]);   // "a partir de"
+unset($pp);
+$precosTxt = array_map(fn($l) => array_map('moeda', $l), $precos);
 $diasTrab = [];  // dentista => [dias da semana]
 foreach ($pdo->query("SELECT DISTINCT id_dentista, dia_semana FROM horario_atendimento")->fetchAll() as $r) $diasTrab[$r['id_dentista']][] = (int) $r['dia_semana'];
 
@@ -44,7 +52,7 @@ $pacientesLista = $modoSecretaria ? $pdo->query("SELECT id_paciente, nome, telef
                     <?php foreach ($procedimentos as $p): ?>
                     <label class="choice">
                         <input type="radio" name="id_procedimento" value="<?= $p['id_procedimento'] ?>"
-                               data-nome="<?= e($p['nome']) ?>" data-dur="<?= $p['duracao_min'] ?>" data-valor="<?= moeda($p['valor']) ?>"
+                               data-nome="<?= e($p['nome']) ?>" data-dur="<?= $p['duracao_min'] ?>" data-valor="a partir de <?= moeda($p['valor']) ?>"
                                <?= $preProc === (int) $p['id_procedimento'] ? 'checked' : '' ?>>
                         <span class="box">
                             <span class="proc-ico flex-shrink-0" style="width:38px;height:38px;font-size:1rem"><i class="bi <?= e($p['icone']) ?>"></i></span>
@@ -154,8 +162,9 @@ $pacientesLista = $modoSecretaria ? $pdo->query("SELECT id_paciente, nome, telef
 <script>
 window.AGENDA = {
     mapa: <?= js($mapa) ?>,
+    precos: <?= js($precosTxt) ?>,
     dias: <?= js($diasTrab) ?>,
     diasAFrente: 30
 };
 </script>
-<script src="assets/js/agendar.js?v=11"></script>
+<script src="assets/js/agendar.js?v=12"></script>

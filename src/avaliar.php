@@ -10,7 +10,9 @@ $nome = trim(strip_tags((string) ($_POST['nome'] ?? '')));
 $com  = trim(strip_tags((string) ($_POST['comentario'] ?? '')));
 $nota = (int) ($_POST['nota'] ?? 0);
 $idD  = (int) ($_POST['id_dentista'] ?? 0) ?: null;
-$antigos = ['nome' => $nome, 'comentario' => $com, 'nota' => $nota, 'id_dentista' => $idD];
+$desde = (int) ($_POST['paciente_desde'] ?? 0);
+if ($desde < 1980 || $desde > (int) date('Y')) $desde = null;
+$antigos = ['nome' => $nome, 'comentario' => $com, 'nota' => $nota, 'id_dentista' => $idD, 'paciente_desde' => $desde];
 
 $erro = '';
 if (!csrf_ok()) $erro = 'O formulário expirou. Tente novamente.';
@@ -30,8 +32,8 @@ if (!$erro && $idD) {
 if ($erro) {
     aviso_publico('avaliacao', $erro, 'danger', $antigos);
 } else {
-    $pdo->prepare("INSERT INTO avaliacao (id_dentista, nome, nota, comentario, status) VALUES (?,?,?,?, 'PENDENTE')")
-        ->execute([$idD, mb_substr($nome, 0, 80), $nota, mb_substr($com, 0, 600)]);
+    $pdo->prepare("INSERT INTO avaliacao (id_dentista, nome, nota, comentario, status, paciente_desde) VALUES (?,?,?,?, 'PENDENTE', ?)")
+        ->execute([$idD, mb_substr($nome, 0, 80), $nota, mb_substr($com, 0, 600), $desde]);
     limite_registrar($pdo, 'avaliacao');
     aviso_publico('avaliacao', 'Obrigado pela sua avaliação! Ela será publicada após a conferência da clínica.');
 }

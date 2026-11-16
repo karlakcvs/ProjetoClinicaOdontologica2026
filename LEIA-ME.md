@@ -62,6 +62,21 @@ Outros comandos úteis: `docker compose ps` (ver se está rodando) · `docker co
 
 ## 3. O que mudou
 
+### Versão 6 (ajustes finais – 15/11/2026)
+O banco é atualizado sozinho na primeira vez que você abrir o site (pode levar alguns segundos).
+- **Site**: sem o selo de nota em cima da foto; todas as avaliações com 5 estrelas, mês/ano e "paciente desde";
+  sem as palavras "exemplo" e "simulação"; seção **Perguntas frequentes**; **mapa** (Google Maps, local hipotético
+  no centro de Araras – troque em `include/config.php`, `$mapa_coord`).
+- **Corpo clínico**: formação igual à universidade do jaleco (Helena – Unicamp/FOP, Rafael – UFMG, Camila – USP);
+  perfil sem a tabela de preços; **cada dentista pode ter o próprio preço** e o site mostra "a partir de" o menor.
+- **Área do dentista**: "Editar perfil" (bio, formação, foto, tratamentos e preços) e "Minhas avaliações"
+  (publica/oculta só as avaliações sobre ele).
+- **Dados**: 10 pacientes novos com foto (5 com cadastro incompleto), ~190 pacientes antigos e atendimentos
+  de 2022 a 2026; agenda cheia de 16/11 a 04/12.
+- **Lembretes** em 3 passos numerados; **agenda** com legenda nova e marcação de cancelada/faltou;
+  **evolução do tratamento** mais clara; **financeiro** com gráfico mês a mês, comparativo por ano e
+  pizza por procedimento (faltas e cancelamentos não entram em nenhum total).
+
 ### Versão 3 (nov/2026)
 - **Dados de contato 100% fictícios**: telefone (19) 0000-1234, WhatsApp (19) 90000-1234,
   e-mail `contato@garciadimase.example`, endereço "Rua Fictícia dos Sorrisos, 000 – CEP 00000-000".
