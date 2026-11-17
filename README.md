@@ -195,13 +195,22 @@ flowchart LR
 # 1. Clone o repositório
 git clone https://github.com/karlakcvs/ProjetoClinicaOdontologica2026.git
 cd ProjetoClinicaOdontologica2026
+```
 
-# 2. Crie o arquivo de configuração e defina suas próprias senhas
-cp .env.example .env          # Windows (CMD): copy .env.example .env
+Crie o arquivo `.env` na raiz com valores privados:
+```dotenv
+MYSQL_ROOT_PASSWORD=troque-por-uma-senha-forte
+MYSQL_DATABASE=barbearia
+MYSQL_USER=clinica
+MYSQL_PASSWORD=troque-por-outra-senha-forte
+```
 
+```bash
 # 3. Suba os containers
 docker compose up -d --build
 ```
+
+O arquivo `.env` é local e não deve ser enviado ao GitHub.
 
 | Serviço | Endereço |
 |:--|:--|
@@ -228,7 +237,7 @@ Comandos úteis: `docker compose ps` (status), `docker compose logs web` (erros 
 
 </details>
 
-Instruções detalhadas em [LEIA-ME.md](LEIA-ME.md). O banco de demonstração para importação manual está em [database/](database/).
+Instruções detalhadas em [LEIA-ME.md](LEIA-ME.md). O banco é criado e inicializado pelo sistema na primeira execução.
 
 <p align="right"><a href="#topo">voltar ao topo ↑</a></p>
 
@@ -258,7 +267,6 @@ A senha deve ter no mínimo 10 caracteres, com letra maiúscula, letra minúscul
 
 ```
 ProjetoClinicaOdontologica2026/
-├── database/                 Banco de demonstração (dados fictícios)
 ├── README-com-imagens/       Telas usadas neste README
 ├── src/
 │   ├── api/                  Horários livres (JSON)
@@ -277,7 +285,7 @@ ProjetoClinicaOdontologica2026/
 ├── gestao-software-sanytech-garcia-di-mase.html   Registro de alterações e plano de testes
 ├── docker-compose.yml
 ├── Dockerfile
-└── .env.example              Modelo de configuração
+└── .env                       Configuração local (não versionada)
 ```
 
 ---
@@ -298,7 +306,7 @@ ProjetoClinicaOdontologica2026/
 Detalhes em [SEGURANCA.md](SEGURANCA.md).
 
 > [!WARNING]
-> Nunca publique o arquivo `.env`, a pasta `mysql-data/` ou o conteúdo de `src/uploads/`: eles podem conter senhas, dados pessoais e informações de saúde. O `.gitignore` do projeto já os exclui.
+> Nunca publique arquivos `.env`, bancos locais (`database/` ou `mysql-data/`) ou o conteúdo de `src/uploads/`: eles podem conter senhas, dados pessoais e informações de saúde. O `.gitignore` do projeto os exclui.
 
 ---
 
@@ -309,7 +317,6 @@ Detalhes em [SEGURANCA.md](SEGURANCA.md).
 | [gestao-software-sanytech-garcia-di-mase.html](gestao-software-sanytech-garcia-di-mase.html) | Organização e Gestão de Software: registro de alterações com motivos, arquivos alterados, plano de testes e aprovação (baixe e abra no navegador) |
 | [LEIA-ME.md](LEIA-ME.md) | Instalação detalhada e histórico de versões |
 | [SEGURANCA.md](SEGURANCA.md) | Medidas de segurança do sistema |
-| [database/README.md](database/README.md) | Banco de demonstração |
 
 ### Versão final · novembro de 2026
 - Nova página inicial com fotografia em tela cheia e menu transparente sobre a imagem

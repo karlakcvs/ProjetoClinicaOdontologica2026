@@ -1,7 +1,7 @@
 Consulte LEIA-ME.md para instalar e executar o projeto.
 
 Antes de iniciar:
-- Copie .env.example para .env e configure credenciais fortes.
+- Crie um arquivo .env local com MYSQL_ROOT_PASSWORD, MYSQL_DATABASE, MYSQL_USER e MYSQL_PASSWORD; configure credenciais fortes e não o envie ao GitHub.
 - Se usar um banco existente em mysql-data, mantenha as credenciais originais.
 - Não publique .env, mysql-data nem conteúdo de src/uploads; podem conter dados pessoais ou de saúde.
 

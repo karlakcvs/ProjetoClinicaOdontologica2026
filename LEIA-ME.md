@@ -10,7 +10,13 @@ Mesmo Docker e mesmo banco do projeto de DW2 — **seus dados continuam**.
 
 > Antes de tudo: abra o **Docker Desktop** e espere aparecer "Engine running".
 
-1. Copie `.env.example` para `.env` e defina senhas fortes e privadas. Nunca envie `.env` ao GitHub.
+1. Crie um arquivo `.env` local na raiz do projeto e defina senhas fortes e privadas. Nunca envie arquivos `.env` ao GitHub:
+   ```dotenv
+   MYSQL_ROOT_PASSWORD=troque-por-uma-senha-forte
+   MYSQL_DATABASE=barbearia
+   MYSQL_USER=clinica
+   MYSQL_PASSWORD=troque-por-outra-senha-forte
+   ```
    Se estiver usando um banco existente em `mysql-data`, mantenha as credenciais originais do banco.
 2. No VS Code, abra a pasta que contém `docker-compose.yml` e abra um terminal.
 3. Pare e remova os containers antigos (o banco fica na pasta local `mysql-data`):
@@ -55,7 +61,7 @@ Outros comandos úteis: `docker compose ps` (ver se está rodando) · `docker co
   (o antigo `gerar_senha.php` foi removido: qualquer pessoa conseguia abrir e trocar a senha.)
 - phpMyAdmin: **http://localhost:8888** — servidor `db`, usuário `root`, senha definida em `.env`.
 
-> **GitHub:** `mysql-data/`, `.env` e os arquivos em `src/uploads/` não devem ser enviados. O
+> **GitHub:** arquivos `.env`, bancos locais (`database/` e `mysql-data/`) e os arquivos em `src/uploads/` não devem ser enviados. O
 > banco pode conter dados pessoais/de saúde; este repositório mantém apenas código e arquivos-base.
 
 ---

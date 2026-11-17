@@ -41,7 +41,7 @@ include __DIR__ . '/include/cabecalho.php';
     <div class="container hero-v5-conteudo">
         <div class="hero-v5-texto">
             <span class="hero-kicker">Odontologia especializada em Araras/SP</span>
-            <h1>Seu sorriso merece cuidado <em>especializado</em>.</h1>
+            <h1>Seu sorriso merece cuidado <em>especializado</em></h1>
             <p class="lead">Ortodontia, implantes e estética dental em um só lugar.<br>Escolha seu especialista e agende seu atendimento.</p>
             <div class="d-flex flex-wrap gap-3">
                 <a href="agendar.php" class="btn btn-teal btn-lg"><i class="bi bi-calendar2-check me-2" aria-hidden="true"></i>Agendar consulta</a>

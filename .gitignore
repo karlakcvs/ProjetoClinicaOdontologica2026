@@ -1,9 +1,9 @@
 # Local credentials and environment
 .env
 .env.*
-!.env.example
 
 # Local database and uploaded patient/clinic files
+/database/
 /mysql-data/
 /mysql-data-backup/
 /src/uploads/*
@@ -36,3 +36,5 @@ Desktop.ini
 # Cópias de segurança locais e ferramentas internas de acompanhamento
 /_backup_antes_nova_entrada/
 /kanban-garcia-di-mase.html
+/ALTERACOES - 16-11-2026.txt
+/BLOCO DE NOTAS - LEIA PRIMEIRO.txt
